@@ -33,6 +33,10 @@ import {
   type FieldDef,
 } from '@/lib/schemas/collection.schema';
 import { slugifyName, uniqueSlug } from '@/modules/cms/slug';
+import {
+  reservedPagePaths,
+  collectionSlugShadowsPage,
+} from '@/modules/cms/materializePublish';
 
 /** auth → token validation → ownership. Returns a response to bail with, or null. */
 async function gate(tokenId: string | null | undefined, action: string) {
@@ -112,7 +116,8 @@ export async function POST(req: Request) {
     // projectId is resolved from the OWNERSHIP-VERIFIED token — never the body.
     const project = await prisma.project.findUnique({
       where: { tokenId },
-      select: { id: true },
+      // `content` carries the project's pages — needed for the shadow check below.
+      select: { id: true, content: true },
     });
     if (!project) {
       return createSecureResponse({ error: 'Project not found' }, 404);
@@ -124,6 +129,14 @@ export async function POST(req: Request) {
     });
     const taken = siblings.map((s) => s.slug);
 
+    // Phase 4 uniqueness hardening: a collection with detail pages fans out
+    // `/<collectionSlug>/<itemSlug>` subpages at publish. A slug that shadows an
+    // existing page path (`/products` on naayom!) would put those pages on top of
+    // real ones — publish would then fail loud, which is a terrible place to learn
+    // it. Reject/clamp at WRITE time instead.
+    const reserved = reservedPagePaths(project.content);
+    const shadowsPage = (s: string) => collectionSlugShadowsPage(s, reserved);
+
     // Explicit slug → collision is a hard 409 (the caller asked for that string).
     // Derived slug → clamped to the next free `base-N`.
     let slug: string;
@@ -134,9 +147,33 @@ export async function POST(req: Request) {
           409
         );
       }
+      if (shadowsPage(parsed.data.slug)) {
+        return createSecureResponse(
+          {
+            error: `Slug "${parsed.data.slug}" conflicts with an existing page path. Pick a different slug.`,
+          },
+          409
+        );
+      }
       slug = parsed.data.slug;
     } else {
-      slug = uniqueSlug(slugifyName(name), taken);
+      // Clamp past BOTH sibling slugs and page-shadowing slugs in one pass.
+      // Bounded: `uniqueSlug`'s own clamp fallback is time-based and could in
+      // principle repeat within a millisecond, so never loop unbounded here.
+      const base = slugifyName(name);
+      const blocked = [...taken];
+      let candidate = uniqueSlug(base, blocked);
+      for (let i = 0; i < 50 && shadowsPage(candidate); i++) {
+        blocked.push(candidate);
+        candidate = uniqueSlug(base, blocked);
+      }
+      if (shadowsPage(candidate)) {
+        return createSecureResponse(
+          { error: 'Could not derive a collection slug that avoids existing page paths' },
+          409
+        );
+      }
+      slug = candidate;
     }
 
     const nextOrder = siblings.reduce((max, s) => Math.max(max, s.order + 1), 0);

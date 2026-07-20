@@ -43,9 +43,12 @@
 //   `roles.primaryCta`   (a FIELD ID, not a URL) — never `primaryLink`
 //   `collectionRef`      (a collection slug string) — never `collectionSlug`
 //   item `itemRef`       (an item slug string) — never `slug`
-// Item-level keys escape the walker TODAY only by recursion DEPTH (groups[].items
-// is reached with `allowRecurse=false`) — that is luck, not design, so `itemRef`
-// is named defensively too.
+// This law is LOAD-BEARING, not defensive. On DETAIL pages the walker actively
+// reaches both keys: `collectionRef` at depth 2 (`elements.cmsItem.collectionRef`)
+// and `itemRef` at depth 3 (`elements.cmsItem.item.itemRef`, hoisted out of
+// `groups[].items[]` by `toDetailModel`). Rename either to a `slug`-suffixed name
+// and you get `'#'` on every live item page — editor-invisible. Full per-section
+// depth table: `src/modules/cms/README.md` › "The naming law is LOAD-BEARING".
 //
 // The ONLY sanctioned `url`-suffixed keys are the genuine URL values inside
 // image / gallery / video / audio / link values (`{url, …}`) — gating those is
@@ -318,7 +321,72 @@ export function toRenderModel(bundle: CmsCollectionBundle): CmsRenderModel {
   };
 }
 
-// ── Reader helpers (used by the core walker) ────────────────────────────────
+// ── Detail pages (phase 4) ──────────────────────────────────────────────────
+//
+// A detail page is a per-ITEM view of the SAME render model — no second feed, no
+// second DB read. `toDetailModel()` is a pure SELECTOR over `CmsRenderModel`, so
+// the listing card and the detail page can never disagree about an item.
+//
+// KEY-NAME LAW applies here too: `collectionRef` / `itemRef`, never
+// `collectionSlug` / `slug`; the only `url`-suffixed keys are the genuine URL
+// values inside image/gallery/video/audio/link values.
+
+/**
+ * The element key under which a materialized DETAIL model is stored on a
+ * fan-out `cmscollectionitem` section
+ * (`content[sectionId].elements[CMS_DETAIL_ELEMENT_KEY]`). Distinct from
+ * `CMS_MODEL_ELEMENT_KEY` so a listing model can never be mistaken for a detail
+ * model (and vice-versa) by either published twin.
+ */
+export const CMS_DETAIL_ELEMENT_KEY = 'cmsItem';
+
+export interface CmsDetailModel {
+  collectionId: string;
+  collectionName: string;
+  /** The collection's slug. NAMED `collectionRef`, never `collectionSlug`. */
+  collectionRef: string;
+  /** Resolved roles — identical to the listing model's, so both views agree. */
+  roles: CmsResolvedRoles;
+  /** The one item this page renders (`itemRef` = its slug). */
+  item: CmsItemRender;
+}
+
+/**
+ * The published path of an item's detail page.
+ *
+ * PINNED CONVENTION — leading-slash ABSOLUTE bare path, used for BOTH the
+ * `content.subpages[…]` key and the listing card's `href`:
+ *   `/<collectionRef>/<itemRef>`   e.g. `/books/deep-work`
+ * NEVER `/p/<slug>/…` and NEVER slash-less. A slash-less path mismatches KV
+ * route derivation and the publish-route locale collision guard, and fails
+ * `isSafeURL` in `publishSanitizer.ts` → the href is coerced to `'#'`.
+ * Returns `null` when either ref is missing (→ no link, no page).
+ */
+export function cmsDetailPath(
+  collectionRef: string | null | undefined,
+  itemRef: string | null | undefined
+): string | null {
+  if (!collectionRef || !itemRef) return null;
+  return `/${collectionRef}/${itemRef}`;
+}
+
+/** Every item in the model, in render order, flattened across groups. */
+export function allRenderItems(model: CmsRenderModel): CmsItemRender[] {
+  return model.groups.flatMap((g) => g.items);
+}
+
+/** Narrow the listing model to ONE item's detail model (pure selector). */
+export function toDetailModel(model: CmsRenderModel, item: CmsItemRender): CmsDetailModel {
+  return {
+    collectionId: model.collectionId,
+    collectionName: model.collectionName,
+    collectionRef: model.collectionRef,
+    roles: model.roles,
+    item,
+  };
+}
+
+// ── Reader helpers (used by the core walkers) ───────────────────────────────
 
 export function fieldById(item: CmsItemRender, fieldId: string | null): CmsFieldRender | null {
   if (!fieldId) return null;

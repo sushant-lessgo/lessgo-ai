@@ -29,6 +29,8 @@ export const sharedBlockCapability: Record<string, CapabilityId | null> = {
   // on EVERY template, so capability gating/shortlisting is moot (plan Deviations
   // #2). Same precedent as followstrip.
   cmscollection: null,
+  // …and neither does its detail-page twin (phase 4). Same reasoning.
+  cmscollectionitem: null,
 };
 
 /**

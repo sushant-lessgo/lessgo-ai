@@ -33,6 +33,7 @@ import {
   makeItemValuesSchema,
   type FieldDef,
 } from '@/lib/schemas/collection.schema';
+import { reservedPagePaths, itemSlugShadowsPage } from '@/modules/cms/materializePublish';
 
 type Params = { params: { collectionId: string; itemId: string } };
 
@@ -149,6 +150,26 @@ export async function PATCH(req: Request, { params }: Params) {
           409
         );
       }
+
+      // Phase 4 uniqueness hardening: this item's detail page publishes at
+      // `/<collectionSlug>/<itemSlug>`. If a real page already sits there, the
+      // publish-side guard would fail the whole publish — reject at write time.
+      const project = await prisma.project.findUnique({
+        where: { tokenId },
+        select: { content: true },
+      });
+      if (
+        itemSlugShadowsPage(found.collection.slug, slug, reservedPagePaths(project?.content))
+      ) {
+        return createSecureResponse(
+          {
+            error: `Slug "${slug}" conflicts with the existing page "/${found.collection.slug}/${slug}". Pick a different slug.`,
+          },
+          409
+        );
+      }
+
+      // A manual slug edit LOCKS the slug (re-materialization never clobbers it).
       slugLocked = true;
     }
 

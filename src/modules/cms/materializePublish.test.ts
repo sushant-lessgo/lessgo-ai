@@ -54,9 +54,26 @@ import {
   materializeCmsContent,
   findCmsSections,
   isCmsSectionId,
+  isCmsItemSectionId,
+  isCmsDetailSubpage,
+  applyCmsDetailPages,
+  buildDetailSubpages,
+  reservedPagePaths,
+  collectionSlugShadowsPage,
+  itemSlugShadowsPage,
+  CmsPathCollisionError,
   CMS_COLLECTION_LAYOUT,
+  CMS_COLLECTION_ITEM_LAYOUT,
 } from './materializePublish';
-import { toRenderModel, CMS_MODEL_ELEMENT_KEY } from './render/toRenderModel';
+import {
+  toRenderModel,
+  toDetailModel,
+  allRenderItems,
+  cmsDetailPath,
+  CMS_MODEL_ELEMENT_KEY,
+  CMS_DETAIL_ELEMENT_KEY,
+} from './render/toRenderModel';
+import CollectionDetail from './render/CollectionDetail';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { sanitizeContentHtml, isUrlContentKey } from '@/lib/publishSanitizer';
 import { LandingPagePublishedRenderer } from '@/modules/generatedLanding/LandingPagePublishedRenderer';
@@ -551,5 +568,480 @@ describe('materialized snapshot ↔ editor parity (through the real published re
     materializeCmsContent(content, bundleMap(bundle()));
     const published = renderPublished(content);
     expect(cmsBodyOf(published).textContent).toContain('No items yet');
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 4 — detail pages + slugs
+// ════════════════════════════════════════════════════════════════════════════
+//
+// What these defend, and against which failure:
+//
+//  A. PATH CONVENTION — subpage KEY *and* card HREF are leading-slash absolute
+//     `/<collectionRef>/<itemRef>`. Slash-less breaks KV route derivation and the
+//     publish route's locale collision guard, and fails `isSafeURL` → '#'.
+//  B. DUAL PIN ON SUBPAGES — every id in a fan-out subpage's `layout.sections`
+//     must have `content[sid].layout` non-empty, or the published renderer's
+//     silent `return null` drops the section and the page publishes BLANK.
+//  C. AUTHORITY — only structurally-cms subpages are written or pruned; a
+//     computed path landing on a real page FAILS LOUD (publish itself has no
+//     collision detection, `usePublishFlow.ts:177`).
+//  D. SANITIZE — detail subpages round-trip BOTH chokepoints byte-identical, and
+//     the key-name meta-guard covers the DETAIL model too.
+//  E. PARITY — the materialized subpage renders through the REAL
+//     `LandingPagePublishedRenderer` (never the registry component directly).
+
+/** Same collection as `bundle()`, with detail pages ON. */
+function detailBundle(id = 'col1'): CmsCollectionBundle {
+  const b = bundle(id);
+  b.collection.detailPages = true;
+  return b;
+}
+
+const PATH_1 = '/books/deep-work';
+const PATH_2 = '/books/loose';
+
+/** A genuine, user-authored (NON-cms) subpage entry. */
+const realPage = (headline: string) => ({
+  title: 'Real page',
+  layout: { sections: ['hero-real0001'] },
+  content: {
+    'hero-real0001': { id: 'hero-real0001', layout: 'leftCopyRightImage', elements: { headline } },
+  },
+});
+
+describe('detail fan-out — path convention + entry shape', () => {
+  it('keys every subpage by the LEADING-SLASH absolute path', () => {
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+
+    const keys = Object.keys(content.subpages).filter((k) => k !== '/about');
+    expect(keys.sort()).toEqual([PATH_1, PATH_2].sort());
+    // …explicitly: every cms key starts with '/', never slash-less, never /p/…
+    for (const k of keys) {
+      expect(k.startsWith('/')).toBe(true);
+      expect(k.startsWith('/p/')).toBe(false);
+    }
+    expect(cmsDetailPath('books', 'deep-work')).toBe(PATH_1);
+  });
+
+  it('emits the PINNED entry shape {layout:{sections},content,title} — no theme, no seo', () => {
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+    const entry = content.subpages[PATH_1];
+
+    expect(Object.keys(entry).sort()).toEqual(['content', 'layout', 'title']);
+    expect(Array.isArray(entry.layout.sections)).toBe(true);
+    expect(entry.layout.sections.length).toBe(1);
+    // theme is OPTIONAL and deliberately absent — the ROOT theme cascades
+    // (renderPublishedExport.ts:262-278). Emitting one would freeze a stale theme.
+    expect(entry.layout.theme).toBeUndefined();
+    expect(entry.seo).toBeUndefined();
+    expect(entry.title).toBe('Deep Work'); // title-role value
+  });
+
+  it('DUAL PIN: every subpage section has a non-empty content[sid].layout', () => {
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+
+    for (const path of [PATH_1, PATH_2]) {
+      const entry = content.subpages[path];
+      expect(entry.layout.sections.length).toBeGreaterThan(0);
+      for (const sid of entry.layout.sections) {
+        const section = entry.content[sid];
+        expect(section).toBeTruthy();
+        expect(typeof section.layout).toBe('string');
+        expect(section.layout.length).toBeGreaterThan(0);
+        expect(section.layout).toBe(CMS_COLLECTION_ITEM_LAYOUT);
+        expect(section.id).toBe(sid);
+        expect(section.elements[CMS_DETAIL_ELEMENT_KEY]).toBeTruthy();
+      }
+    }
+  });
+
+  it('detail section ids carry the cmscollectionitem prefix (and are NOT cms collection ids)', () => {
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+    const sid = content.subpages[PATH_1].layout.sections[0];
+    expect(isCmsItemSectionId(sid)).toBe(true);
+    // …so the phase-3 listing walk can never pick them up.
+    expect(isCmsSectionId(sid)).toBe(false);
+    expect(findCmsSections(content).map((f) => f.sectionId)).not.toContain(sid);
+  });
+
+  it('the listing CARD links to the same leading-slash path (href convention)', () => {
+    const content = payload();
+    materializeCmsContent(content, bundleMap(detailBundle()));
+    runPublishSanitizers(content);
+    const published = dom(
+      React.createElement(LandingPagePublishedRenderer, {
+        sections: content.layout.sections,
+        content: content.content,
+        theme: { colors: { sectionBackgrounds: {} } },
+      })
+    );
+    const hrefs = Array.from(published.querySelectorAll('a.lg-cms__titlelink')).map((a) =>
+      a.getAttribute('href')
+    );
+    expect(hrefs).toContain(PATH_1);
+    expect(hrefs).toContain(PATH_2);
+    // The '#'-coercion regression: a slash-less href would be rewritten by
+    // sanitizePublishedUrl. Assert none survived as '#'.
+    expect(hrefs).not.toContain('#');
+  });
+
+  it('detailPages OFF → the listing card carries NO detail link', () => {
+    const content = payload();
+    materializeCmsContent(content, bundleMap(bundle())); // detailPages: false
+    const published = dom(
+      React.createElement(LandingPagePublishedRenderer, {
+        sections: content.layout.sections,
+        content: content.content,
+        theme: { colors: { sectionBackgrounds: {} } },
+      })
+    );
+    expect(published.querySelector('a.lg-cms__titlelink')).toBeNull();
+  });
+
+  // HONESTY NOTE: this does NOT guard `slugLocked`. Nothing in the phase-4 path
+  // READS that flag — `materializePublish.ts` only copies it into the bundle, and
+  // `buildDetailSubpages` derives the path from `item.itemRef` alone. Setting
+  // `slugLocked` here would change nothing, so it is deliberately NOT set: the
+  // test would sit green with or without it (an inert assertion). `slugLocked` is
+  // an UNGUARDED PIN until the phase-7 item editor gives it a reader; whoever
+  // adds that reader owns writing its first real test.
+  // What IS guarded below: the stored item slug is used VERBATIM in the subpage
+  // path — never re-derived from the title or any other field.
+  it('uses the stored item slug VERBATIM in the subpage path (never re-derived)', () => {
+    const b = detailBundle();
+    b.items[0].slug = 'my-custom-path';
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(b));
+    expect(content.subpages['/books/my-custom-path']).toBeTruthy();
+    expect(content.subpages[PATH_1]).toBeUndefined();
+  });
+});
+
+describe('detail fan-out — authority scoping', () => {
+  it('leaves NON-cms subpages byte-identical', () => {
+    const content = payload();
+    content.subpages['/contact'] = realPage('Contact us');
+    const before = clone(content.subpages);
+
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+
+    expect(content.subpages['/about']).toEqual(before['/about']);
+    expect(content.subpages['/contact']).toEqual(before['/contact']);
+  });
+
+  it('OVERWRITES a stale client-sent copy of a cms path (server authority)', () => {
+    const content = payload();
+    const sid = `cmscollectionitem-i1`;
+    // A structurally-cms subpage carrying forged content.
+    content.subpages[PATH_1] = {
+      title: 'FORGED',
+      layout: { sections: [sid] },
+      content: {
+        [sid]: { id: sid, layout: CMS_COLLECTION_ITEM_LAYOUT, elements: { cmsItem: { hacked: true } } },
+      },
+    };
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+
+    expect(content.subpages[PATH_1].title).toBe('Deep Work');
+    const written = content.subpages[PATH_1].content[sid].elements[CMS_DETAIL_ELEMENT_KEY];
+    expect((written as any).hacked).toBeUndefined();
+    expect(written.item.itemRef).toBe('deep-work');
+  });
+
+  it('FAILS LOUD when a computed path collides with a real (non-cms) page', () => {
+    const content = payload();
+    content.subpages[PATH_1] = realPage('A page the user made');
+    expect(() => applyCmsDetailPages(content, bundleMap(detailBundle()))).toThrow(
+      CmsPathCollisionError
+    );
+  });
+
+  it('a failed collision guard mutates NOTHING (no half-written fan-out)', () => {
+    const content = payload();
+    content.subpages[PATH_1] = realPage('A page the user made');
+    const before = clone(content);
+    expect(() => applyCmsDetailPages(content, bundleMap(detailBundle()))).toThrow();
+    expect(content).toEqual(before);
+  });
+
+  it('toggle OFF → the cms subpages are REMOVED, non-cms untouched', () => {
+    const content = payload();
+    content.subpages['/contact'] = realPage('Contact us');
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+    expect(content.subpages[PATH_1]).toBeTruthy();
+
+    // Same collection, detailPages now off.
+    const off = applyCmsDetailPages(content, bundleMap(bundle()));
+    expect(off.written).toBe(0);
+    expect(off.removed).toBe(2);
+    expect(content.subpages[PATH_1]).toBeUndefined();
+    expect(content.subpages[PATH_2]).toBeUndefined();
+    expect(content.subpages['/about']).toBeTruthy();
+    expect(content.subpages['/contact']).toBeTruthy();
+  });
+
+  it('an ORPHANED cms subpage (collection unplaced entirely) is pruned', () => {
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+    const { removed } = applyCmsDetailPages(content, new Map());
+    expect(removed).toBe(2);
+    expect(Object.keys(content.subpages)).toEqual(['/about']);
+  });
+
+  it('a deleted item loses its page; the surviving item keeps its own', () => {
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+    const b = detailBundle();
+    b.items = b.items.filter((i) => i.id !== 'i1');
+    applyCmsDetailPages(content, bundleMap(b));
+    expect(content.subpages[PATH_1]).toBeUndefined();
+    expect(content.subpages[PATH_2]).toBeTruthy();
+  });
+
+  it('isCmsDetailSubpage only accepts an all-cmscollectionitem section list', () => {
+    expect(isCmsDetailSubpage({ layout: { sections: ['cmscollectionitem-a'] } })).toBe(true);
+    expect(isCmsDetailSubpage({ layout: { sections: ['hero-a'] } })).toBe(false);
+    expect(isCmsDetailSubpage({ layout: { sections: ['cmscollectionitem-a', 'hero-a'] } })).toBe(
+      false
+    );
+    expect(isCmsDetailSubpage({ layout: { sections: [] } })).toBe(false);
+    expect(isCmsDetailSubpage({})).toBe(false);
+    // a cms LISTING section is not a detail page
+    expect(isCmsDetailSubpage({ layout: { sections: ['cmscollection-a'] } })).toBe(false);
+  });
+
+  it('creates content.subpages when the payload had none, and no-ops when there is nothing to do', () => {
+    const withNone: Record<string, any> = { layout: { sections: [] }, content: {} };
+    applyCmsDetailPages(withNone, bundleMap(detailBundle()));
+    expect(Object.keys(withNone.subpages).sort()).toEqual([PATH_1, PATH_2].sort());
+
+    const empty: Record<string, any> = { layout: { sections: [] }, content: {} };
+    applyCmsDetailPages(empty, new Map());
+    expect(empty.subpages).toBeUndefined();
+  });
+});
+
+describe('detail fan-out — coercion + url-key proof', () => {
+  it('detail subpages round-trip BOTH publish chokepoints BYTE-IDENTICAL', () => {
+    const content = payload();
+    materializeCmsContent(content, bundleMap(detailBundle()));
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+    const before = clone(content);
+
+    runPublishSanitizers(content);
+
+    expect(content.subpages[PATH_1]).toEqual(before.subpages[PATH_1]);
+    expect(content.subpages[PATH_2]).toEqual(before.subpages[PATH_2]);
+
+    // Anti-vacuity + the exact values the url-key walker corrupts.
+    const sid = content.subpages[PATH_1].layout.sections[0];
+    const detail = content.subpages[PATH_1].content[sid].elements[CMS_DETAIL_ELEMENT_KEY];
+    expect(detail.item.fields.length).toBeGreaterThan(2);
+    expect(detail.item.itemRef).toBe('deep-work');
+    expect(detail.collectionRef).toBe('books');
+    expect(detail.roles.primaryCta).toBe('buy');
+  });
+
+  it('the SECOND chokepoint scheme-gates nothing in the detail model to "#"', () => {
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+    runPublishSanitizers(content);
+    const sid = content.subpages[PATH_1].layout.sections[0];
+    const detail = content.subpages[PATH_1].content[sid].elements[CMS_DETAIL_ELEMENT_KEY];
+    expect(allEntries(detail).filter(([, v]) => v === '#')).toEqual([]);
+  });
+
+  // ⚠️ PHASE-4 FINDING — the naming law is no longer "depth luck" here.
+  // Empirically probed: `sanitizeContentHtml` recurses THREE levels into a
+  // subpage section's `elements`, i.e. it REACHES `elements.cmsItem.item.<key>`
+  // (it stops one level short, inside `item.fields[]`). In the LISTING model the
+  // item keys sat below the walker; on a DETAIL page they sit right in it. So
+  // `collectionRef` / `itemRef` are actively saved by their names, and a rename
+  // to `collectionSlug` / `slug` would '#'-corrupt the published item page while
+  // the editor kept rendering it. This test proves the corruption is real at
+  // exactly that depth, so the guard above cannot be dismissed as theoretical.
+  it('a url-SUFFIXED key at the detail model\'s depth IS corrupted (the naming law bites)', () => {
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+    const sid = content.subpages[PATH_1].layout.sections[0];
+    const detail = content.subpages[PATH_1].content[sid].elements[CMS_DETAIL_ELEMENT_KEY];
+
+    // simulate the forbidden rename, at the real depths the model uses
+    detail.collectionSlug = detail.collectionRef; // depth 2
+    detail.item.slug = detail.item.itemRef;       // depth 3
+
+    runPublishSanitizers(content);
+
+    expect(detail.collectionSlug).toBe('#');
+    expect(detail.item.slug).toBe('#');
+    // …while the correctly-named keys are untouched.
+    expect(detail.collectionRef).toBe('books');
+    expect(detail.item.itemRef).toBe('deep-work');
+  });
+
+  it('META-GUARD: no DETAIL-model key ends in href/url/link/slug except sanctioned `url`', () => {
+    const model = toRenderModel(detailBundle());
+    const detail = toDetailModel(model, allRenderItems(model)[0]);
+
+    const entries = allEntries(detail);
+    expect(entries.length).toBeGreaterThan(20); // anti-vacuity
+    const offenders = entries
+      .filter(([k]) => isUrlContentKey(k))
+      .filter(([k]) => k !== 'url')
+      .map(([k]) => k);
+    expect(offenders).toEqual([]);
+    expect(entries.some(([k]) => k === 'url')).toBe(true);
+  });
+
+  it('the detail model carries NO numeric key anywhere (coercion rule 2)', () => {
+    const model = toRenderModel(detailBundle());
+    const detail = toDetailModel(model, allRenderItems(model)[0]);
+    const keys = allKeys(detail);
+    expect(keys.length).toBeGreaterThan(10);
+    expect(keys.some((k) => /^\d+$/.test(k))).toBe(false);
+  });
+
+  it('drops javascript: URLs from a detail page too', () => {
+    const hostile = hostileBundle();
+    hostile.collection.detailPages = true;
+    const content = payload({ collectionId: 'colX' });
+    applyCmsDetailPages(content, bundleMap(hostile));
+    const json = JSON.stringify(content.subpages);
+    expect(json).not.toContain('javascript:');
+    expect(json).toContain('https://cdn.test/ok.png');
+  });
+});
+
+// ── detail PARITY through the REAL published renderer ───────────────────────
+//
+// Same rule as the listing gate: the published half MUST go through
+// LandingPagePublishedRenderer, the only place that rebuilds layouts from
+// `content[sid].layout` and silently drops a section without one. A direct
+// registry render would sit GREEN while publish emitted a blank page.
+
+describe('detail page ↔ editor parity (through the real published renderer)', () => {
+  function publishedDetail(content: Record<string, any>, path: string) {
+    const entry = content.subpages[path];
+    return dom(
+      React.createElement(LandingPagePublishedRenderer, {
+        sections: entry.layout.sections,
+        content: entry.content,
+        theme: { colors: { sectionBackgrounds: {} } },
+      })
+    );
+  }
+
+  const detailBodyOf = (c: HTMLElement) => {
+    const body = c.querySelector('[data-cms-detail-body]');
+    if (!body) throw new Error('the detail section did not render at all (silent vanish?)');
+    return body;
+  };
+
+  it('publishes the SAME detail body skeleton the editor renders from the same tables', () => {
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+    // Render what publish ACTUALLY emits: post-BOTH-chokepoints.
+    runPublishSanitizers(content);
+
+    const model = toRenderModel(detailBundle());
+    const item = allRenderItems(model).find((i) => i.itemRef === 'deep-work')!;
+    const edit = dom(
+      React.createElement(CollectionDetail, {
+        sectionId: `cmscollectionitem-${item.itemId}`,
+        model: toDetailModel(model, item),
+      })
+    );
+
+    const publishedSkeleton = skeleton(detailBodyOf(publishedDetail(content, PATH_1)));
+    expect(publishedSkeleton).toBe(skeleton(detailBodyOf(edit)));
+    // Anti-vacuity: real content, and the CTA slot POPULATED on published.
+    expect(publishedSkeleton).toContain('#text:Deep Work');
+    expect(publishedSkeleton.split('\n').length).toBeGreaterThan(20);
+    expect(publishedSkeleton).toContain('lg-cms__cta');
+    expect(publishedSkeleton).toContain('mailto:hi@acme.com');
+  });
+
+  it('a detail section stripped of its layout DOES vanish from the published render (the gate bites)', () => {
+    const content = payload();
+    applyCmsDetailPages(content, bundleMap(detailBundle()));
+    const entry = content.subpages[PATH_1];
+    delete entry.content[entry.layout.sections[0]].layout; // simulate the half-pin bug
+    expect(publishedDetail(content, PATH_1).querySelector('[data-cms-detail-body]')).toBeNull();
+  });
+
+  it('a detail page with no materialized model renders empty, not broken', () => {
+    const sid = 'cmscollectionitem-ghost';
+    const entry = {
+      layout: { sections: [sid] },
+      content: { [sid]: { id: sid, layout: CMS_COLLECTION_ITEM_LAYOUT, elements: {} } },
+      title: 'Ghost',
+    };
+    const rendered = dom(
+      React.createElement(LandingPagePublishedRenderer, {
+        sections: entry.layout.sections,
+        content: entry.content,
+        theme: { colors: { sectionBackgrounds: {} } },
+      })
+    );
+    expect(detailBodyOf(rendered).textContent).toContain('Nothing here yet');
+  });
+});
+
+// ── write-time shadow guards (the other half of the collision story) ────────
+
+describe('reserved page-path helpers (route write-time guards)', () => {
+  const projectContent = {
+    pages: {
+      home: { id: 'home', pathSlug: '/', title: 'Home' },
+      p1: { id: 'p1', pathSlug: '/products', title: 'Products' },
+      p2: { id: 'p2', pathSlug: '/products/nwc-1000', title: 'NWC 1000' },
+      p3: { id: 'p3', pathSlug: 'contact', title: 'Contact' }, // slash-less in store
+    },
+  };
+
+  it('normalizes every page path to leading-slash absolute', () => {
+    expect([...reservedPagePaths(projectContent)].sort()).toEqual(
+      ['/', '/contact', '/products', '/products/nwc-1000'].sort()
+    );
+    expect(reservedPagePaths(null).size).toBe(0);
+    expect(reservedPagePaths({}).size).toBe(0);
+  });
+
+  it('a collection slug that shadows a page (or its subtree) is rejected', () => {
+    const reserved = reservedPagePaths(projectContent);
+    expect(collectionSlugShadowsPage('products', reserved)).toBe(true); // naayom!
+    expect(collectionSlugShadowsPage('contact', reserved)).toBe(true);
+    expect(collectionSlugShadowsPage('books', reserved)).toBe(false);
+    expect(collectionSlugShadowsPage('', reserved)).toBe(false);
+  });
+
+  it('an item slug is rejected only when its exact detail path already exists', () => {
+    const reserved = reservedPagePaths(projectContent);
+    expect(itemSlugShadowsPage('products', 'nwc-1000', reserved)).toBe(true);
+    expect(itemSlugShadowsPage('products', 'nwc-2000', reserved)).toBe(false);
+    expect(itemSlugShadowsPage('books', 'deep-work', reserved)).toBe(false);
+  });
+});
+
+describe('buildDetailSubpages', () => {
+  it('produces nothing for a detailPages-off collection', () => {
+    expect(buildDetailSubpages(bundleMap(bundle())).size).toBe(0);
+  });
+
+  it('produces one entry per item for a detailPages-on collection', () => {
+    expect([...buildDetailSubpages(bundleMap(detailBundle())).keys()].sort()).toEqual(
+      [PATH_1, PATH_2].sort()
+    );
+  });
+
+  it('skips an item with no slug (no page, rather than a "/books/" path)', () => {
+    const b = detailBundle();
+    b.items[0].slug = '';
+    expect([...buildDetailSubpages(bundleMap(b)).keys()]).toEqual([PATH_2]);
   });
 });

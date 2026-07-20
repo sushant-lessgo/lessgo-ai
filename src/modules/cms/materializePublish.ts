@@ -51,15 +51,41 @@
 // works-catalog authority boundary).
 
 import { prisma } from '@/lib/prisma';
-import { toRenderModel, CMS_MODEL_ELEMENT_KEY } from './render/toRenderModel';
+import {
+  toRenderModel,
+  toDetailModel,
+  allRenderItems,
+  cmsDetailPath,
+  fieldById,
+  CMS_MODEL_ELEMENT_KEY,
+  CMS_DETAIL_ELEMENT_KEY,
+  type CmsRenderModel,
+  type CmsDetailModel,
+} from './render/toRenderModel';
 import type { CmsCollectionBundle, CmsCollection, FieldDef, CollectionRoles } from './types';
-import { CMS_SECTION_TYPE, CMS_COLLECTION_LAYOUT, isCmsSectionId } from './sectionKeys';
+import {
+  CMS_SECTION_TYPE,
+  CMS_COLLECTION_LAYOUT,
+  isCmsSectionId,
+  CMS_ITEM_SECTION_TYPE,
+  CMS_COLLECTION_ITEM_LAYOUT,
+  isCmsItemSectionId,
+} from './sectionKeys';
 
-// The section-identity constants now LIVE in the prisma-free `./sectionKeys`, so
-// client modules (the editor store slice) can share them without pulling this
-// server-only module's `@/lib/prisma` import into the browser bundle. Re-exported
-// here for back-compat — existing tests/consumers import them from this path.
-export { CMS_SECTION_TYPE, CMS_COLLECTION_LAYOUT, isCmsSectionId };
+// EVERY section-identity constant (listing AND detail) lives in the prisma-free
+// `./sectionKeys`, so client modules (the editor store slice) can share them
+// without pulling this server-only module's `@/lib/prisma` import into the browser
+// bundle. Re-exported here for back-compat — existing tests/consumers import them
+// from this path (`materializePublish.test.ts`, `hooks/editStore/cmsActions.test.ts`),
+// so this re-export is load-bearing: deleting it breaks them.
+export {
+  CMS_SECTION_TYPE,
+  CMS_COLLECTION_LAYOUT,
+  isCmsSectionId,
+  CMS_ITEM_SECTION_TYPE,
+  CMS_COLLECTION_ITEM_LAYOUT,
+  isCmsItemSectionId,
+};
 
 /** One placed cms section, located inside whichever container holds it. */
 interface FoundSection {
@@ -153,6 +179,227 @@ export function materializeCmsContent(
   return sections.length;
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// DETAIL PAGES (phase 4) — server-authoritative fan-out into content.subpages
+// ════════════════════════════════════════════════════════════════════════════
+//
+// `detailPages: on` ⇒ every item of a PLACED collection gets its own published
+// page. There are no editor page entries for these (plan Deviations #3): this
+// module is their SOLE author, they ride the existing generic subpage chain
+// (subpages → blob → KV → /p/<slug>/<subpath>), and `pageActions.ts` is not
+// touched — so naayom's live products pages are untouched by construction.
+//
+// ── PATH CONVENTION (pinned) ────────────────────────────────────────────────
+// Key AND card href are the SAME leading-slash absolute bare path,
+// `/<collectionRef>/<itemRef>` (`cmsDetailPath`). Slash-less breaks KV route
+// derivation and the publish route's locale collision guard, and fails
+// `isSafeURL` → the href is coerced to '#'.
+//
+// ── THE DUAL PIN APPLIES TO EVERY FAN-OUT SECTION ───────────────────────────
+// Subpage layouts are ALSO rebuilt exclusively from `content[sid].layout`
+// (`LandingPagePublishedRenderer.tsx:106-113`), and a missing layout hits the
+// silent `return null` at :121 — the section vanishes with no error. So every id
+// in `layout.sections` gets a full `{id, layout, elements}` entry.
+//
+// ── AUTHORITY SCOPING ───────────────────────────────────────────────────────
+// We touch ONLY subpages that are STRUCTURALLY cms detail pages (every section
+// id carries the `cmscollectionitem` type prefix). Non-cms subpages — user pages,
+// naayom's `/products/*`, works pages — are never written and never removed. A
+// computed cms path landing on a non-cms subpage is a FAIL-LOUD collision, never
+// a silent overwrite (publish itself has no collision detection:
+// `usePublishFlow.ts:177` blindly assigns `subpages[pathSlug]`).
+
+// `CMS_ITEM_SECTION_TYPE`, `CMS_COLLECTION_ITEM_LAYOUT` and `isCmsItemSectionId`
+// live in `./sectionKeys` alongside their listing counterparts (imported +
+// re-exported at the top of this file).
+
+/**
+ * Thrown when a computed detail path would overwrite a non-cms subpage.
+ *
+ * The publish route CATCHES THIS BY CLASS and maps it to a 409 carrying
+ * `.message` verbatim (`api/publish/route.ts`), because the user has to act on it
+ * (rename the page, or change the collection/item slug) and cannot do that unless
+ * they are told WHICH path collided. So the message is a user-facing contract:
+ * keep the path in it, and keep the class exported.
+ */
+export class CmsPathCollisionError extends Error {
+  constructor(public readonly path: string) {
+    super(
+      `A page already exists at "${path}", so the collection item page cannot be created. ` +
+        `Rename that page, or change the collection or item slug.`
+    );
+    this.name = 'CmsPathCollisionError';
+  }
+}
+
+/**
+ * Is this subpage entry one WE authored? True only when it has at least one
+ * section and EVERY section id is a `cmscollectionitem` id. A user cannot author
+ * such a page (no editor plumbing exists), so this is a safe ownership marker —
+ * and it is the same structural filtering phase 3 used, not a looser rule.
+ */
+export function isCmsDetailSubpage(sub: any): boolean {
+  const sections = sub?.layout?.sections;
+  if (!Array.isArray(sections) || sections.length === 0) return false;
+  return sections.every((s: unknown) => typeof s === 'string' && isCmsItemSectionId(s));
+}
+
+/** The section id of an item's detail section — deterministic, so republishing
+ *  the same item produces a byte-identical subpage. Item ids are Prisma cuids
+ *  (letter-prefixed), so the id is coercion-safe. */
+function detailSectionId(itemId: string): string {
+  return `${CMS_ITEM_SECTION_TYPE}-${itemId}`;
+}
+
+/** The <title> of a detail page: the item's title-role value, else the
+ *  collection name, else the item slug. Always a non-empty string. */
+function detailTitle(detail: CmsDetailModel): string {
+  const title = fieldById(detail.item, detail.roles.title);
+  const fromTitle = typeof title?.value === 'string' ? title.value.trim() : '';
+  return fromTitle || detail.collectionName || detail.item.itemRef;
+}
+
+/**
+ * Build ONE subpage entry. Shape is PINNED:
+ *   `{ layout: { sections }, content, title }`
+ * `theme` is deliberately OMITTED — `renderPublishedExport.ts:262-278` falls back
+ * to the root theme, so detail pages inherit the site's look automatically. No
+ * `seo` either (the root cascade applies).
+ */
+function buildDetailSubpage(detail: CmsDetailModel): Record<string, any> {
+  const sid = detailSectionId(detail.item.itemId);
+  return {
+    layout: { sections: [sid] },
+    content: {
+      // THE DUAL PIN: a full entry with a non-empty `layout`, for every id in
+      // `layout.sections`. Drop `layout` and the page publishes BLANK, silently.
+      [sid]: {
+        id: sid,
+        layout: CMS_COLLECTION_ITEM_LAYOUT,
+        elements: {
+          collectionId: detail.collectionId,
+          [CMS_DETAIL_ELEMENT_KEY]: detail,
+        },
+      },
+    },
+    title: detailTitle(detail),
+  };
+}
+
+/** Every detail subpage a set of bundles should produce, keyed by path. */
+export function buildDetailSubpages(
+  bundles: Map<string, CmsCollectionBundle>
+): Map<string, Record<string, any>> {
+  const out = new Map<string, Record<string, any>>();
+  for (const bundle of bundles.values()) {
+    const model: CmsRenderModel = toRenderModel(bundle);
+    if (!model.detailPages) continue; // toggle OFF ⇒ this collection makes no pages
+    for (const item of allRenderItems(model)) {
+      const path = cmsDetailPath(model.collectionRef, item.itemRef);
+      if (!path) continue; // missing slug ⇒ no page (and the card carries no link)
+      out.set(path, buildDetailSubpage(toDetailModel(model, item)));
+    }
+  }
+  return out;
+}
+
+/**
+ * Reconcile `content.subpages` with the authoritative detail pages. PURE (no DB).
+ * Mutates `content` in place.
+ *
+ * 1. FAIL LOUD on a computed path that is occupied by a NON-cms subpage.
+ * 2. REMOVE every cms detail subpage that is no longer authoritative (detailPages
+ *    toggled off, item deleted/renamed, collection unplaced) — scoped to
+ *    structurally-cms entries, so nothing else can be dropped.
+ * 3. WRITE every computed entry, overwriting any stale client-sent copy (server
+ *    authority: the client's snapshot of a cms path is never trusted).
+ *
+ * @returns counts (diagnostic; used by tests)
+ */
+export function applyCmsDetailPages(
+  content: Record<string, any>,
+  bundles: Map<string, CmsCollectionBundle>
+): { written: number; removed: number } {
+  const desired = buildDetailSubpages(bundles);
+
+  const existing =
+    content?.subpages && typeof content.subpages === 'object' ? content.subpages : null;
+
+  // 1. collision guard — before ANY mutation, so a failed publish changes nothing.
+  if (existing) {
+    for (const path of desired.keys()) {
+      const sub = existing[path];
+      if (sub !== undefined && !isCmsDetailSubpage(sub)) {
+        throw new CmsPathCollisionError(path);
+      }
+    }
+  }
+
+  if (!existing && desired.size === 0) return { written: 0, removed: 0 };
+
+  const subpages: Record<string, any> = existing ?? {};
+  if (!existing) content.subpages = subpages;
+
+  // 2. prune stale cms detail pages (never anything else).
+  let removed = 0;
+  for (const path of Object.keys(subpages)) {
+    if (desired.has(path)) continue;
+    if (!isCmsDetailSubpage(subpages[path])) continue; // not ours → untouched
+    delete subpages[path];
+    removed++;
+  }
+
+  // 3. write the authoritative entries.
+  for (const [path, entry] of desired) subpages[path] = entry;
+
+  return { written: desired.size, removed };
+}
+
+/**
+ * The top-level page paths a project already occupies (`Project.content.pages[*]
+ * .pathSlug`), as leading-slash absolute paths.
+ *
+ * Used by the collection/item slug routes to reject a slug that would SHADOW an
+ * existing page — the write-time half of the collision guard above. Keeping it
+ * next to the publish-side guard is deliberate: one module owns the path rule.
+ */
+export function reservedPagePaths(projectContent: unknown): Set<string> {
+  const out = new Set<string>();
+  const pages = (projectContent as any)?.pages;
+  if (!pages || typeof pages !== 'object') return out;
+  for (const page of Object.values(pages) as any[]) {
+    const p = page?.pathSlug;
+    if (typeof p !== 'string' || !p) continue;
+    out.add(p.startsWith('/') ? p : `/${p}`);
+  }
+  return out;
+}
+
+/**
+ * Would a collection with this slug shadow an existing page path? True when a
+ * page already sits at `/<slug>` OR anywhere beneath it (`/<slug>/…`) — the
+ * latter is the one that actually bites: a collection slugged `products` on
+ * naayom would fan out `/products/<item>` straight onto live product pages.
+ */
+export function collectionSlugShadowsPage(slug: string, reserved: Set<string>): boolean {
+  if (!slug) return false;
+  const base = `/${slug}`;
+  for (const path of reserved) {
+    if (path === base || path.startsWith(`${base}/`)) return true;
+  }
+  return false;
+}
+
+/** Would this item's detail page land exactly on an existing page path? */
+export function itemSlugShadowsPage(
+  collectionSlug: string,
+  itemSlug: string,
+  reserved: Set<string>
+): boolean {
+  const path = cmsDetailPath(collectionSlug, itemSlug);
+  return !!path && reserved.has(path);
+}
+
 /** Narrow a Prisma Collection row (Json columns) to the app-level shape. */
 function toCmsCollection(row: any): CmsCollection {
   return {
@@ -231,7 +478,17 @@ export async function materializeCmsForPublish(
   content: Record<string, any>
 ): Promise<number> {
   const sections = findCmsSections(content);
-  if (sections.length === 0) return 0;
+
+  if (sections.length === 0) {
+    // FAST PATH — still ZERO queries. The detail-page reconcile runs with an empty
+    // authoritative set because it is PURELY STRUCTURAL: it drops orphaned cms
+    // detail subpages left behind when the last collection section was removed.
+    // Without this, deleting the block would leave its item pages published
+    // forever. Non-cms subpages are untouched, so a project that never used the
+    // CMS is byte-identical to today.
+    applyCmsDetailPages(content, new Map());
+    return 0;
+  }
 
   const ids = Array.from(
     new Set(
@@ -242,5 +499,11 @@ export async function materializeCmsForPublish(
   );
 
   const bundles = await loadCmsBundles(tokenId, ids);
-  return materializeCmsContent(content, bundles);
+  const materialized = materializeCmsContent(content, bundles);
+  // Fan-out AFTER the listing sections: the detail sections we add carry the
+  // `cmscollectionitem` prefix, which `findCmsSections` deliberately does not
+  // match, so the two passes cannot interfere in either order — but this order
+  // keeps "listing first, then its pages" readable.
+  applyCmsDetailPages(content, bundles);
+  return materialized;
 }

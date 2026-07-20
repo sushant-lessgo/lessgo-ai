@@ -12,8 +12,12 @@
 // runtime into the editor chunk. Adding ANY import here (especially a Prisma- or
 // React-bearing one) silently re-opens that hole.
 //
-// `materializePublish.ts` re-exports all three for back-compat: existing tests
-// and consumers import them from there.
+// `materializePublish.ts` re-exports every name below for back-compat: existing
+// tests and consumers import them from there (`materializePublish.test.ts` and
+// `hooks/editStore/cmsActions.test.ts` both do — the re-export is load-bearing,
+// not decoration).
+
+// ── LISTING SECTIONS (the placed `cmscollection` block) ─────────────────────
 
 /** Lowercased section-type prefix of a placed CMS section id (`cmscollection-<uuid>`). */
 export const CMS_SECTION_TYPE = 'cmscollection';
@@ -29,4 +33,30 @@ export const CMS_COLLECTION_LAYOUT = 'SharedCmsCollection';
 /** `cmscollection-abc123` → true; `hero-abc123` / `works-…` → false. */
 export function isCmsSectionId(sectionId: string): boolean {
   return typeof sectionId === 'string' && sectionId.split('-')[0].toLowerCase() === CMS_SECTION_TYPE;
+}
+
+// ── DETAIL SECTIONS (the per-item fan-out pages, phase 4) ───────────────────
+//
+// A SEPARATE type prefix on purpose: `findCmsSections` (the listing walk) matches
+// `isCmsSectionId` ONLY, so the detail sections the fan-out adds can never be
+// re-walked as listings. The two id spaces are deliberately disjoint — see the
+// `isCmsItemSectionId` note below and `materializePublish.test.ts`.
+
+/** Lowercased section-type prefix of a fan-out detail section. */
+export const CMS_ITEM_SECTION_TYPE = 'cmscollectionitem';
+
+/**
+ * Layout NAME stored on a fan-out detail section. Like `CMS_COLLECTION_LAYOUT`
+ * it keys nothing template-side (shared blocks dispatch on section TYPE) but the
+ * published renderer needs it PRESENT to render the section at all. It must
+ * NEVER gain a `layoutElementSchema` entry (plan Deviations #4).
+ */
+export const CMS_COLLECTION_ITEM_LAYOUT = 'SharedCmsCollectionItem';
+
+/** `cmscollectionitem-abc123` → true. Note `isCmsSectionId` is FALSE for these. */
+export function isCmsItemSectionId(sectionId: string): boolean {
+  return (
+    typeof sectionId === 'string' &&
+    sectionId.split('-')[0].toLowerCase() === CMS_ITEM_SECTION_TYPE
+  );
 }

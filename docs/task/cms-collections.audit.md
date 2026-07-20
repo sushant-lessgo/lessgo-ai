@@ -1044,3 +1044,394 @@ tests, as predicted).
   two test files.
 
 Not committed, per instructions.
+
+---
+
+## Phase 4 — detail pages + slugs
+
+### Files changed
+
+| File | Status |
+|---|---|
+| `src/modules/cms/render/CollectionDetail.core.tsx` | NEW |
+| `src/modules/cms/render/CollectionDetail.tsx` | NEW |
+| `src/modules/cms/render/CollectionDetail.published.tsx` | NEW |
+| `src/modules/cms/render/CollectionSection.core.tsx` | modified (detail links, `FieldNode` exported) |
+| `src/modules/cms/render/toRenderModel.ts` | modified (detail selector + path builder) |
+| `src/modules/cms/render/toRenderModel.test.ts` | modified (selector unit tests) |
+| `src/modules/cms/render/parity.test.tsx` | modified (detail dispatch + detail parity) |
+| `src/modules/generatedLanding/sharedBlocks/registry.ts` | modified |
+| `src/modules/generatedLanding/sharedBlocks/registry.published.ts` | modified |
+| `src/modules/generatedLanding/sharedBlocks/capabilities.ts` | modified |
+| `src/modules/generatedLanding/sharedBlocks/capabilities.test.ts` | modified |
+| `src/modules/cms/materializePublish.ts` | modified (fan-out + guards) |
+| `src/modules/cms/materializePublish.test.ts` | modified (phase-4 suites) |
+| `src/app/api/collections/route.ts` | modified (slug shadow check) |
+| `src/app/api/collections/[collectionId]/route.ts` | modified (slug shadow check) |
+| `src/app/api/collections/[collectionId]/items/[itemId]/route.ts` | modified (item slug shadow check) |
+| `e2e/cms-publish.spec.ts` | modified (extended, NOT a second file) |
+| `docs/task/cms-collections.audit.md` | this section |
+
+No file outside the plan's Phase-4 Files-touched list was edited. `pageActions.ts`,
+`src/app/api/publish/route.ts`, `sectionKeys.ts` and `src/modules/cms/README.md` are
+untouched.
+
+### What changed, per file
+
+**`toRenderModel.ts`** — added `CMS_DETAIL_ELEMENT_KEY = 'cmsItem'`, `CmsDetailModel`,
+`cmsDetailPath()`, `allRenderItems()`, `toDetailModel()`. The detail model is a pure
+SELECTOR over `CmsRenderModel` (it reuses the *same* `roles` object and the *same*
+`CmsItemRender` objects by reference — asserted in `toRenderModel.test.ts`), so there is
+still exactly ONE shaping path and a card cannot disagree with its detail page.
+Model shape `{collectionId, collectionName, collectionRef, roles, item}` — no key ends in
+`href|url|link|slug`; the only `url` keys are the genuine value URLs.
+
+**`CollectionSection.core.tsx`** — `ItemCard` gained `detailHref`; when `model.detailPages`
+is on, the card's title is wrapped in an `E.Link` to `cmsDetailPath(collectionRef, itemRef)`.
+Items with no title role get a standalone "View" link instead of being silently unreachable.
+`FieldNode` is now exported so the detail core renders fields through the identical emitters.
+Two CSS classes added to the inline stylesheet.
+
+**Detail trio** — `.core` holds the layout once (cover -> h1 -> labelled fields in schema
+order -> primaryCta), `.tsx` injects the edit primitives, `.published.tsx` the static ones.
+`.published` imports `makeCmsPublishedPrimitives` from `CollectionSection.published` (a plain
+module) — never the edit factory: the published/client boundary law holds.
+
+**`materializePublish.ts`** — `CMS_ITEM_SECTION_TYPE`, `CMS_COLLECTION_ITEM_LAYOUT`,
+`isCmsItemSectionId`, `isCmsDetailSubpage`, `CmsPathCollisionError`, `buildDetailSubpages`,
+`applyCmsDetailPages`, `reservedPagePaths`, `collectionSlugShadowsPage`,
+`itemSlugShadowsPage`. `materializeCmsForPublish` now reconciles detail subpages on both the
+normal and the zero-section fast path.
+
+**Routes** — write-time shadow guards so a collection slug cannot own a namespace a real page
+already occupies (`/products` on naayom is the motivating case), and an item slug cannot land
+exactly on an existing page path.
+
+### Pins honoured (each with the test that proves it)
+
+- **Key-naming law** — detail model keys are `collectionRef` / `itemRef`; the meta-guard
+  importing the REAL `isUrlContentKey` now covers the detail model too.
+- **Dual pin on every fan-out section** — every id in a subpage's `layout.sections` gets
+  `{id, layout: 'SharedCmsCollectionItem', elements}`; asserted per-section, plus a
+  "stripped layout DOES vanish" test proving the gate bites.
+- **Path convention** — subpage KEY and card HREF both asserted leading-slash absolute, and
+  `/p/` prefixes explicitly asserted absent.
+- **Subpage entry shape** — `Object.keys(entry)` asserted to be exactly
+  `['content','layout','title']`; `layout.theme` and `seo` asserted `undefined`.
+- **Authority scoping** — non-cms subpages byte-identical; only structurally-cms entries are
+  written or pruned; `isCmsDetailSubpage` has its own truth-table test.
+- **Collision = fail loud** — throws `CmsPathCollisionError`, and a separate test asserts the
+  payload is byte-identical after the throw (no half-written fan-out).
+- **Both sanitize chokepoints in route order** — detail subpages round-trip
+  `runPublishSanitizers()` byte-identical. Verified non-vacuous: both sanitizers do walk
+  `content.subpages`.
+- **Parity through `LandingPagePublishedRenderer`** — the detail parity test renders the
+  materialized subpage through the real renderer (post-BOTH-chokepoints), never the registry
+  component directly.
+- **`pageActions.ts` untouched** — `pageActions.test.ts` + `naayomProducts.test.ts` +
+  `collectionHelpers.works.test.ts` run green (38 tests).
+
+### FINDING the reviewer should scrutinise — the naming law now BITES on detail pages
+
+I probed `sanitizeContentHtml`'s recursion depth into a subpage section empirically:
+
+```
+elements.<key>                       -> rewritten
+elements.cmsItem.<key>               -> rewritten
+elements.cmsItem.item.<key>          -> rewritten    <- the detail model's itemRef lives HERE
+elements.cmsItem.item.fields[].<key> -> NOT reached
+```
+
+The README currently says item-level keys "escape the walker TODAY only by recursion DEPTH...
+that is luck". On a **detail page that luck has run out**: `collectionRef` (depth 2) and
+`itemRef` (depth 3) are both actively dispatched by the walker, so the phase-3 defensive
+renames are what keep item pages working — a rename back to `collectionSlug`/`slug` would
+'#'-corrupt the published item page while the editor rendered it fine. I added a test that
+plants those forbidden key names at exactly those depths and asserts they become `'#'` while
+the real keys survive, so this can never be dismissed as theoretical.
+The README is NOT in the phase-4 Files-touched list, so I did not update its
+"luck, not design" wording — **recommend a one-line README amendment in a later phase.**
+
+### Deviations / unpinned decisions (conservative option taken, logged)
+
+1. **Detail constants live in `materializePublish.ts`, not `sectionKeys.ts`.**
+   `sectionKeys.ts` is the natural home (it exists to keep prisma out of client bundles) but
+   is not in the phase-4 Files-touched list. Nothing client-side needs these constants today
+   (no editor placement of detail sections exists), so nothing is dragged into the browser
+   bundle. If a later phase places one from the editor, move them to `sectionKeys.ts` then.
+2. **Collision error surfaces as a generic 500, not a user-readable message.**
+   `applyCmsDetailPages` throws `CmsPathCollisionError` with a clear message, but
+   `/api/publish` is not in the Files-touched list and its fatal catch returns
+   `{error:'Internal Server Error'}`. The message reaches server logs + Sentry only.
+   Mitigated by the write-time shadow guards (which make the publish-time collision hard to
+   reach). **Recommend a 3-line catch in `route.ts` in a follow-up phase.**
+3. **Stale-page pruning runs on the zero-cms-section fast path too.** Without it, removing
+   the last collection section would leave its item pages published forever. This is purely
+   structural (no DB query), so the "zero cms sections => zero queries" pin still holds and a
+   project that never used the CMS is byte-identical to today.
+4. **Detail pages are produced only for PLACED collections** (the materializer only loads
+   bundles for collections referenced by a placed section). A `detailPages: true` collection
+   that is never placed publishes no pages. Conservative; matches "the listing is the entry
+   point".
+5. **Card link placement**: title-as-link, with a "View" link fallback when the collection
+   has no title role — chosen over making the whole card clickable, which would have changed
+   the existing card skeleton and the phase-2 parity baseline.
+6. **`toRenderModel.test.ts` and `parity.test.tsx` were edited** (the plan allowed this "IF
+   the detail-item selector requires it"): selector unit tests in the former; detail
+   dispatch-resolution + detail twin parity in the latter. The dispatch assertions are the
+   valuable half — a consistently mis-cased `cmsCollectionItem` key would pass the
+   capabilities key-sync test and then never resolve at runtime, publishing blank pages.
+7. **Bounded slug derivation loop** in `collections/route.ts` POST: `uniqueSlug`'s clamp
+   fallback is time-based and could repeat within a millisecond, so the shadow-avoidance loop
+   is capped at 50 iterations and then 409s rather than spinning.
+
+### Verification (actual results)
+
+- `npx tsc --noEmit` — **exit 0, zero output** (baseline preserved).
+- `npm run test:run` — **271 passed | 1 skipped (272 files); 4366 passed | 15 skipped (4381)**.
+  Baseline was 4326 passed / 4341 total; **+40 tests, zero new test files** (all extensions),
+  skipped count unchanged. No pre-existing suite regressed.
+- `pageActions.test.ts`, `naayomProducts.test.ts`, `collectionHelpers.works.test.ts` — 38
+  passed, sources untouched.
+- `npm run lint` (scoped to the changed files, via `next lint --file`) — clean. One
+  pre-existing `@next/next/no-img-element` **warning** in `parity.test.tsx` (the phase-2
+  diverged-`Img` meta-test); its line number shifted because of my insertion, the warning
+  itself is not new.
+- **e2e: NOT run locally** — `e2e/cms-publish.spec.ts` needs a dev server + a Clerk session +
+  Blob/KV, none of which are available here. The file typechecks cleanly under the project
+  tsconfig (verified with a temporary e2e-scoped tsconfig; the only errors reported were
+  pre-existing ones in `dashboard-redirects` / `engine-decider` / `parity` / `workPlan`).
+  Its new test is written to the same local-500 tolerance as the phase-3 test.
+
+### Open risks
+
+- The e2e detail test asserts `>= 400` for the item path after toggle-off. If a CDN/ISR window
+  serves the stale blob, that could flake on preview. Binding coverage is the vitest prune
+  test; treat an e2e failure there as a cache question, not a logic one.
+- Republishing is idempotent because detail section ids are derived from the item cuid. If a
+  future phase ever regenerates item ids, every detail section id changes (content is
+  rewritten wholesale anyway, so this is cosmetic, but worth knowing).
+- The founder's phase-4 human gate should specifically check: item page reachable from BOTH
+  `/p/<slug>` and a custom-domain root, and naayom's `/products/*` pages unchanged.
+
+Not committed, per instructions.
+
+---
+
+## Phase 4 — authorized follow-ups (collision 409, constant relocation, README fact-fix)
+
+Three scoped follow-ups on top of the phase-4 work above. Branch verified
+`feature/cms-collections` before any edit. Nothing committed.
+
+### Files changed
+
+- `src/app/api/publish/route.ts`
+- `src/app/api/publish/route.test.ts`
+- `src/modules/cms/sectionKeys.ts`
+- `src/modules/cms/materializePublish.ts`
+- `src/modules/cms/README.md`
+- `docs/task/cms-collections.audit.md` (this section)
+
+### 1. `CmsPathCollisionError` → 409 (`route.ts`)
+
+The materializer call is now wrapped in a `try` that catches **only**
+`cmsError instanceof CmsPathCollisionError` and returns
+`createSecureResponse({ error: cmsError.message }, 409)`. Every other throw is
+re-thrown unchanged and still lands in the outer fatal catch's generic 500 —
+fail-closed semantics for DB errors are untouched.
+
+Unchanged, as required: the ownership gate above it, the call order relative to
+`sanitizeContentForPublish`, and the `if (content && typeof content === 'object')`
+guard (the try sits *inside* it).
+
+**Status choice: 409, not 400.** The route already speaks 409 for the one existing
+"that name is taken" conflict (`'Slug already taken'`). The 400 precedent
+(`findLocaleSubpageCollision`) is the closer *message* analogue but the weaker
+*semantic* one — a locale collision is a malformed combination, a path collision is
+a resource conflict. Logged here as the in-scope judgment call; flipping it to 400
+is a one-line change plus one test constant if the reviewer disagrees.
+
+The client needs no change: `usePublishFlow.ts:218` does
+`if (!response.ok) throw new Error(result.error || …)` for any non-2xx, so the
+message (which names the path) reaches `SlugModal`'s `publish-error` surface.
+
+`materializePublish.ts`'s `CmsPathCollisionError` docblock now records that the
+route catches it by class and renders `.message` verbatim — i.e. the message string
+and the class export are a user-facing contract, not internal detail.
+
+### 2. Detail constants moved to `sectionKeys.ts`
+
+`CMS_ITEM_SECTION_TYPE`, `CMS_COLLECTION_ITEM_LAYOUT` and `isCmsItemSectionId`
+moved out of `materializePublish.ts` into `sectionKeys.ts`, under a new
+"DETAIL SECTIONS" heading beside their listing counterparts. `materializePublish.ts`
+imports all six names and re-exports all six.
+
+**The re-export is load-bearing — verified, not assumed.** `materializePublish.test.ts`
+imports `isCmsItemSectionId` (:57) and `CMS_COLLECTION_ITEM_LAYOUT` (:66) from
+`materializePublish`, and `hooks/editStore/cmsActions.test.ts` imports
+`CMS_COLLECTION_LAYOUT`/`CMS_SECTION_TYPE` from it (:22). Both re-export comments
+now name those files so a future cleanup can't mistake it for dead code.
+
+No production consumer imports the detail constants from a client module today, so
+there is no bundle change; the move is for consistency with the documented
+prisma-free pattern.
+
+### 3. README: the key-naming law is load-bearing, not defensive
+
+Replaced the "escape the walker TODAY only by recursion DEPTH — that is luck"
+paragraph with a section stating the current fact and the measured depths.
+
+Findings, derived from `sanitizeItemObject` (`publishSanitizer.ts:286-300`, one
+recursion level — `allowRecurse` flips false on first descent) against both section
+shapes:
+
+| Section | Path | Walked |
+|---|---|---|
+| listing | `elements.cmsModel.collectionRef` | yes |
+| listing | `elements.cmsModel.roles.*` | yes |
+| listing | `elements.cmsModel.groups[].{groupId,name}` | yes |
+| listing | `…groups[].items[].itemRef` | **no** (`groups[]` spends the recursion) |
+| detail | `elements.cmsItem.collectionRef` | yes |
+| detail | `elements.cmsItem.roles.*` | yes |
+| detail | `elements.cmsItem.item.itemRef` | **YES — the change** |
+| detail | `…item.fields[].*` (incl. image `{url}`) | no |
+
+Cause: `toDetailModel` hoists the item out of `groups[].items[]` onto a bare `item`
+prop, so `itemRef` sits one level shallower on a detail page than on a listing —
+inside the one-level budget. Same key, different depth, opposite outcome.
+Consequence recorded in the README: violating the naming law now produces `'#'`
+corruption on live item pages, invisible in the editor.
+
+Also confirmed the detail sections are actually reached by that pass —
+`sanitizeContentHtml` walks `content.subpages` first (`publishSanitizer.ts:371-382`).
+
+### Deviations
+
+1. **409 vs 400** — see above; conservative read of the route's existing vocabulary.
+2. **Test file choice** — the new tests went in `route.test.ts`, not
+   `publish.authz.test.ts`. `route.test.ts` already owns "what status/body does this
+   route return for failure X", which is exactly this; `publish.authz.test.ts` owns
+   the ownership gate, which this doesn't touch.
+3. **`vi.hoisted` in the mock** — the `materializeCmsForPublish` stub had to be
+   `vi.hoisted(...)`, not a plain const like its neighbours, because the new direct
+   `import { CmsPathCollisionError }` resolves that mock factory before the module
+   body's const initializers run (plain const → TDZ `ReferenceError`, observed).
+   The factory uses `importOriginal` and spreads the real module so
+   `CmsPathCollisionError` stays the REAL class — a hand-built fake would pass
+   against a catch-all and fail against the correct narrow `instanceof` catch,
+   inverting the test.
+4. **`security` mock untouched** — the change needed no new `@/lib/security` export,
+   so the hand-built factory is already in sync.
+5. **Stale duplicate wording left in place (out of scope).**
+   `src/modules/cms/render/toRenderModel.ts:46-48` carries the same now-false
+   "escape the walker TODAY only by recursion DEPTH … that is luck" sentence. It is
+   NOT on the Files-touched list, so it was not edited. **Follow-up owed:** point it
+   at the README's new section, or it will re-mislead the next agent.
+
+### Verification (actual)
+
+- `npx tsc --noEmit` → exit 0, zero output.
+- `npm run test:run` → **271 passed | 1 skipped (272 files); 4368 passed | 15 skipped (4383)**.
+  Baseline was 4366/4381 → **+2 tests**, matching the two added cases; no file-count
+  change, no regressions.
+- `npx next lint` on the four changed source/test files → "No ESLint warnings or errors".
+- Targeted re-run of `src/app/api/publish`, `src/modules/cms`,
+  `src/hooks/editStore/cmsActions.test.ts` → 7 files, 121 passed (the two re-export
+  consumers included).
+
+### Open risks
+
+- The 409 is pinned by a unit test with a mocked materializer; no end-to-end proof
+  that a real collision produces one. The path to a real collision (a user page at
+  exactly `/<collectionRef>/<itemRef>`) is worth one manual check at the founder gate.
+- `item.fields[].*` is unreached by the url pass on BOTH shapes, so a genuine image
+  `{url}` inside a CMS field value is not scheme-gated at publish. Pre-existing, not
+  introduced here, and out of scope — but it is the next thing that will surprise
+  someone, and the README's ❌ rows now say so explicitly.
+- Deviation 5 leaves two docs disagreeing until the `toRenderModel.ts` header is
+  updated.
+
+Not committed, per instructions.
+
+---
+
+## Phase 4 nit-pass (post-impl-review honesty/correctness tightening)
+
+**Files changed**
+
+- `src/modules/cms/render/toRenderModel.ts` (comment only)
+- `src/modules/cms/README.md`
+- `src/modules/cms/materializePublish.test.ts`
+- `src/modules/cms/render/parity.test.tsx`
+- `docs/task/cms-collections.audit.md` (this file)
+
+No runtime behaviour changed. The only non-comment/non-test edit is zero: `toRenderModel.ts`
+is a header-comment-only change.
+
+### Per file
+
+**`toRenderModel.ts`** — replaced the stale "escape the walker TODAY only by recursion DEPTH …
+that is luck" note (Deviation 5 of the phase-4 audit, left open). It now states the law is
+LOAD-BEARING: on detail pages the walker actively reaches `collectionRef` (depth 2,
+`elements.cmsItem.collectionRef`) and `itemRef` (depth 3, `elements.cmsItem.item.itemRef`,
+hoisted out of `groups[].items[]` by `toDetailModel`); renaming either to a `slug`-suffixed
+name yields `'#'` on every live item page. Points at the README for the full depth table.
+The two docs no longer disagree.
+
+**`README.md`** — the depth table named the detail element key `cmsDetail` in 4 places; the
+exported constant is `CMS_DETAIL_ELEMENT_KEY = 'cmsItem'` (`toRenderModel.ts:338`, verified
+against the source, not against either doc). Corrected to `elements.cmsItem.*` and the prose
+path now cites the constant by name. Depths were already right; only the key name was wrong.
+
+**`materializePublish.test.ts`** — the "respects slugLocked" case was INERT: nothing in the
+phase-4 path reads `slugLocked` (`materializePublish.ts:458` only copies it into the bundle;
+`buildDetailSubpages` derives the path from `item.itemRef`), so deleting the flag left the
+test green. Made truthful rather than faked: renamed to "uses the stored item slug VERBATIM in
+the subpage path (never re-derived)", the `slugLocked = true` line DROPPED (it contributed
+nothing), and a header comment records that `slugLocked` is an **unguarded pin** with no
+reader until the phase-7 item editor — whoever adds the reader owns its first real test.
+
+**`parity.test.tsx`** — the bundle was `detailPages: false`, so the listing card's detail-link
+branch (`lg-cms__titlelink` / `lg-cms__more`) was never parity-compared. Added
+`rawBundleWithDetail()` (same fixture, `detailPages: true`, and i3's title value stripped so
+the titleless `lg-cms__more` branch renders too) and ONE new case through the EXISTING
+hardened comparator (`skeleton`/`COMPARED_ATTRS` — no second comparator). Anti-vacuity
+assertions: the compared skeleton must contain `lg-cms__titlelink`, `href=/books/deep-work`,
+`lg-cms__more` and `href=/books/loose`.
+
+### Deviations
+
+- None from the phase brief. Item 3 chose the "drop the line + comment" option over "keep it
+  with a comment" (the conservative reading: an unread flag in a test body invites the same
+  misreading again); the unguarded-pin fact is preserved in the comment either way.
+- Item 4 additionally strips i3's title value inside the new fixture helper so BOTH detail-link
+  branches are compared. This is a test-fixture-only change, scoped to the new helper — the
+  pre-existing `rawBundle()` used by every other case is untouched.
+
+### Test results (actual)
+
+- `npx tsc --noEmit` → exit 0, zero output.
+- `npm run test:run` → **271 passed | 1 skipped (272 files); 4369 passed | 15 skipped (4384)**.
+  Baseline was 4368 passed / 4383 total → +1, the new parity case. No other delta.
+
+### Non-vacuity evidence
+
+Both new/fixed assertions were verified by MUTATION (mutations applied to the test files only,
+then reverted; the restored files re-run green):
+
+- Item 3 — removing `b.items[0].slug = 'my-custom-path'` (i.e. simulating a path re-derived
+  from something other than the stored slug) FAILS:
+  `FAIL … > uses the stored item slug VERBATIM in the subpage path (never re-derived)`
+  `AssertionError: expected undefined to be truthy`.
+- Item 4 — flipping the new helper back to `detailPages: false` FAILS at
+  `expect(editSkeleton).toContain('lg-cms__titlelink')` (parity.test.tsx:299), confirming the
+  new case is bound to the detail-link branch actually being in the compared output.
+- Restored: `2 passed (2) / 69 passed (69)` for the two files.
+
+### Open risks
+
+- `slugLocked` remains an unguarded pin (recorded, deliberately not shadow-guarded here).
+- Item CREATE shadow guards, blog-reserved-path and locale-collision behaviours untouched —
+  still carried to later phases per the phase-4 audit.
+
+Not committed, per instructions.

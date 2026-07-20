@@ -36,6 +36,10 @@ import {
   type CollectionRoles,
   type RoleKey,
 } from '@/lib/schemas/collection.schema';
+import {
+  reservedPagePaths,
+  collectionSlugShadowsPage,
+} from '@/modules/cms/materializePublish';
 
 type Params = { params: { collectionId: string } };
 
@@ -148,6 +152,20 @@ export async function PATCH(req: Request, { params }: Params) {
       if (clash) {
         return createSecureResponse(
           { error: `Slug "${slug}" is already used in this project` },
+          409
+        );
+      }
+
+      // Phase 4: the slug also owns the `/<slug>/<item>` detail-page namespace,
+      // so it must not shadow an existing page path (see the POST route + the
+      // publish-side fail-loud collision guard in materializePublish).
+      const project = await prisma.project.findUnique({
+        where: { tokenId },
+        select: { content: true },
+      });
+      if (collectionSlugShadowsPage(slug, reservedPagePaths(project?.content))) {
+        return createSecureResponse(
+          { error: `Slug "${slug}" conflicts with an existing page path. Pick a different slug.` },
           409
         );
       }

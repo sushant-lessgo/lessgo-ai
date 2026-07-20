@@ -124,3 +124,139 @@ test('a placed CMS collection publishes with its items', async ({ page }) => {
   // 7. Edit-only chrome must NOT ship to the published page.
   await expect(page.locator('[data-cms-manage]')).toHaveCount(0);
 });
+
+// ── phase 4: detail pages + slugs ───────────────────────────────────────────
+//
+// Same tolerance caveat as above. The BINDING versions of every assertion here
+// (fan-out shape, leading-slash key AND href, dual pin, collision guard,
+// toggle-off pruning, detail parity through the real published renderer) live in
+// `src/modules/cms/materializePublish.test.ts`.
+
+test('detailPages ON publishes an item page per item; OFF removes them', async ({ page }) => {
+  const cfg = AUDIENCES.find((c) => c.templateId === 'meridian')!;
+  const slug = 'e2e-cms-detail-smoke';
+  const TITLE = 'Deep Work Detail';
+  const BLURB = 'Focus, deeply, on a detail page.';
+
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean((window as any).Clerk?.user), null, { timeout: 30_000 });
+  const api = page.request;
+
+  const personaRes = await api.post('/api/user/persona', { data: { persona: cfg.persona } });
+  expect(personaRes.ok(), `persona: ${personaRes.status()}`).toBeTruthy();
+
+  const startRes = await api.get('/api/start');
+  expect(startRes.ok(), `/api/start: ${startRes.status()}`).toBeTruthy();
+  const { url } = await startRes.json();
+  const token = new URL(url).pathname.split('/').filter(Boolean).pop()!;
+
+  const finalContent = await seedDraft(api, token, cfg);
+
+  // Collection with detail pages ON.
+  const colRes = await api.post('/api/collections', {
+    data: {
+      tokenId: token,
+      name: 'E2E Detail Books',
+      slug: `e2e-detail-${Date.now()}`,
+      fieldSchema: [
+        { id: 'title', name: 'Title', type: 'text_short' },
+        { id: 'blurb', name: 'Blurb', type: 'text_long' },
+      ],
+      roles: { title: 'title' },
+      detailPages: true,
+    },
+  });
+  expect(colRes.ok(), `create collection: ${colRes.status()}`).toBeTruthy();
+  const { collection } = await colRes.json();
+
+  const mkItem = async (values: Record<string, unknown>) => {
+    const res = await api.post(`/api/collections/${collection.id}/items`, {
+      data: { tokenId: token, values },
+    });
+    expect(res.ok(), `create item: ${res.status()}`).toBeTruthy();
+    return (await res.json()).item;
+  };
+
+  const item1 = await mkItem({ title: TITLE, blurb: BLURB });
+  // DUPLICATE TITLE → the derived slug must be CLAMPED, never reused (two items
+  // sharing a slug would silently collapse to one published page).
+  const item2 = await mkItem({ title: TITLE, blurb: 'The second one.' });
+  expect(item2.slug).not.toBe(item1.slug);
+
+  // An EXPLICIT duplicate slug is rejected outright (409), not clamped.
+  const dupRes = await api.post(`/api/collections/${collection.id}/items`, {
+    data: { tokenId: token, slug: item1.slug, values: { title: 'Clash' } },
+  });
+  expect(dupRes.status(), 'explicit duplicate item slug').toBe(409);
+
+  // Place the listing section (dual pin, as in the first test).
+  const sectionId = 'cmscollection-e2e0002';
+  finalContent.layout.sections.push(sectionId);
+  finalContent.content[sectionId] = {
+    id: sectionId,
+    layout: 'SharedCmsCollection',
+    elements: { collectionId: collection.id },
+  } as any;
+
+  const save = async () => {
+    const res = await api.post('/api/saveDraft', {
+      data: {
+        tokenId: token,
+        title: cfg.title,
+        paletteId: cfg.paletteId,
+        templateId: cfg.templateId,
+        variantId: cfg.variantId,
+        finalContent,
+      },
+    });
+    expect(res.ok(), `saveDraft: ${res.status()}`).toBeTruthy();
+  };
+  await save();
+
+  await page.goto(`/edit/${token}`);
+  await expect(page.getByText(cfg.heroText).first()).toBeVisible({ timeout: 45_000 });
+
+  const publish = async () => {
+    const btn = page.getByTestId('editor-publish-trigger');
+    await expect(btn).toBeEnabled({ timeout: 15_000 });
+    await btn.click();
+    const modal = page.getByTestId('publish-confirm-card');
+    await expect(modal).toBeVisible();
+    await modal.getByTestId('publish-slug-input').fill(slug);
+    await modal.getByTestId('publish-title-input').fill(cfg.title);
+    const resPromise = page.waitForResponse(
+      (r) => r.url().includes('/api/publish') && r.request().method() === 'POST',
+      { timeout: 120_000 },
+    );
+    await modal.getByRole('button', { name: 'Publish now' }).click();
+    const status = (await resPromise).status();
+    expect([200, 500], `/api/publish -> ${status}`).toContain(status);
+  };
+  await publish();
+
+  // The item page serves at /p/<slug>/<collectionSlug>/<itemSlug> — the pinned
+  // leading-slash path, derived server-side from the tables.
+  const detailUrl = `/p/${slug}/${collection.slug}/${item1.slug}`;
+  const detail = await page.goto(detailUrl);
+  expect(detail?.status(), `${detailUrl} status`).toBeLessThan(400);
+  await expect(page.locator('[data-cms-detail-body]')).toHaveCount(1);
+  await expect(page.getByText(BLURB).first()).toBeVisible();
+
+  // …and the listing card links to it with the SAME leading-slash href.
+  await page.goto(`/p/${slug}`);
+  await expect(page.locator(`a.lg-cms__titlelink[href="/${collection.slug}/${item1.slug}"]`))
+    .toHaveCount(1);
+
+  // Toggle detail pages OFF → republish → the item page is gone.
+  const offRes = await api.patch(`/api/collections/${collection.id}`, {
+    data: { tokenId: token, detailPages: false },
+  });
+  expect(offRes.ok(), `toggle off: ${offRes.status()}`).toBeTruthy();
+
+  await page.goto(`/edit/${token}`);
+  await expect(page.getByText(cfg.heroText).first()).toBeVisible({ timeout: 45_000 });
+  await publish();
+
+  const gone = await page.goto(detailUrl);
+  expect(gone?.status(), `${detailUrl} after toggle-off`).toBeGreaterThanOrEqual(400);
+});

@@ -17,13 +17,15 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
-import { toRenderModel } from './toRenderModel';
+import { toRenderModel, toDetailModel, allRenderItems } from './toRenderModel';
 import CollectionSection, { makeCmsEditPrimitives } from './CollectionSection';
 import CollectionSectionPublished, {
   makeCmsPublishedPrimitives,
 } from './CollectionSection.published';
 import { CollectionSectionCore } from './CollectionSection.core';
-import { CMS_MODEL_ELEMENT_KEY } from './toRenderModel';
+import CollectionDetail from './CollectionDetail';
+import CollectionDetailPublished from './CollectionDetail.published';
+import { CMS_MODEL_ELEMENT_KEY, CMS_DETAIL_ELEMENT_KEY } from './toRenderModel';
 import { resolveSharedBlock } from '@/modules/generatedLanding/sharedBlocks/registry';
 import { resolveSharedBlockPublished } from '@/modules/generatedLanding/sharedBlocks/registry.published';
 import type { CmsCollectionBundle, FieldDef } from '../types';
@@ -104,6 +106,26 @@ function rawBundle(rolesSet: boolean): CmsCollectionBundle {
 }
 
 /**
+ * Same fixture with detail pages ON. The listing card then takes its
+ * detail-LINK branch (`lg-cms__titlelink` / `lg-cms__more`, via `E.Link`), which
+ * the `detailPages: false` bundle never renders — so without this the twins were
+ * never compared on that branch at all.
+ */
+function rawBundleWithDetail(rolesSet: boolean): CmsCollectionBundle {
+  const b = rawBundle(rolesSet);
+  return {
+    ...b,
+    collection: { ...b.collection, detailPages: true },
+    // i3 loses its title value so the OTHER detail-link branch — the standalone
+    // "View" link (`lg-cms__more`) emitted when there is no title node to wrap —
+    // is exercised in the same comparison.
+    items: b.items.map((it) =>
+      it.id === 'i3' ? { ...it, values: { buy: it.values.buy } as typeof it.values } : it
+    ),
+  };
+}
+
+/**
  * Attributes the parity gate COMPARES. The two primitive factories
  * (`makeCmsEditPrimitives` / `makeCmsPublishedPrimitives`) are hand-duplicated, so
  * anything left out of this set is exactly where silent divergence can hide. In
@@ -173,6 +195,59 @@ describe('CMS collection block — shared-block dispatch resolves', () => {
   it('resolves the published twin through the published registry', () => {
     expect(resolveSharedBlockPublished('cmscollection')).toBe(CollectionSectionPublished);
   });
+
+  // Phase 4: the DETAIL block. Same trap — a consistently mis-cased
+  // `cmsCollectionItem` key would pass capabilities key-sync and then never
+  // resolve at runtime, publishing every item page blank.
+  it('resolves the detail twins through both registries', () => {
+    expect(resolveSharedBlock('cmscollectionitem')).toBe(CollectionDetail);
+    expect(resolveSharedBlockPublished('cmscollectionitem')).toBe(CollectionDetailPublished);
+  });
+});
+
+describe('CMS detail block — editor↔published parity', () => {
+  const detailOf = (rolesSet: boolean) => {
+    const model = toRenderModel(rawBundle(rolesSet));
+    const item = allRenderItems(model).find((i) => i.itemRef === 'deep-work')!;
+    return toDetailModel(model, item);
+  };
+
+  const detailBodyOf = (c: HTMLElement) => {
+    const body = c.querySelector('[data-cms-detail-body]');
+    if (!body) throw new Error('no [data-cms-detail-body] rendered');
+    return body;
+  };
+
+  for (const rolesSet of [false, true]) {
+    it(`renders an identical detail skeleton from the SAME toDetailModel output (roles ${rolesSet ? 'set' : 'unset'})`, () => {
+      const detail = detailOf(rolesSet);
+      const edit = dom(<CollectionDetail sectionId="cmscollectionitem-i1" model={detail} />);
+      const published = dom(
+        <CollectionDetailPublished
+          sectionId="cmscollectionitem-i1"
+          {...{ [CMS_DETAIL_ELEMENT_KEY]: detail }}
+        />
+      );
+
+      const editSkeleton = skeleton(detailBodyOf(edit));
+      expect(skeleton(detailBodyOf(published))).toBe(editSkeleton);
+      // Anti-vacuity + the attributes the comparator only bites on if exercised.
+      expect(editSkeleton.split('\n').length).toBeGreaterThan(25);
+      expect(editSkeleton).toContain('#text:Deep Work');
+      expect(editSkeleton).toContain('pre-wrap');
+      expect(editSkeleton).toContain('href=mailto:hi@acme.com');
+    });
+  }
+
+  it('published detail twin renders an empty (not broken) page with no model', () => {
+    const container = dom(<CollectionDetailPublished sectionId="s1" />);
+    expect(detailBodyOf(container).textContent).toContain('Nothing here yet');
+  });
+
+  it('edit detail twin shows a skeleton (not a crash) with no model', () => {
+    const container = dom(<CollectionDetail sectionId="s1" />);
+    expect(container.querySelector('[data-cms-skeleton]')).toBeTruthy();
+  });
 });
 
 describe('CMS collection block — editor↔published parity', () => {
@@ -203,6 +278,29 @@ describe('CMS collection block — editor↔published parity', () => {
       expect(editSkeleton).toContain('href=mailto:hi@acme.com'); // link href
     });
   }
+
+  // The detail-LINK branch of the card, through the SAME comparator. Both twins
+  // route through `CollectionSection.core` + `E.Link`, but the two primitive
+  // factories are hand-duplicated, so this branch has to be compared, not assumed.
+  it('renders an identical body skeleton with detailPages ON (card detail-link branch)', () => {
+    const model = toRenderModel(rawBundleWithDetail(false));
+
+    const edit = dom(<CollectionSection sectionId="cmscollection-1" model={model} />);
+    const published = dom(
+      <CollectionSectionPublished
+        sectionId="cmscollection-1"
+        {...{ [CMS_MODEL_ELEMENT_KEY]: model }}
+      />
+    );
+
+    const editSkeleton = skeleton(bodyOf(edit));
+    expect(skeleton(bodyOf(published))).toBe(editSkeleton);
+    // Anti-vacuity: the branch under test must actually be in the compared output.
+    expect(editSkeleton).toContain('lg-cms__titlelink');
+    expect(editSkeleton).toContain('href=/books/deep-work');
+    expect(editSkeleton).toContain('lg-cms__more'); // titleless item → "View" link
+    expect(editSkeleton).toContain('href=/books/loose');
+  });
 
   it('all 9 field types reach the DOM in both twins', () => {
     const model = toRenderModel(rawBundle(false));

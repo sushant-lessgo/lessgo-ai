@@ -7,6 +7,10 @@
 //   1. export throws            → 500 { error }, no `url`, blob rolled back, row 'failed'
 //   2. KV write throws          → same 500 + 'failed' row (KV sub-catch rethrows)
 //   3. everything succeeds      → 200 { message, url }   (regression pin)
+//
+// cms-collections phase 4 adds the CMS materializer's error mapping:
+//   4. CmsPathCollisionError    → 409 naming the colliding PATH (actionable)
+//   5. any OTHER materializer error → still 500 (fail-closed, catch stays narrow)
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 vi.mock('@clerk/nextjs/server', () => ({ auth: vi.fn(async () => ({ userId: 'user_1' })) }));
@@ -65,6 +69,21 @@ vi.mock('@/lib/staticExport/renderPublishedExport', () => ({ renderPublishedExpo
 vi.mock('@/lib/staticExport/versionCleanup', () => ({ cleanupOldVersions: vi.fn(async () => {}) }));
 vi.mock('@/lib/blog/publishBlogPost', () => ({ syncBlogAfterSitePublish: vi.fn(async () => {}) }));
 
+// CMS materializer: only `materializeCmsForPublish` is stubbed. `importOriginal`
+// keeps the REAL `CmsPathCollisionError` class in the module graph — the route
+// narrows with `instanceof`, so a hand-built fake class would make the test pass
+// against a catch-all and fail against the real (correct) narrow catch. That
+// inversion is exactly the bug this file exists to prevent.
+// `vi.hoisted` (not a plain const): this factory is evaluated by the direct
+// `import { CmsPathCollisionError }` below, which resolves BEFORE the module body's
+// const initializers run — a plain const TDZ-crashes there. The other mocks in this
+// file get away with plain consts only because nothing imports their module directly.
+const materializeCmsForPublish = vi.hoisted(() => vi.fn(async () => 0));
+vi.mock('@/modules/cms/materializePublish', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/modules/cms/materializePublish')>()),
+  materializeCmsForPublish,
+}));
+
 const del = vi.fn(async () => {});
 vi.mock('@vercel/blob', () => ({ del }));
 
@@ -78,6 +97,7 @@ vi.mock('@/lib/routing/kvRoutes', () => ({
 
 import * as Sentry from '@sentry/nextjs';
 import { prisma } from '@/lib/prisma';
+import { CmsPathCollisionError } from '@/modules/cms/materializePublish';
 import { POST } from './route';
 
 const db = prisma as any;
@@ -125,6 +145,7 @@ describe('/api/publish — honest failure on static-export error (publish-trust 
     db.publishedPage.count.mockResolvedValue(0);
     renderPublishedExport.mockResolvedValue({ version: 3, blobKey: BLOB_KEY, blobUrl: 'https://blob/x', sizeBytes: 1024, extraRoutes: {} });
     atomicPublishWithRetry.mockResolvedValue({ attempts: 1, verified: true } as any);
+    materializeCmsForPublish.mockResolvedValue(0 as any);
   });
 
   it('case 1: static export throws → 500 { error }, no url, row failed (no blob to roll back)', async () => {
@@ -188,5 +209,61 @@ describe('/api/publish — honest failure on static-export error (publish-trust 
     expect(res.__body.error).toBeUndefined();
     expect(failedUpdateCalls().length).toBe(0);
     expect(del).not.toHaveBeenCalled();
+  });
+});
+
+// cms-collections phase 4. A detail-page path collision is the one CMS failure the
+// user can actually FIX, and only if we tell them which path collided. Before this
+// mapping it escaped to the outer fatal catch as a bare 500 'Internal Server Error'
+// — the real message reached Sentry and nobody else.
+describe('/api/publish — CMS detail-path collision surfaces as an actionable 409', () => {
+  const COLLIDING_PATH = '/products/widget-9';
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    db.project.findUnique.mockResolvedValue({ id: 'proj_1', audienceType: 'product', templateId: 'meridian', variantId: null, paletteId: null, themeValues: {}, content: {} });
+    db.project.upsert.mockResolvedValue({});
+    db.token.upsert.mockResolvedValue({});
+    db.publishedPage.findUnique.mockResolvedValue(PAGE_ROW);
+    db.publishedPage.update.mockResolvedValue(PAGE_ROW);
+    db.publishedPage.create.mockResolvedValue(PAGE_ROW);
+    db.publishedPage.count.mockResolvedValue(0);
+    renderPublishedExport.mockResolvedValue({ version: 3, blobKey: BLOB_KEY, blobUrl: 'https://blob/x', sizeBytes: 1024, extraRoutes: {} });
+    atomicPublishWithRetry.mockResolvedValue({ attempts: 1, verified: true } as any);
+    materializeCmsForPublish.mockResolvedValue(0 as any);
+  });
+
+  it('case 4: CmsPathCollisionError → 409 whose body NAMES the colliding path', async () => {
+    materializeCmsForPublish.mockRejectedValue(new CmsPathCollisionError(COLLIDING_PATH) as any);
+
+    const res: any = await POST(makeReq(BODY));
+
+    // 409 = the route's existing conflict vocabulary ('Slug already taken').
+    expect(res.__status).toBe(409);
+    // THE point of the mapping: the user must learn WHICH path collided, or they
+    // cannot act. Assert the path itself, not merely that some error string exists.
+    expect(res.__body.error).toContain(COLLIDING_PATH);
+    expect(res.__body.error).not.toBe('Internal Server Error');
+    expect(res.__body.url).toBeUndefined();
+
+    // Fail-closed BEFORE any side effect: nothing published, nothing written.
+    expect(renderPublishedExport).not.toHaveBeenCalled();
+    expect(db.publishedPage.update).not.toHaveBeenCalled();
+    expect(db.publishedPage.create).not.toHaveBeenCalled();
+    expect(db.project.upsert).not.toHaveBeenCalled();
+  });
+
+  it('case 5: a NON-collision materializer error still 500s (the catch stays narrow)', async () => {
+    materializeCmsForPublish.mockRejectedValue(new Error('collection read failed') as any);
+
+    const res: any = await POST(makeReq(BODY));
+
+    // Falls through to the outer fatal catch — unchanged behaviour, no leak of
+    // internals. A catch-all in the route would have turned this into a 409.
+    expect(res.__status).toBe(500);
+    expect(res.__body.error).toBe('Internal Server Error');
+    expect(res.__body.error).not.toContain('collection read failed');
+    expect(Sentry.captureException).toHaveBeenCalled();
+    expect(renderPublishedExport).not.toHaveBeenCalled();
   });
 });

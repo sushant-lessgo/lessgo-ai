@@ -7,7 +7,7 @@ import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { PublishSchema, sanitizeForLogging, sanitizeSeo } from '@/lib/validation';
 import { createSecureResponse, validateSlug, verifyProjectAccess, assertProjectOwner } from '@/lib/security';
-import { materializeCmsForPublish } from '@/modules/cms/materializePublish';
+import { materializeCmsForPublish, CmsPathCollisionError } from '@/modules/cms/materializePublish';
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit, hasTrackingPixels, getPlanConfig, PlanTier } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
@@ -73,8 +73,27 @@ async function publishHandler(req: NextRequest) {
     // written into the snapshot. Runs BEFORE both sanitize chokepoints so the
     // materialized payload flows through them like any other content. Zero cms
     // sections ⇒ zero queries ⇒ existing publishes are byte-identical.
+    //
+    // The ONLY expected user-facing failure here is `CmsPathCollisionError`: a
+    // computed detail path (`/<collectionRef>/<itemRef>`) is already occupied by a
+    // NON-cms subpage, so publishing would silently overwrite a real page. That is
+    // an actionable conflict — the user has to rename the page or change a slug —
+    // so it must reach them with the offending PATH, not die as a generic 500 in
+    // Sentry. 409 matches this route's existing conflict vocabulary ('Slug already
+    // taken', :241).
+    //
+    // Catch ONLY this class. Everything else (DB failure, unexpected bug) keeps
+    // falling to the outer fatal catch's 500 — fail-CLOSED: we must never publish a
+    // half-materialized snapshot because a read failed.
     if (content && typeof content === 'object') {
-      await materializeCmsForPublish(tokenId, content as Record<string, any>);
+      try {
+        await materializeCmsForPublish(tokenId, content as Record<string, any>);
+      } catch (cmsError) {
+        if (cmsError instanceof CmsPathCollisionError) {
+          return createSecureResponse({ error: cmsError.message }, 409);
+        }
+        throw cmsError;
+      }
     }
 
     // Sanitize: strip excluded elements, set required defaults

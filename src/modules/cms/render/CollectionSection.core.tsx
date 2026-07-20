@@ -26,6 +26,7 @@ import {
   fieldById,
   nonRoleFields,
   coverSrc,
+  cmsDetailPath,
   type CmsRenderModel,
   type CmsFieldRender,
   type CmsItemRender,
@@ -56,11 +57,19 @@ export const CMS_COLLECTION_STYLES = `
 .lg-cms__media{font-size:14px;text-decoration:underline;}
 .lg-cms__link{font-size:14px;text-decoration:underline;}
 .lg-cms__cta{display:inline-block;margin-top:2px;font-size:14px;font-weight:600;text-decoration:underline;}
+.lg-cms__titlelink{color:inherit;text-decoration:none;}
+.lg-cms__more{font-size:14px;text-decoration:underline;}
 .lg-cms__empty{font-size:14px;opacity:.55;}
 `;
 
-/** One non-role field, dispatched purely on its TYPE. */
-function FieldNode({ field, E }: { field: CmsFieldRender; E: CmsPrimitives }) {
+/**
+ * One non-role field, dispatched purely on its TYPE.
+ *
+ * EXPORTED so `CollectionDetail.core.tsx` renders fields through the exact same
+ * emitters — a detail page that dispatched types independently would be a second
+ * markup source and could drift from the listing card.
+ */
+export function FieldNode({ field, E }: { field: CmsFieldRender; E: CmsPrimitives }) {
   switch (field.fieldType) {
     case 'text_short':
       return <E.Txt value={field.value as string} as="span" className="lg-cms__short" />;
@@ -123,16 +132,27 @@ function ItemCard({
   item,
   roles,
   E,
+  detailHref,
 }: {
   item: CmsItemRender;
   roles: CmsResolvedRoles;
   E: CmsPrimitives;
+  /**
+   * `/<collectionRef>/<itemRef>` when the collection has detail pages on, else
+   * `null`. Leading-slash absolute — the pinned path convention (`cmsDetailPath`).
+   * Inert in the edit twin (the edit `Link` preventDefaults), live on published.
+   */
+  detailHref?: string | null;
 }) {
   const cover = fieldById(item, roles.cover);
   const title = fieldById(item, roles.title);
   const cta = fieldById(item, roles.primaryCta);
   const src = coverSrc(cover);
   const rest = nonRoleFields(item, roles);
+
+  const titleNode = title ? (
+    <E.Txt value={title.value as string} as="h3" className="lg-cms__title" />
+  ) : null;
 
   return (
     <>
@@ -143,8 +163,20 @@ function ItemCard({
           className="lg-cms__cover"
         />
       ) : null}
-      {title ? (
-        <E.Txt value={title.value as string} as="h3" className="lg-cms__title" />
+      {/* detail pages ON → the card's title is the link to the item page. With no
+          title role there is nothing to wrap, so a standalone "View" link keeps
+          every item reachable rather than silently unreachable. */}
+      {titleNode && detailHref ? (
+        <E.Link href={detailHref} className="lg-cms__titlelink">
+          {titleNode}
+        </E.Link>
+      ) : (
+        titleNode
+      )}
+      {!titleNode && detailHref ? (
+        <E.Link href={detailHref} className="lg-cms__more">
+          View
+        </E.Link>
       ) : null}
       {rest.length ? (
         <div className="lg-cms__fields">
@@ -220,7 +252,14 @@ export function CollectionSectionCore({
                   itemClassName="lg-cms__card"
                   keyOf={(i: CmsItemRender) => i.itemId}
                   render={(i: CmsItemRender) => (
-                    <ItemCard item={i} roles={model.roles} E={E} />
+                    <ItemCard
+                      item={i}
+                      roles={model.roles}
+                      E={E}
+                      detailHref={
+                        model.detailPages ? cmsDetailPath(model.collectionRef, i.itemRef) : null
+                      }
+                    />
                   )}
                 />
               </div>

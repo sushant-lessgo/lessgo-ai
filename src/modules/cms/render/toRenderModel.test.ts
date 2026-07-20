@@ -5,7 +5,13 @@
 //     coercePublishValue silently collapses at publish time
 
 import { describe, it, expect } from 'vitest';
-import { toRenderModel, type CmsRenderModel } from './toRenderModel';
+import {
+  toRenderModel,
+  toDetailModel,
+  allRenderItems,
+  cmsDetailPath,
+  type CmsRenderModel,
+} from './toRenderModel';
 import type { CmsCollectionBundle, FieldDef } from '../types';
 
 const FIELDS: FieldDef[] = [
@@ -344,5 +350,60 @@ describe('toRenderModel — coercion-proof shape', () => {
     const rendered = m.groups[0].items[0];
     expect(rendered.itemRef).toBe('i1');
     expect((rendered as any).slug).toBeUndefined();
+  });
+});
+
+// ── Detail-page selectors (phase 4) ────────────────────────────────────────
+//
+// The detail page is a SELECTOR over the listing model, not a second feed —
+// these assert that stays true (same roles object, same field objects), plus the
+// pinned leading-slash path convention.
+
+describe('detail-page selectors', () => {
+  const built = () =>
+    toRenderModel(
+      bundle({
+        collection: { ...bundle().collection, detailPages: true },
+        groups: [
+          { id: 'gA', collectionId: 'col1', name: 'Recent', order: 0 },
+          { id: 'gB', collectionId: 'col1', name: 'Older', order: 1 },
+        ],
+        items: [
+          item('i1', { title: 'One' }, { groupId: 'gA' }),
+          item('i2', { title: 'Two' }, { groupId: 'gB' }),
+          item('i3', { title: 'Three' }),
+        ],
+      })
+    );
+
+  it('allRenderItems flattens every group in render order', () => {
+    expect(allRenderItems(built()).map((i) => i.itemRef)).toEqual(['i1', 'i2', 'i3']);
+  });
+
+  it('cmsDetailPath is leading-slash absolute, and null without both refs', () => {
+    expect(cmsDetailPath('books', 'deep-work')).toBe('/books/deep-work');
+    expect(cmsDetailPath('books', '')).toBeNull();
+    expect(cmsDetailPath('', 'deep-work')).toBeNull();
+    expect(cmsDetailPath(null, undefined)).toBeNull();
+  });
+
+  it('toDetailModel reuses the listing model\'s roles and field objects (one feed)', () => {
+    const model = built();
+    const item0 = allRenderItems(model)[0];
+    const detail = toDetailModel(model, item0);
+
+    expect(detail.roles).toBe(model.roles); // same object, cannot drift
+    expect(detail.item).toBe(item0);
+    expect(detail.collectionRef).toBe('books');
+    expect(detail.collectionId).toBe('col1');
+    expect(detail.collectionName).toBe('Books');
+  });
+
+  it('the detail model carries no `slug`/`link`-suffixed key (key-name law)', () => {
+    const model = built();
+    const detail = toDetailModel(model, allRenderItems(model)[0]) as any;
+    expect(detail.slug).toBeUndefined();
+    expect(detail.collectionSlug).toBeUndefined();
+    expect(detail.item.itemRef).toBe('i1');
   });
 });

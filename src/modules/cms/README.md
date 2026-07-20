@@ -92,9 +92,41 @@ Hence the deliberately non-matching names:
 The stored `CollectionRoles.primaryLink` (DB/Zod contract) keeps its name — it never enters
 `elements`. `toRenderModel()` bridges the two vocabularies.
 
-Item-level keys escape the walker *today* only by recursion **depth** (`groups[].items` is
-reached with `allowRecurse=false`) — that is luck, not design, and phase 4 renders item slugs
-into hrefs, so `itemRef` is named defensively too.
+### The naming law is LOAD-BEARING, not defensive (phase 4 changed this)
+
+An earlier version of this file said item-level keys escaped the walker "only by recursion
+**depth** — that is luck, not design". **That luck has run out.** Phase 4's detail pages put
+`itemRef` on a SHORTER path than the listing model does, and it is now genuinely walked.
+Rename `collectionRef`/`itemRef` to anything ending in `slug` and you do not get a latent
+risk — you get **`'#'` on every live item page**, in the editor-invisible way described above.
+
+The walker is `sanitizeItemObject` (`publishSanitizer.ts:286-300`): it dispatches its own
+object's string props, and recurses exactly **ONE** level (`allowRecurse` flips to `false` on
+the first descent). Measured against that, per section shape:
+
+| Section | Path | Walked? |
+|---|---|---|
+| listing `cmscollection` | `elements.cmsModel.collectionRef` | ✅ **yes** |
+| listing | `elements.cmsModel.roles.{title,cover,primaryCta}` | ✅ yes |
+| listing | `elements.cmsModel.groups[].{groupId,name}` | ✅ yes |
+| listing | `…groups[].items[].itemRef` | ❌ no — `groups[]` spends the one recursion, so `items[]` is out of reach |
+| detail `cmscollectionitem` | `elements.cmsItem.collectionRef` | ✅ **yes** |
+| detail | `elements.cmsItem.roles.*` | ✅ yes |
+| detail | `elements.cmsItem.item.itemRef` | ✅ **YES — this is the one that changed** |
+| detail | `…item.fields[].*` (`{fieldType, value}`, image `{url}`) | ❌ no |
+
+The detail model (`toDetailModel`) hoists the item OUT of `groups[].items[]` to a bare `item`
+prop, so `itemRef` sits at `elements → cmsItem → item → itemRef` (the detail element key is
+`CMS_DETAIL_ELEMENT_KEY = 'cmsItem'`, toRenderModel.ts): within the one-level
+budget, where on the listing side it sat one level too deep. Same key, different depth,
+opposite outcome.
+
+Corollary for whoever extends the model: **do not reason about safety from the listing shape.**
+A key that is unreachable there can be reachable on a detail page. Assume every model key is
+walked, and obey the suffix rule unconditionally.
+
+(The two ❌ rows are unreached *today*; treat that as an implementation detail of the current
+shapes, not a guarantee — which is the whole lesson of this section.)
 
 The **only** sanctioned url-suffixed keys are the genuine URL values inside image / gallery /
 video / audio / link values (`{url, …}`) — gating those is correct and desirable. **Any new
