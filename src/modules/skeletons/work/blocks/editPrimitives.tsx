@@ -29,6 +29,14 @@ import type {
 
 export interface WorkEditCtx {
   sectionId: string;
+  /**
+   * Editor mode, read ONCE in `useWorkEditCtx` (never per primitive — a page
+   * renders hundreds of Txt nodes and per-node store subscriptions would be a
+   * real perf regression). `'preview'` ⇒ every primitive renders the SAME markup
+   * MINUS its edit affordance (no contentEditable, no ×/+ Add, no pickers), so
+   * `/edit` preview, `/preview/[token]` and the mobile iframe all look published.
+   */
+  mode?: 'edit' | 'preview';
   update: (elementKey: string, value: any) => void;
   updateCollection: (collectionKey: string, value: any[]) => void;
   getCollection: (collectionKey: string) => any[];
@@ -85,13 +93,30 @@ const Editable: React.FC<{
   placeholder?: string;
   multiline?: boolean;
   isButton?: boolean;
+  /** false ⇒ static render (preview): same tag/markers, zero editing affordance. */
+  editable?: boolean;
   onSave: (key: string, value: string) => void;
-}> = ({ sectionId, elementKey, value, as, className = '', style, placeholder = '', multiline = false, isButton = false, onSave }) => {
+}> = ({ sectionId, elementKey, value, as, className = '', style, placeholder = '', multiline = false, isButton = false, editable = true, onSave }) => {
   const Tag = as as any;
   const isHtml = /<[^>]*>/.test(value || '');
   const [editing, setEditing] = React.useState(false);
   const isElExcluded = useIsElementExcluded(sectionId, elementKey);
   if (isElExcluded) return null;
+
+  // Preview: static tag. Keeps `data-section-id`/`data-element-key` (conformance +
+  // toolbar selectors) and the visible copy; drops contentEditable entirely.
+  if (!editable) {
+    const shown = value || placeholder;
+    const staticProps = {
+      className,
+      style,
+      'data-section-id': sectionId,
+      'data-element-key': elementKey,
+    };
+    return /<[^>]*>/.test(shown || '')
+      ? <Tag {...staticProps} dangerouslySetInnerHTML={{ __html: shown }} />
+      : <Tag {...staticProps}>{shown}</Tag>;
+  }
 
   // Button mode: selectable (non-editing) until double-clicked.
   if (isButton && !editing) {
@@ -144,6 +169,7 @@ const Txt: React.FC<WorkTxtProps> = ({ elementKey, value, as = 'span', className
       placeholder={placeholder}
       multiline={multiline}
       isButton={isButton}
+      editable={ctx.mode !== 'preview'}
       onSave={(k, v) => saveField(ctx, k, v)}
     />
   );
@@ -160,6 +186,7 @@ const Img: React.FC<WorkImgProps> = ({ elementKey, src, alt, className, imgClass
   const [picking, setPicking] = React.useState(false);
   const onPick = (url: string) => saveField(ctx, elementKey, url);
   const clear = () => saveField(ctx, elementKey, '');
+  const preview = ctx.mode === 'preview';
   // Parity: the wrapper must stay a STATIC (non-positioned) box like the published
   // `<div class={className}>`. If it were `position:relative` it becomes a
   // containing block, and a CONTENT placeholder using `position:absolute; inset:0`
@@ -175,22 +202,26 @@ const Img: React.FC<WorkImgProps> = ({ elementKey, src, alt, className, imgClass
       data-element-key={elementKey}
     >
       {src ? <img src={src} alt={alt || ''} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
-      <span className="wk-img-edit">
-        <button type="button" className="wk-img-edit__btn" onClick={() => setPicking(true)}>
-          {src ? 'Replace' : '↥ Image'}
-        </button>
-        {src && <button type="button" className="wk-img-edit__x" onClick={clear}>Remove</button>}
-      </span>
-      {/* Radix Dialog renders nothing while `open` is false → zero in-flow DOM,
-          parity preserved. `'use client'` MediaPickerModal lives ONLY on the edit
-          side (this module) — never reachable from publishedPrimitives. */}
-      <MediaPickerModal
-        open={picking}
-        onOpenChange={setPicking}
-        tokenId={ctx.tokenId}
-        initialTab="library"
-        onPick={onPick}
-      />
+      {!preview && (
+        <>
+          <span className="wk-img-edit">
+            <button type="button" className="wk-img-edit__btn" onClick={() => setPicking(true)}>
+              {src ? 'Replace' : '↥ Image'}
+            </button>
+            {src && <button type="button" className="wk-img-edit__x" onClick={clear}>Remove</button>}
+          </span>
+          {/* Radix Dialog renders nothing while `open` is false → zero in-flow DOM,
+              parity preserved. `'use client'` MediaPickerModal lives ONLY on the edit
+              side (this module) — never reachable from publishedPrimitives. */}
+          <MediaPickerModal
+            open={picking}
+            onOpenChange={setPicking}
+            tokenId={ctx.tokenId}
+            initialTab="library"
+            onPick={onPick}
+          />
+        </>
+      )}
     </div>
   );
 };
@@ -210,13 +241,15 @@ const Link: React.FC<WorkLinkProps> = ({ hrefKey, href, className, ariaLabel, ch
       data-element-key={hrefKey}
     >
       {children}
-      <LinkPicker
-        value={href || ''}
-        sectionOptions={ctx.sectionOptions}
-        pageOptions={ctx.pageOptions}
-        triggerClassName="wk-link-edit__btn"
-        onChange={(link) => saveField(ctx, hrefKey, resolveDestination(link.dest))}
-      />
+      {ctx.mode !== 'preview' && (
+        <LinkPicker
+          value={href || ''}
+          sectionOptions={ctx.sectionOptions}
+          pageOptions={ctx.pageOptions}
+          triggerClassName="wk-link-edit__btn"
+          onChange={(link) => saveField(ctx, hrefKey, resolveDestination(link.dest))}
+        />
+      )}
     </span>
   );
 };
@@ -237,6 +270,17 @@ const List: React.FC<WorkListProps> = ({ collectionKey, items, render, makeItem,
   // then an ABSOLUTE overlay (zero in-flow footprint, hidden until hover/focus) so
   // it can't shift a bottom-aligned neighbour — editor-only chrome off layout flow,
   // same as `.wk-list-x` / `.wk-link-edit__btn`.
+  // Preview: no ×/+ Add, and no `position:relative` either — those styles exist
+  // PURELY to anchor the (now absent) absolute controls.
+  if (ctx.mode === 'preview') {
+    return (
+      <div className={className}>
+        {items.map((item, i) => (
+          <div key={item.id ?? i} className={itemClassName}>{render(item, i)}</div>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className={className} style={{ position: 'relative' }}>
       {items.map((item, i) => (
@@ -317,6 +361,7 @@ const Nav: React.FC<WorkNavProps> = ({
 const Toggle: React.FC<WorkToggleProps> = ({ elementKey, value, label = 'Toggle', className, children }) => {
   const ctx = useCtx();
   const flip = () => saveField(ctx, elementKey, value ? '' : 'true');
+  if (ctx.mode === 'preview') return <>{children}</>;
   return (
     <>
       {children}
@@ -354,12 +399,15 @@ export function useWorkEditCtx(
   // Token-scoped project id → the shared MediaPickerModal (same store field the
   // gallery wrapper reads for its board deep-link).
   const tokenId = useEditStore((s) => (s as any).tokenId) as string | null | undefined;
+  // ONE mode subscription for the whole block (never per primitive — see WorkEditCtx).
+  const mode = useEditStore((s) => (s as any).mode) as 'edit' | 'preview' | undefined;
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const contentRef = React.useRef(blockContent);
   contentRef.current = blockContent;
   return {
     sectionId,
+    mode,
     update,
     updateCollection,
     getCollection: (k) => (contentRef.current?.[k] as any[]) || [],

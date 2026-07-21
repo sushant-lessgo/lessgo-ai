@@ -70,6 +70,11 @@ export function InlineTextEditorV2({
   const isEditingRef = useRef(false);
   const saveContentRef = useRef<() => void>(() => {});
 
+  // Defense in depth (qa-0721 B1): preview must have ZERO editing affordance even
+  // if a caller forgets to gate. One narrow selector — this component is already
+  // per-element, and it already subscribes to three store fields.
+  const mode = useEditStore((s) => (s as any).mode) as 'edit' | 'preview' | undefined;
+  const isPreview = mode === 'preview';
   const setTextEditingMode = useEditStore((s) => s.setTextEditingMode);
   const showToolbar = useEditStore((s) => s.showToolbar);
   const hideToolbar = useEditStore((s) => s.hideToolbar);
@@ -272,6 +277,21 @@ export function InlineTextEditorV2({
         ...style
       }
     : style;
+
+  // Preview: same tag + markers + imperatively painted content (the paint effect
+  // above runs whenever `!isEditing`, which preview always is), but no
+  // contentEditable, no focus/click/key handlers, no textbox role or tab stop.
+  if (isPreview) {
+    return (
+      <Element
+        ref={editorRef as any}
+        className={`inline-text-editor-v2 ${className}`}
+        style={style}
+        data-section-id={sectionId}
+        data-element-key={elementKey}
+      />
+    );
+  }
 
   return (
     <Element

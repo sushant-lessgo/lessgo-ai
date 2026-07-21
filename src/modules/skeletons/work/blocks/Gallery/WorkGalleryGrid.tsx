@@ -26,7 +26,10 @@ export default function WorkGalleryGrid({ sectionId }: { sectionId: string }) {
   const ctx = useWorkEditCtx(sectionId, blockContent, handleContentUpdate, handleCollectionUpdate);
   // One-shot read of the token-scoped store's token → the board deep-link.
   const tokenId = useEditStore((s) => s.tokenId);
-  const manageSlot = (
+  // Preview must look published: no manage-photos link (the published wrapper
+  // proves the core renders fine with no manageSlot).
+  const mode = useEditStore((s) => s.mode);
+  const manageSlot = mode === 'preview' ? undefined : (
     <p className="wk-gallery__manage">
       <a href={workLibraryBoardHref(tokenId)} data-wk-manage-photos="">Manage photos →</a>
     </p>

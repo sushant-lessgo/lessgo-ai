@@ -22,6 +22,13 @@ import type {
 
 export interface VestriaEditCtx {
   sectionId: string;
+  /**
+   * Editor mode, read ONCE in `useVestriaEditCtx` (never per primitive — a page
+   * renders hundreds of Txt nodes; per-node store subscriptions would be a perf
+   * regression). `'preview'` ⇒ every primitive renders the SAME markup MINUS its
+   * edit affordance, so preview matches the published page.
+   */
+  mode?: 'edit' | 'preview';
   update: (elementKey: string, value: any) => void;
   updateCollection: (collectionKey: string, value: any[]) => void;
   getCollection: (collectionKey: string) => any[];
@@ -72,7 +79,7 @@ const Txt: React.FC<VestriaTxtProps> = ({ elementKey, value, as = 'span', classN
   return (
     <VestriaEditable
       as={as}
-      mode="edit"
+      mode={ctx.mode === 'preview' ? 'preview' : 'edit'}
       sectionId={ctx.sectionId}
       content={{ [elementKey]: value ?? '' }}
       elementKey={elementKey}
@@ -117,23 +124,28 @@ const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgCl
   const onAlt = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (path) ctx.setItemAlt(path.coll, path.id, e.target.value);
   };
+  const preview = ctx.mode === 'preview';
   return (
-    <div className={className} style={{ position: 'relative' }}>
+    <div className={className} style={preview ? undefined : { position: 'relative' }}>
       {src ? <img src={src} alt={shownAlt} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
-      <span className="vs-img-edit">
-        <label className="vs-img-edit__btn">
-          {uploading ? '…' : (src ? 'Replace' : '↥ Image')}
-          <input type="file" accept="image/*" onChange={onFile} hidden disabled={uploading} />
-        </label>
-        {src && <button type="button" className="vs-img-edit__x" onClick={clear}>Remove</button>}
-      </span>
-      {path && src && (
-        <input
-          className="vs-img-alt"
-          value={metaAlt ?? ''}
-          placeholder={alt ? `Alt (fallback: ${alt})` : 'Describe this image (alt text)'}
-          onChange={onAlt}
-        />
+      {!preview && (
+        <>
+          <span className="vs-img-edit">
+            <label className="vs-img-edit__btn">
+              {uploading ? '…' : (src ? 'Replace' : '↥ Image')}
+              <input type="file" accept="image/*" onChange={onFile} hidden disabled={uploading} />
+            </label>
+            {src && <button type="button" className="vs-img-edit__x" onClick={clear}>Remove</button>}
+          </span>
+          {path && src && (
+            <input
+              className="vs-img-alt"
+              value={metaAlt ?? ''}
+              placeholder={alt ? `Alt (fallback: ${alt})` : 'Describe this image (alt text)'}
+              onChange={onAlt}
+            />
+          )}
+        </>
       )}
     </div>
   );
@@ -141,6 +153,13 @@ const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgCl
 
 const Link: React.FC<VestriaLinkProps> = ({ hrefKey, href, className, ariaLabel, children }) => {
   const ctx = useCtx();
+  if (ctx.mode === 'preview') {
+    return (
+      <span className="vs-link-edit">
+        <span className={className} aria-label={ariaLabel}>{children}</span>
+      </span>
+    );
+  }
   return (
     <span className="vs-link-edit" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <span className={className} aria-label={ariaLabel}>{children}</span>
@@ -156,6 +175,17 @@ const Link: React.FC<VestriaLinkProps> = ({ hrefKey, href, className, ariaLabel,
 
 const List: React.FC<VestriaListProps> = ({ collectionKey, items, render, makeItem, min = 0, max = 99, addLabel = '+ Add', className, itemClassName, reorderable, imageField, captionField }) => {
   const ctx = useCtx();
+  // Preview: plain items, no add/remove/reorder chrome (also skips the
+  // EditableImageCollection editor below — it IS chrome).
+  if (ctx.mode === 'preview') {
+    return (
+      <div className={className}>
+        {items.map((item, i) => (
+          <div key={item.id ?? i} className={itemClassName}>{render(item, i)}</div>
+        ))}
+      </div>
+    );
+  }
   // editor phase-3 (phase 6): an imageCollection slot (declares reorderable and/or
   // imageField) DELEGATES its entire edit chrome to the shared EditableImageCollection
   // — the existing add/remove branch below is NOT used for these lists, so there is
@@ -229,6 +259,8 @@ export function useVestriaEditCtx(
       | Record<string, { alt?: string | Record<string, string> }>
       | undefined,
   );
+  // ONE mode subscription for the whole block (never per primitive — see VestriaEditCtx).
+  const mode = useEditStore((s) => (s as any).mode) as 'edit' | 'preview' | undefined;
   const setItemAltAction = useEditStore((s) => (s as any).setItemAlt) as
     | ((sectionId: string, collectionKey: string, itemId: string, alt: string) => void)
     | undefined;
@@ -240,6 +272,7 @@ export function useVestriaEditCtx(
   metaRef.current = elementMetadata;
   return {
     sectionId,
+    mode,
     update,
     updateCollection,
     getCollection: (k) => (contentRef.current?.[k] as any[]) || [],

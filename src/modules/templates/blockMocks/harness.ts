@@ -3,7 +3,9 @@
 // suites (template-factory phase 2). Extracted VERBATIM (behavior-preserving)
 // from `renderParity.meridian.test.tsx` so BOTH that test and the conformance
 // editor-basics group seed ONE vanilla zustand store the same way, then render
-// edit blocks with `mode:'preview'` via `renderToStaticMarkup`.
+// edit blocks with `mode:'preview'` via `renderToStaticMarkup`. `mode:'preview'`
+// is now the REAL preview contract for every family (qa-0721 B1): static markup,
+// markers kept, zero editing affordance.
 //
 // ── Extraction caveat (plan review note) ────────────────────────────────────
 // `vi.mock` / `vi.hoisted` are PER-FILE hoisted and CANNOT live here — each test
@@ -28,9 +30,11 @@ export interface HarnessSection {
 /**
  * Build the seeded store STATE from a list of sections. Each content field is
  * stored under `content[sectionId].elements[key] = { value, content }` — the
- * shape the block hooks' `extractLayoutContent` reads. `mode:'preview'` makes the
- * Editable wrappers render the static (marker-emitting) path, which is the only
- * path jsdom can drive (no contentEditable). Extra store slices are stubbed so
+ * shape the block hooks' `extractLayoutContent` reads. `mode:'preview'` makes
+ * EVERY edit primitive (classic templates AND — since qa-0721 B1 — work / granth
+ * / vestria) render the static, marker-emitting path with zero editing
+ * affordance, which is the only path jsdom can drive (no contentEditable). Extra
+ * store slices are stubbed so
  * blocks that read `sections`/`pages`/`forms`/etc. via narrow selectors resolve
  * without a real EditProvider.
  */

@@ -20,6 +20,13 @@ import type {
 
 export interface GranthEditCtx {
   sectionId: string;
+  /**
+   * Editor mode, read ONCE in `useGranthEditCtx` (never per primitive — a page
+   * renders hundreds of Txt nodes; per-node store subscriptions would be a perf
+   * regression). `'preview'` ⇒ every primitive renders the SAME markup MINUS its
+   * edit affordance, so preview matches the published page.
+   */
+  mode?: 'edit' | 'preview';
   update: (elementKey: string, value: any) => void;
   updateCollection: (collectionKey: string, value: any[]) => void;
   getCollection: (collectionKey: string) => any[];
@@ -65,7 +72,7 @@ const Txt: React.FC<GranthTxtProps> = ({ elementKey, value, as = 'span', classNa
   return (
     <GranthEditable
       as={as}
-      mode="edit"
+      mode={ctx.mode === 'preview' ? 'preview' : 'edit'}
       sectionId={ctx.sectionId}
       content={{ [elementKey]: value ?? '' }}
       elementKey={elementKey}
@@ -98,22 +105,32 @@ const Img: React.FC<GranthImgProps> = ({ elementKey, src, alt, className, imgCla
     finally { setUploading(false); }
   };
   const clear = () => saveField(ctx, elementKey, '');
+  const preview = ctx.mode === 'preview';
   return (
-    <div className={className} style={{ position: 'relative' }}>
+    <div className={className} style={preview ? undefined : { position: 'relative' }}>
       {src ? <img src={src} alt={alt || ''} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
-      <span className="gr-img-edit">
-        <label className="gr-img-edit__btn">
-          {uploading ? '…' : (src ? 'बदलें' : '↥ चित्र')}
-          <input type="file" accept="image/*" onChange={onFile} hidden disabled={uploading} />
-        </label>
-        {src && <button type="button" className="gr-img-edit__x" onClick={clear}>हटाएँ</button>}
-      </span>
+      {!preview && (
+        <span className="gr-img-edit">
+          <label className="gr-img-edit__btn">
+            {uploading ? '…' : (src ? 'बदलें' : '↥ चित्र')}
+            <input type="file" accept="image/*" onChange={onFile} hidden disabled={uploading} />
+          </label>
+          {src && <button type="button" className="gr-img-edit__x" onClick={clear}>हटाएँ</button>}
+        </span>
+      )}
     </div>
   );
 };
 
 const Link: React.FC<GranthLinkProps> = ({ hrefKey, href, className, ariaLabel, children }) => {
   const ctx = useCtx();
+  if (ctx.mode === 'preview') {
+    return (
+      <span className="gr-link-edit">
+        <span className={className} aria-label={ariaLabel}>{children}</span>
+      </span>
+    );
+  }
   return (
     <span className="gr-link-edit" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <span className={className} aria-label={ariaLabel}>{children}</span>
@@ -137,6 +154,15 @@ const List: React.FC<GranthListProps> = ({ collectionKey, items, render, makeIte
     if (items.length <= min) return;
     ctx.updateCollection(collectionKey, items.filter((_, i) => i !== idx));
   };
+  if (ctx.mode === 'preview') {
+    return (
+      <div className={className}>
+        {items.map((item, i) => (
+          <div key={item.id ?? i} className={itemClassName}>{render(item, i)}</div>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className={className}>
       {items.map((item, i) => (
@@ -170,12 +196,15 @@ export function useGranthEditCtx(
   const sections = useEditStore((s) => (s as any).sections) as string[] | undefined;
   const pages = useEditStore((s) => (s as any).pages);
   const uploadImage = useEditStore((s) => (s as any).uploadImage);
+  // ONE mode subscription for the whole block (never per primitive — see GranthEditCtx).
+  const mode = useEditStore((s) => (s as any).mode) as 'edit' | 'preview' | undefined;
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const contentRef = React.useRef(blockContent);
   contentRef.current = blockContent;
   return {
     sectionId,
+    mode,
     update,
     updateCollection,
     getCollection: (k) => (contentRef.current?.[k] as any[]) || [],

@@ -154,12 +154,15 @@ export default function VestriaTailoredHero({ sectionId }: { sectionId: string }
     useVestriaBlock<VestriaFullBleedHeroContent>({ sectionId });
   const ctx = useVestriaEditCtx(sectionId, blockContent, handleContentUpdate, handleCollectionUpdate);
   const isFullBleed = layout === 'VestriaFullBleedHero';
+  // Preview must look published — the media chrome is an edit-only affordance.
+  const mode = useEditStore((s) => s.mode);
+  const showChrome = isFullBleed && mode !== 'preview';
   return (
     <VestriaEditProvider ctx={ctx}>
       {isFullBleed
         ? <VestriaFullBleedHeroCore content={blockContent} E={editPrimitives} />
         : <VestriaTailoredHeroCore content={blockContent as VestriaHeroContent} E={editPrimitives} />}
-      {isFullBleed && <FullBleedMediaChrome sectionId={sectionId} content={blockContent} />}
+      {showChrome && <FullBleedMediaChrome sectionId={sectionId} content={blockContent} />}
     </VestriaEditProvider>
   );
 }
