@@ -13,6 +13,21 @@ export const WORK_HERO_STYLES = `
 .wk-hero{ position:relative; min-height:clamp(520px,82vh,860px); display:flex; align-items:var(--wk-hero-items, flex-end); overflow:hidden; background:var(--u-bg, var(--wk-dark)); color:var(--u-fg, var(--wk-on-dark)); }
 .wk-hero__media{ position:absolute; inset:0; z-index:0; }
 .wk-hero__media img{ width:100%; height:100%; object-fit:cover; display:block; }
+/* Multi-slide slider (Wave 2). >=2 slides only; hooks match work.v1.js verbatim.
+   Slides stack full-bleed; only .is-active is visible (crossfade). The first
+   slide ships .is-active so it shows with no JS. */
+.wk-hero__slides{ position:absolute; inset:0; z-index:0; }
+.wk-hero__slide{ position:absolute; inset:0; opacity:0; transition:opacity .8s ease; }
+.wk-hero__slide.is-active{ opacity:1; }
+.wk-hero__slide-media{ position:absolute; inset:0; }
+.wk-hero__slide-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+.wk-hero__arrow{ position:absolute; top:50%; transform:translateY(-50%); z-index:3; width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; font-size:24px; line-height:1; color:#fff; background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.35); border-radius:50%; cursor:pointer; }
+.wk-hero__arrow:hover{ background:rgba(0,0,0,0.5); }
+.wk-hero__arrow--prev{ left:20px; }
+.wk-hero__arrow--next{ right:20px; }
+.wk-hero__dots{ position:absolute; bottom:22px; left:50%; transform:translateX(-50%); z-index:3; display:flex; gap:9px; }
+.wk-hero__dot{ width:9px; height:9px; padding:0; border:none; border-radius:50%; background:rgba(255,255,255,0.42); cursor:pointer; }
+.wk-hero__dot[aria-current="true"]{ background:#fff; }
 .wk-hero__ph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:var(--wk-paper-2); color:var(--wk-ink-mute); font-family:var(--wk-ff-mono); font-size:12px; letter-spacing:0.2em; text-transform:uppercase; }
 .wk-hero__num{ display:var(--wk-hero-num-display, none); position:absolute; right:4vw; bottom:-0.12em; z-index:1; font-family:var(--wk-ff-display); font-weight:800; font-size:clamp(180px,32vw,460px); line-height:1; letter-spacing:-0.05em; color:oklch(1 0 0 / 0.07); user-select:none; pointer-events:none; }
 .wk-hero__scrim{ position:absolute; inset:0; z-index:1; background:linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.35)); }
@@ -25,6 +40,9 @@ export const WORK_HERO_STYLES = `
 .wk-hero__actions{ display:flex; flex-wrap:wrap; gap:14px; margin-top:8px; align-items:center; }
 .wk-hero__cta{ display:inline-flex; align-items:center; justify-content:center; gap:10px; font-family:var(--wk-ff-body); font-weight:600; font-size:13px; letter-spacing:0.04em; padding:15px 28px; background:var(--wk-accent); color:var(--wk-accent-ink,#fff); border:1.5px solid var(--wk-accent); border-radius:var(--u-radius, var(--wk-r)); text-decoration:none; white-space:nowrap; cursor:pointer; }
 .wk-hero__cta-label{ display:inline; }
+/* Second CTA — ghost/outline variant (transparent fill, current text colour). */
+.wk-hero__cta--ghost{ background:transparent; color:var(--u-fg, var(--wk-on-dark)); border-color:currentColor; }
+.wk-hero__cta--ghost:hover{ background:oklch(1 0 0 / 0.1); }
 .wk-hero__socials{ display:flex; gap:18px; margin-top:4px; flex-wrap:wrap; }
 .wk-hero__social{ color:inherit; text-decoration:none; font-family:var(--wk-ff-body); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.85; }
 .wk-hero__social:hover{ opacity:1; }

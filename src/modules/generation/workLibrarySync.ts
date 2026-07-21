@@ -68,6 +68,7 @@ import { slugify } from '@/lib/normalize';
 import type { CollectionEntry, CollectionEntryPhoto } from '@/modules/brief/collections';
 import type { WorkFacts } from '@/lib/schemas/workFacts.schema';
 import { deriveWorksEntries } from './workCollections';
+import { stampWorkFooterNav } from './workFooterDerive';
 
 /** The `works` collection key + item-page key (mirror of workCollections.ts). */
 const WORKS_KEY = 'works';
@@ -239,6 +240,13 @@ export function resyncWorkContent(storedContent: any, facts: WorkFacts | null | 
     const slug = pageKey.startsWith('page-') ? pageKey.slice('page-'.length) : null;
     if (slug && !slugSet.has(slug)) delete pages[pageKey];
   }
+
+  // (e) footer derived columns re-stamp (Wave 2) — AFTER the page-set changes
+  // above (item-page add/prune) so the columns reflect the FINAL page set. Gated
+  // on the marker being already present: a footer that never opted into the
+  // derived shape (Kundius / any pre-Wave-2 draft) is LEFT UNTOUCHED — the derived
+  // footer is never retroactively forced on. Facts feed the contact block.
+  stampWorkFooterNav(fc, facts, { onlyIfMarked: true });
 
   return fc;
 }

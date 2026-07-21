@@ -380,6 +380,13 @@ export function createAIActions(set: any, get: any) {
               key.includes('logo');
 
             Object.entries(data.content).forEach(([key, value]: [string, any]) => {
+              // BELT (Wave 2 About lane): `signature` is a manual-lane field
+              // (fillMode:'system', stamped first-gen, stripped at parse) — never
+              // legitimately in a story-regen response. Skip it so even a hostile/
+              // legacy response can't clobber a user-customized signature.
+              // (portrait_image is already covered by isImageKey; badge stays
+              // absent because story output is hard-listed to {eyebrow,heading,bio}.)
+              if (key === 'signature') return;
               if (isImageValue(existingElements[key]) || isImageKey(key)) return;
 
               const existing = updatedElements[key];

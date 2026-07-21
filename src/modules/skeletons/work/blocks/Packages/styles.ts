@@ -16,7 +16,26 @@ export const WORK_PACKAGES_STYLES = `
 .wk-packages__heading{ font-family:var(--wk-ff-display); font-weight:var(--wk-display-weight); font-size:clamp(1.9rem,4.4vw,3.4rem); line-height:1.02; letter-spacing:-0.02em; margin:10px 0 0; }
 .wk-packages__lead{ font-family:var(--wk-ff-body); font-size:var(--wk-fs-body); line-height:var(--wk-lh-body); color:var(--wk-ink-soft); max-width:52ch; margin:14px 0 0; }
 .wk-packages__grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:clamp(16px,2.4vw,30px); }
-.wk-packages__card{ display:flex; flex-direction:column; gap:14px; background:var(--wk-paper); border:1px solid var(--wk-line); border-radius:var(--u-radius, var(--wk-r)); padding:clamp(22px,2.6vw,34px); }
+.wk-packages__card{ position:relative; display:flex; flex-direction:column; gap:14px; background:var(--wk-paper); border:1px solid var(--wk-line); border-radius:var(--u-radius, var(--wk-r)); padding:clamp(22px,2.6vw,34px); }
+/* Per-tier image (Wave 2). Pulled flush to the card edges (counter the card
+   padding) to match the designer .atl-pack-img. GRACEFUL-EMPTY: an image-less
+   tier renders an EMPTY div (published Img with no src + no placeholder) — hidden
+   via :empty so the card is byte-identical to today. In edit the div holds the
+   picker affordance (never :empty), so the "add image" control stays reachable. */
+.wk-packages__img{ margin:calc(-1 * clamp(22px,2.6vw,34px)) calc(-1 * clamp(22px,2.6vw,34px)) 0; border-radius:var(--u-radius, var(--wk-r)) var(--u-radius, var(--wk-r)) 0 0; overflow:hidden; }
+.wk-packages__img:empty{ display:none; }
+.wk-packages__img-el{ display:block; width:100%; aspect-ratio:3/2; object-fit:cover; }
+/* "Most booked" chip (Wave 2). Absolute over the card top-left; anchors to the
+   position:relative card. Rendered only when featured (graceful-empty). */
+.wk-packages__flag{ position:absolute; top:0; left:0; z-index:2; background:var(--wk-accent); color:var(--wk-accent-ink,#fff); font-family:var(--wk-ff-body); font-weight:600; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:9px 14px; }
+/* Per-tier category label (Wave 2b, per the designer .atl-pack — a kicker above
+   the tier name). Empty -> the E.Txt renders nothing (no leak); the card's flex
+   gap only spans present children, so an uncategorised tier is byte-identical. */
+.wk-packages__cat{ display:block; font-family:var(--wk-ff-body); font-weight:600; font-size:10px; letter-spacing:0.24em; text-transform:uppercase; color:var(--wk-accent); margin:0 0 -8px; }
+/* Dash-bullet "what's included" list (Wave 2). */
+.wk-packages__bullets{ list-style:none; margin:2px 0 0; padding:16px 0 0; border-top:1px solid var(--wk-line); display:grid; gap:10px; }
+.wk-packages__bullet{ display:grid; grid-template-columns:auto 1fr; gap:10px; font-family:var(--wk-ff-body); font-size:14px; line-height:1.5; color:var(--wk-ink-soft); }
+.wk-packages__bullet::before{ content:"—"; color:var(--wk-accent); }
 .wk-packages__name{ font-family:var(--wk-ff-display); font-weight:600; font-size:1.25rem; letter-spacing:-0.01em; }
 .wk-packages__price{ display:flex; align-items:baseline; gap:8px; font-family:var(--wk-ff-display); font-weight:var(--wk-display-weight); font-size:var(--wk-pkg-price-fs, 1.7rem); letter-spacing:-0.02em; color:var(--wk-accent); }
 .wk-packages__from{ font-family:var(--wk-ff-body); font-weight:600; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--wk-ink-mute); }

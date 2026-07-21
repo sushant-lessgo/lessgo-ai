@@ -24,6 +24,11 @@ export interface WorkPackage {
   price_line?: string;
   description?: string;
   cta_label?: string;
+  // Wave 2 packages quad — all optional, graceful-empty.
+  category?: string;  // per-tier category label (Wave 2b); AI-drafted + editable
+  bullets?: string;   // newline-delimited "what's included"; split at render
+  image?: string;     // manual lane (picker); url string
+  featured?: string;  // manual lane (toggle); 'true' when the "most booked" chip shows
 }
 
 export interface WorkPackagesContent {
@@ -31,6 +36,14 @@ export interface WorkPackagesContent {
   heading?: string;
   lead?: string;
   packages?: WorkPackage[];
+}
+
+/** Split a newline-delimited bullets string into trimmed, non-empty lines. */
+function bulletLines(bullets?: string): string[] {
+  return (bullets || '')
+    .split('\n')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 }
 
 export function WorkPackagesCore({
@@ -54,10 +67,31 @@ export function WorkPackagesCore({
 
           <E.List collectionKey="packages" items={packages} className="wk-packages__grid"
             itemClassName="wk-packages__card"
-            makeItem={() => ({ name: '', price_mode: 'on-request', price_line: 'On request', description: '', cta_label: '' })}
+            makeItem={() => ({ name: '', price_mode: 'on-request', price_line: 'On request', description: '', cta_label: '', category: '', bullets: '', image: '', featured: '' })}
             min={1} max={6} addLabel="+ Package"
-            render={(item: WorkPackage) => (
+            render={(item: WorkPackage) => {
+              const lines = bulletLines(item.bullets);
+              const featured = item.featured === 'true';
+              return (
               <>
+                {/* "Most booked" chip (Wave 2). E.Toggle supplies the edit-only
+                    flip control (zero-layout); the visible chip is rendered here
+                    from the flag. Card is position:relative (styles) so the chip +
+                    control anchor to it. Featured off → nothing (graceful-empty). */}
+                <E.Toggle elementKey={`packages.${item.id}.featured`} value={featured} label="Most booked">
+                  {featured ? <span className="wk-packages__flag">Most booked</span> : null}
+                </E.Toggle>
+                {/* Per-tier image (Wave 2, picker-wired). No placeholder — empty
+                    renders an :empty div that styles.ts hides in the published
+                    renderer, so an image-less tier is byte-identical to today. */}
+                <E.Img elementKey={`packages.${item.id}.image`} src={item.image} alt={item.name}
+                  className="wk-packages__img" imgClassName="wk-packages__img-el" />
+                {/* Per-tier category label (Wave 2b, per `.atl-pack`). No
+                    placeholder — an empty value must render NOTHING in both
+                    renderers (graceful-empty: an uncategorised tier is
+                    byte-identical to today's card). */}
+                <E.Txt elementKey={`packages.${item.id}.category`} value={item.category} as="span"
+                  className="wk-packages__cat" />
                 <E.Txt elementKey={`packages.${item.id}.name`} value={item.name} as="span"
                   className="wk-packages__name" placeholder="Package name" />
                 <span className="wk-packages__price" data-price-mode={item.price_mode || 'on-request'}>
@@ -67,12 +101,22 @@ export function WorkPackagesCore({
                   <E.Txt elementKey={`packages.${item.id}.price_line`} value={item.price_line} as="span"
                     placeholder="On request" />
                 </span>
+                {/* Dash-bullet list (Wave 2), split at render. Plain text — identical
+                    in both renderers. Empty → nothing (graceful-empty). */}
+                {lines.length > 0 && (
+                  <ul className="wk-packages__bullets" data-element-key={`packages.${item.id}.bullets`}>
+                    {lines.map((line, i) => (
+                      <li key={i} className="wk-packages__bullet">{line}</li>
+                    ))}
+                  </ul>
+                )}
                 <E.Txt elementKey={`packages.${item.id}.description`} value={item.description} as="p"
                   className="wk-packages__desc" multiline placeholder="What this package includes." />
                 <E.Txt elementKey={`packages.${item.id}.cta_label`} value={item.cta_label} as="span"
                   className="wk-packages__cta" isButton placeholder="Enquire →" />
               </>
-            )}
+              );
+            }}
           />
         </div>
       </section>

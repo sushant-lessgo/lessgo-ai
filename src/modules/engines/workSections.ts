@@ -145,6 +145,10 @@ const headerContract: UIBlockSchemaV2 = {
   sectionType: 'header',
   elements: {
     logo_text: str('required'),
+    // Optional wordmark IMAGE. Manual lane (`fillMode:'system'`) — never AI-emitted;
+    // the text wordmark stays the default. `WorkHeader.core` already binds
+    // `E.Logo imageKey="logo_image"`; empty → wordmark, unchanged.
+    logo_image: { type: 'string', requirement: 'optional', fillMode: 'system', default: '' },
     cta_label: str('optional'),
     cta_href: str('optional', '#contact'),
   },
@@ -162,8 +166,36 @@ const headerContract: UIBlockSchemaV2 = {
   },
 };
 
-// opening. Donor: GranthArchedHero.
+// opening. Donor: GranthArchedHero. `fromDonor` copies only the donor's OWN keys
+// (role_line · name · quote · portrait_image · cta_label · cta_href + socials[]),
+// so Wave-2 hero fields must be added to the returned schema EXPLICITLY.
+//   • slides — MANUAL media lane: an optional multi-image cover slider. Per-item
+//     `id`/`image` are `fillMode:'system'` (never AI-emitted; auto-stripped at
+//     parse; set via the editor picker OR auto-derived from works-group covers by
+//     stampHeroSlides at first-gen). Empty / <2 slides → today's single-media hero
+//     exactly (graceful-empty; Kundius byte-identical).
+//   • cta2_label — optional SECOND CTA label. AI-drafted + editable
+//     (`manual_preferred`, char-capped in copyPrompt).
+//   • cta2_href — the second CTA destination. MANUAL lane (`fillMode:'system'`):
+//     never AI-emitted; the button renders only once this href is set (a button
+//     needs a destination).
 const heroContract = fromDonor(writerElementSchema.GranthArchedHero, 'hero');
+heroContract.elements.cta2_label = str('optional');
+heroContract.elements.cta2_href = {
+  type: 'string', requirement: 'optional', fillMode: 'system', default: '',
+};
+heroContract.collections = {
+  ...(heroContract.collections ?? {}),
+  slides: {
+    requirement: 'optional',
+    fillMode: FILL,
+    constraints: { min: 0, max: 6 },
+    fields: {
+      id: { type: 'string', fillMode: 'system' },
+      image: { type: 'string', fillMode: 'system', default: '' },
+    },
+  },
+};
 
 // work gallery — a group REFERENCE onto the `works` collection (no forked item
 // shape; items live in COLLECTIONS.works). `groups` are the promoted top-level
@@ -213,18 +245,52 @@ const packagesContract: UIBlockSchemaV2 = {
       fields: {
         id: { type: 'string', fillMode: 'system' },
         name: { type: 'string', fillMode: FILL, default: '' },
+        // Per-tier category label (Wave 2b — per-card, matching the designer
+        // `.atl-pack` where each tier card shows its own category). AI-drafted +
+        // editable (manual_preferred): WorkFacts carries no category, so it has
+        // no facts source — the model drafts a short label, the seller can edit.
+        // Optional (default '') → graceful-empty: a tier with no category renders
+        // EXACTLY today's card (no node).
+        category: { type: 'string', fillMode: FILL, default: '' },
         // price display slots: mode drives whether an amount is shown.
         price_mode: { type: 'string', fillMode: FILL, default: 'on-request' }, // exact | from | on-request
         price_line: { type: 'string', fillMode: FILL, default: 'On request' },
         description: { type: 'string', fillMode: FILL, default: '' },
         cta_label: { type: 'string', fillMode: FILL, default: '' },
+        // Wave 2 packages quad — per-tier extensions. All optional, graceful-empty
+        // (empty → today's card markup exactly).
+        //  • bullets — newline-delimited "what's included" list, split at render.
+        //    AI-drafted (manual_preferred), but facts-verbatim-injected at parse
+        //    (injectPackages) when the seller stated group items.
+        //  • image / featured — MANUAL lane (`fillMode:'system'`): never AI-emitted
+        //    (isSystemField skip in the prompt + the parse-time system-key strip);
+        //    set only via the editor (picker / toggle).
+        bullets: { type: 'string', fillMode: FILL, default: '' },
+        image: { type: 'string', fillMode: 'system', default: '' },
+        featured: { type: 'string', fillMode: 'system', default: '' },
       },
     },
   },
 };
 
-// your story. Donor: GranthParichay.
+// your story. Donor: GranthParichay (eyebrow · heading · bio + facts[]).
+// `fromDonor` copies only the donor's OWN keys (blanking string defaults), so
+// Wave-2 About fields must be added to the returned schema EXPLICITLY.
+//   • portrait_image / signature — MANUAL lane (`fillMode:'system'`): never
+//     AI-emitted (isSystemField prompt skip + the parse-time system-key strip),
+//     set only via the editor. signature defaults to the seller's name at
+//     first-gen (stampAboutSignature in work.llm.ts) — NOT here / not at parse.
+//   • badge — AI-drafted + editable (`manual_preferred`); DISTINCT from eyebrow
+//     (binding rule in copyPrompt). ALL optional → graceful-empty (empty →
+//     today's about markup exactly; Kundius byte-identical).
 const aboutContract = fromDonor(writerElementSchema.GranthParichay, 'about');
+aboutContract.elements.portrait_image = {
+  type: 'string', requirement: 'optional', fillMode: 'system', default: '',
+};
+aboutContract.elements.signature = {
+  type: 'string', requirement: 'optional', fillMode: 'system', default: '',
+};
+aboutContract.elements.badge = str('optional');
 
 // how to reach — REFERENCES a lead mechanism (forms internals are scope-OUT).
 // `contact_method` picks the mechanism; `form_ref` names a form the forms system owns.

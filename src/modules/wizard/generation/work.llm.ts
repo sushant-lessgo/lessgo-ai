@@ -36,7 +36,8 @@ import {
   type MultiPageOnboardingData,
   type CollectionFanOutResult,
 } from '@/modules/generation/multiPageAssembly';
-import { deriveWorksEntries, stampWorkGalleryBinding } from '@/modules/generation/workCollections';
+import { deriveWorksEntries, stampWorkGalleryBinding, stampHeroSlides } from '@/modules/generation/workCollections';
+import { stampWorkFooterNav } from '@/modules/generation/workFooterDerive';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
 import { templateMeta } from '@/modules/templates/templateMeta';
 import type { CollectionEntry } from '@/modules/brief/collections';
@@ -205,6 +206,45 @@ export async function runWorksFanOut(
 }
 
 /**
+ * FIRST-GEN-ONLY signature default (Wave 2 About lane). Stamp the seller's own
+ * name into each `about` section's `signature` when it is empty. PURE (mutates fc
+ * in place). Walks the flat home content + every page's content, matching a
+ * section by its `about-…` id, and writes ONLY when signature is empty — a
+ * customized signature (set later in the editor) is NEVER clobbered, so re-running
+ * on RESUME is idempotent.
+ *
+ * Why HERE and not in `parseWorkCopy`: the story-regen route (regenerate-story)
+ * ALSO calls `parseWorkCopy`, so a parse-time inject would re-emit `signature=name`
+ * on every story regen and the client merge would then overwrite a user-edited
+ * signature. This first-gen site is unreachable by scoped/story regen → no clobber
+ * by construction. The AI can never emit `signature` itself (it is
+ * `fillMode:'system'` → the parse-time system-key strip drops it), so the field is
+ * empty until this stamp fills it.
+ *
+ * Placed in the works-binding region of `runFanOut` (NOT inside `runWorksFanOut`)
+ * so it fires on EVERY fresh generation — `runWorksFanOut` early-returns when there
+ * are no derivable works entries, which would skip a name-only default that has
+ * nothing to do with photos.
+ */
+export function stampAboutSignature(fc: any, name: string | undefined | null): void {
+  const sig = (name ?? '').trim();
+  if (!fc || !sig) return;
+  const stampTree = (content: Record<string, any> | undefined): void => {
+    if (!content || typeof content !== 'object') return;
+    for (const sec of Object.values(content)) {
+      const id = (sec as any)?.id;
+      if (typeof id !== 'string' || !id.startsWith('about-')) continue;
+      const el = (sec as any).elements;
+      if (!el || typeof el !== 'object') continue;
+      if (!el.signature) el.signature = sig; // only-when-empty — never clobber
+    }
+  };
+  stampTree(fc.content);
+  const pages = fc.pages && typeof fc.pages === 'object' ? fc.pages : {};
+  for (const page of Object.values(pages)) stampTree((page as any)?.content);
+}
+
+/**
  * The WORK LLM multi-page fan-out. Guarded (workCopyEngineEnabled / atelier
  * allow-list) at the GeneratingSlot fork — called DIRECTLY, mirroring
  * runWorkSkeleton (NOT via runGeneration).
@@ -350,6 +390,29 @@ export async function runWorkLLMGeneration(
     } catch (e: any) {
       return { status: 'error', error: e?.message || 'Works binding failed.' };
     }
+
+    // ─── About signature default (Wave 2) — first-gen only; the SAME call-site
+    // family as the works stamps. Fills `about.signature` with the seller's name
+    // when empty. Runs unconditionally (unlike runWorksFanOut's photo-gated early
+    // return) so a name-only default is never skipped. Idempotent on resume.
+    stampAboutSignature(fc, getWorkFacts(input.brief?.facts)?.identity?.name);
+
+    // ─── Hero slides auto-derive (Wave 2) — first-gen only; SAME call-site family.
+    // One hero slide per works-group cover (reuses deriveWorksEntries → pickCover,
+    // so hidden photos never become slides). No covers ⇒ no-op (single-portrait
+    // hero stays byte-identical). Never overwrites user-edited slides (guarded in
+    // stampHeroSlides), so a resume re-run is idempotent.
+    stampHeroSlides(fc, deriveWorksEntries(getWorkFacts(input.brief?.facts)));
+
+    // ─── Footer derived columns + contact (Wave 2) — first-gen only; SAME
+    // call-site family. Runs HERE (not in multiPageAssembly): only after the full
+    // sitemap fan-out + works-binding fan-out is `fc.pages` COMPLETE (incl. any CMS
+    // detail pages) — the per-page merge in multiPageAssembly sees only a partial
+    // page set, and finalizeMultiPageGeneration is audience-SHARED (would touch
+    // product/thing footers). Fresh gens get the marker + derived data; old drafts
+    // (Kundius) never reach this path → today's footer, byte-identical. Marker-gated
+    // re-stamp lives in resyncWorkContent for later CMS page-set changes.
+    stampWorkFooterNav(fc, getWorkFacts(input.brief?.facts));
 
     cb.onStage?.('saving');
     try {

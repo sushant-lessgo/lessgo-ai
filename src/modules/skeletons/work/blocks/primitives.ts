@@ -109,6 +109,27 @@ export interface WorkNavProps {
   addLabel?: string;
 }
 
+/** Boolean flag affordance for a content key (e.g. a package's "most booked"
+ *  chip). The core renders the VISIBLE output (the chip) from `value`; `Toggle`
+ *  only supplies the edit-mode click-to-flip control and renders no visible
+ *  output of its own. Edit adds a zero-layout floating control (absolute,
+ *  opacity:0 until hover — same `EDIT_AFFORDANCE_STYLES` idiom as the image/list
+ *  chrome) so the edit render adds NO in-flow node the published Toggle lacks;
+ *  published renders only `children` (usually nothing). The stored flag is the
+ *  string `'true'` when on, `''` when off. */
+export interface WorkToggleProps {
+  /** Content key holding the flag (scalar key or collection-item path). */
+  elementKey: string;
+  /** Current on/off state (the core derives it from the stored `'true'`/`''`). */
+  value?: boolean;
+  /** Label shown on the edit affordance. */
+  label?: string;
+  /** Extra className merged onto the edit affordance control. */
+  className?: string;
+  /** Visible content the toggle annotates; rendered identically in both modes. */
+  children?: React.ReactNode;
+}
+
 export interface WorkPrimitives {
   Txt: React.FC<WorkTxtProps>;
   Img: React.FC<WorkImgProps>;
@@ -116,4 +137,5 @@ export interface WorkPrimitives {
   List: React.FC<WorkListProps>;
   Logo: React.FC<WorkLogoProps>;
   Nav: React.FC<WorkNavProps>;
+  Toggle: React.FC<WorkToggleProps>;
 }

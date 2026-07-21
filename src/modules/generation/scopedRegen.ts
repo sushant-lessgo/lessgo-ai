@@ -945,7 +945,8 @@ Return exactly: {"variations": ["…", …]} with ${variationCount} entries.`
             ? (parseWorkCopy(
                 response as Record<string, SectionCopy>,
                 workUiblocks,
-                workFacts?.praise
+                workFacts?.praise,
+                workFacts?.groups
               ) as unknown as Record<string, { elements: Record<string, unknown> }>)
             : response;
 

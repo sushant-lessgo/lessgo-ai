@@ -32,6 +32,7 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
     sectionId: 'atelier-header',
     content: {
       logo_text: 'Kristina Kundius',
+      logo_image: '',
       cta_label: 'Start Your Project',
       cta_href: '#contact',
       nav_links: [
@@ -69,6 +70,43 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
       button: ['cta_label'],
       collections: [
         { key: 'socials', countPrefix: 'socials.', itemPrefixes: ['socials.'], items: 2 },
+      ],
+    },
+  },
+  {
+    // Multi-slide state (Wave 2) — ≥2 `slides` trips the slider fork: the core emits
+    // `.wk-hero__slide` set + arrows/`[data-wk-dots]`/`[data-wk-interval]` (the exact
+    // hooks work.v1.js queries), and a SECOND CTA (cta2). Two slides carry the SAME
+    // image url so the editor autoplay's is-active swap is visually inert → the
+    // edit↔published parity screenshot stays deterministic while still exercising the
+    // multi-slide DOM. (The single-image byte-identical state = the atelier-hero
+    // fixture above.)
+    sectionType: 'hero',
+    layout: 'WorkHeroSlider',
+    sectionId: 'atelier-hero-slides',
+    content: {
+      role_line: 'Professional Photographer',
+      name: 'Kristina <em>Kundius</em>',
+      quote: 'A body of work that does the persuading for you — browse it, then let’s make yours.',
+      portrait_image: '',
+      cta_label: 'Start Your Project',
+      cta_href: '#contact',
+      cta2_label: 'View portfolio',
+      cta2_href: '#work',
+      slides: [
+        { id: 'hs1', image: 'https://cdn.example.com/hero-slide.jpg' },
+        { id: 'hs2', image: 'https://cdn.example.com/hero-slide.jpg' },
+      ],
+      socials: [
+        { id: 'hss1', network: 'instagram', label: 'Instagram', href: '#' },
+      ],
+    },
+    editBasics: {
+      text: ['role_line', 'name', 'quote'],
+      button: ['cta_label', 'cta2_label'],
+      collections: [
+        { key: 'slides', countPrefix: 'slides.', itemPrefixes: ['slides.'], items: 2 },
+        { key: 'socials', countPrefix: 'socials.', itemPrefixes: ['socials.'], items: 1 },
       ],
     },
   },
@@ -147,6 +185,54 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
       heading: 'Let’s make yours.',
       note: 'Portfolio headshots and brand photography, Netherlands — serving enterprise brands.',
       copyright: '© 2026 Kristina Kundius',
+      socials: [
+        { id: 'fs1', network: 'Instagram', href: '#' },
+        { id: 'fs2', network: 'LinkedIn', href: '#' },
+      ],
+    },
+    editBasics: {
+      text: ['eyebrow', 'heading', 'note', 'copyright'],
+      button: [],
+      collections: [
+        { key: 'socials', countPrefix: 'socials.', itemPrefixes: ['socials.'], items: 2 },
+      ],
+    },
+  },
+  {
+    // Wave 2 (phase 5) — DERIVED footer (marker footer_nav_mode:'derived'). Exercises
+    // the 3-col index shape (nav columns from the page set + contact) — the STORED
+    // shape stampWorkFooterNav writes; both renderers read it identically. Kept as a
+    // SEPARATE fixture so the primary `atelier-footer` proves the legacy (no-marker,
+    // Kundius byte-identical) footer stays untouched.
+    sectionType: 'footer',
+    layout: 'WorkFooter',
+    sectionId: 'atelier-footer-derived',
+    content: {
+      eyebrow: 'Get in touch',
+      heading: 'Let’s make yours.',
+      note: 'Portfolio headshots and brand photography, Netherlands — serving enterprise brands.',
+      copyright: '© 2026 Kristina Kundius',
+      footer_nav_mode: 'derived',
+      nav_columns: [
+        {
+          id: 'fc-explore',
+          heading: 'Explore',
+          links: [
+            { id: 'fnl-home', label: 'Home', href: '/' },
+            { id: 'fnl-works', label: 'Work', href: '/works' },
+          ],
+        },
+        {
+          id: 'fc-work',
+          heading: 'Work',
+          links: [
+            { id: 'fnl-works-brand', label: 'Brand Portraits', href: '/works/brand-portraits' },
+            { id: 'fnl-works-editorial', label: 'Editorial', href: '/works/editorial' },
+          ],
+        },
+      ],
+      contact_location: 'Amsterdam, Netherlands',
+      contact_reach: 'Serving enterprise brands worldwide',
       socials: [
         { id: 'fs1', network: 'Instagram', href: '#' },
         { id: 'fs2', network: 'LinkedIn', href: '#' },
@@ -300,9 +386,12 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
       eyebrow: 'Packages',
       heading: 'Ways to work together',
       lead: 'Clear, honest pricing — pick the scope that fits your brand.',
+      // Wave 2 packages quad exercised: per-tier image + bullets + a "most booked"
+      // featured flag, plus a PER-TIER category label (Wave 2b). The filled tiers
+      // carry a category; the empty tier (pk3) leaves it blank (graceful-empty).
       packages: [
-        { id: 'pk1', name: 'Full brand package', price_mode: 'from', price_line: '€2,400', description: 'A complete shoot day plus a curated library for every channel.', cta_label: 'Enquire →' },
-        { id: 'pk2', name: 'Brand photoshoot', price_mode: 'exact', price_line: '€1,200', description: 'A focused half-day covering your core brand imagery.', cta_label: 'Enquire →' },
+        { id: 'pk1', name: 'Full brand package', category: 'Commercial', price_mode: 'from', price_line: '€2,400', description: 'A complete shoot day plus a curated library for every channel.', cta_label: 'Enquire →', image: 'https://cdn.example.com/pkg-full.jpg', bullets: 'A full production day, art-directed\nEnough material for a year of publishing\nEdited selects + full archive access\nFull commercial license' },
+        { id: 'pk2', name: 'Brand photoshoot', category: 'Editorial', price_mode: 'exact', price_line: '€1,200', description: 'A focused half-day covering your core brand imagery.', cta_label: 'Enquire →', image: 'https://cdn.example.com/pkg-brand.jpg', featured: 'true', bullets: 'Half a day, multiple setups\nPosed and candid material\nA full set for web and social\nUsage license included' },
         { id: 'pk3', name: 'Portrait & business shoot', price_mode: 'on-request', price_line: 'On request', description: 'Team headshots and executive portraits, scoped to your size.', cta_label: 'Enquire →' },
       ],
     },
@@ -323,6 +412,11 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
     content: {
       eyebrow: 'About',
       heading: 'The person behind the lens',
+      // Wave 2 About lane exercised: 4:5 portrait (manual media lane), a serif
+      // signature sign-off, and an accent badge DISTINCT from the eyebrow.
+      badge: 'Kristina · Amsterdam',
+      signature: 'Kristina Kundius',
+      portrait_image: 'https://cdn.example.com/about-portrait.jpg',
       bio: 'I photograph brands the way I wish more of them were seen — honestly, warmly, and with an eye for the small details that make a company feel human. Over the last decade I have worked with enterprise teams across the Netherlands to build image libraries they actually reach for.',
       facts: [
         { id: 'af1', value: '10+ yrs', label: 'Behind the camera' },
@@ -331,7 +425,7 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
       ],
     },
     editBasics: {
-      text: ['eyebrow', 'heading', 'bio'],
+      text: ['eyebrow', 'heading', 'bio', 'badge', 'signature'],
       button: [],
       collections: [
         { key: 'facts', countPrefix: 'facts.', itemPrefixes: ['facts.'], items: 3 },

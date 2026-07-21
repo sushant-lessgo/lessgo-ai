@@ -76,8 +76,12 @@ const WORK_CHAR_CAPS: Record<string, number> = {
   note: 160,
   copyright: 80,
   cta_label: 28,
+  cta2_label: 28, // optional second hero CTA — same restraint as the primary CTA
   description: 140,
   price_line: 40,
+  category: 24, // per-tier category label — 1-3 words (e.g. "Portrait", "Wedding")
+  badge: 36, // about portrait badge — a short accent chip, DISTINCT from eyebrow
+  bullets: 200, // whole newline-list; each line stays short (see the packages rule)
   label: 40,
   value: 24,
   question: 100,
@@ -161,6 +165,7 @@ export function buildWorkCopyPrompt(input: WorkCopyPromptInput): string {
   const groupNames = (facts.groups ?? []).map((g) => g.name);
   const hasWork = page.sections.includes('work');
   const hasPackages = page.sections.includes('packages');
+  const hasAbout = page.sections.includes('about');
   const hasContact = page.sections.includes('contact');
   const agencyMetrics = hasAgencyMetrics(voice, page);
 
@@ -177,6 +182,27 @@ export function buildWorkCopyPrompt(input: WorkCopyPromptInput): string {
     );
     bindingRuleLines.push(
       `${nextRule++}. **Prices are law — verbatim or mode-phrased.** Use each item's price EXACTLY as given in the WORK LIBRARY: an exact price as stated, a "from" price framed as "from …", and an on-request item framed as "on request" / "price on enquiry". NEVER invent, round, discount, or attach a number the library does not state.`
+    );
+  }
+
+  if (hasPackages) {
+    // Package bullets are facts-verbatim-injected at parse (injectPackages) from
+    // the seller's stated group items — like proof quotes. So the model drafts
+    // bullets ONLY as a silent-facts fallback, and never fabricates inclusions.
+    bindingRuleLines.push(
+      `${nextRule++}. **Package \`bullets\` — draft only when the facts are silent; NEVER fabricate inclusions.** \`bullets\` is a short newline-separated "what's included" list (one concise line per line, no leading dash — the layout adds it). If the WORK LIBRARY states what a package includes, the system injects those verbatim — do NOT restate or invent them. When the library says nothing about inclusions, you MAY draft 3–5 true, concrete lines drawn ONLY from what the seller actually offers — never invent a deliverable, turnaround, or perk the facts do not support. Leave \`bullets\` empty rather than pad it.`
+    );
+    bindingRuleLines.push(
+      `${nextRule++}. **Package \`category\` — a short per-tier label, distinct from the name.** Give each package tier a 1-3 word \`category\` (e.g. "Portrait", "Wedding", "Commercial") that classifies the tier at a glance — NOT a restatement of its \`name\`. Draw it from the kind of work the tier covers. Leave it empty rather than force a label that adds nothing.`
+    );
+  }
+
+  if (hasAbout) {
+    // The about `badge` is a short accent chip beside the portrait. It is
+    // manual_preferred (AI-drafted, seller-editable) and MUST read differently
+    // from the section `eyebrow` — otherwise the chip just echoes the label.
+    bindingRuleLines.push(
+      `${nextRule++}. **About \`badge\` — a short accent chip, DISTINCT from the eyebrow.** In the \`about\` section, \`badge\` is a tiny caption that sits over the portrait (e.g. a name·place stamp, discipline, or years like "Photographer · Amsterdam"). Keep it a few words and make it DIFFERENT text from the \`eyebrow\` — never restate the eyebrow or heading. Draw it only from stated facts; leave it empty rather than invent a credential.`
     );
   }
 

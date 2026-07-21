@@ -143,6 +143,35 @@ dormant (no `/works` pages, href never stamped) so the STEP-02 UI is engine-wide
 but the reveal is capability-scoped. See `generation/README.md` and
 `skeletons/work/resolveWorkBlock.ts` for the render half.
 
+## Wave-2 contract fields + the parse-time system-key strip
+
+work-contract-wave2 added designer-parity fields to the frozen work contract
+(`engines/workSections.ts`), each with a declared source lane (full field table +
+lane mechanics in `docs/architecture/copyEngines.md` › "Work contract — Wave-2
+fields + source lanes"). The two seams that live in THIS module:
+
+- **`stripSystemKeys` (`parseCopy.ts`)** — the UNIFORM manual-lane guard. Every
+  `fillMode:'system'` contract field (packages `image`/`featured`, about
+  `portrait_image`/`signature`, hero `slides`/`cta2_href`, header `logo_image`) is
+  hard-excluded from the AI spec by `isSystemField` in `copyPrompt.ts`, but
+  `applyAllSchemaDefaults` keeps any non-null AI key — so a confused section-regen
+  response could still surface a system key. `stripSystemKeys` deletes AI-emitted
+  values for every `fillMode:'system'` scalar + collection field EXCEPT `id`,
+  covering first-gen + ALL regen routes. Per-merge belts (the story-regen `signature`
+  skip in `hooks/editStore/aiActions.ts`) complement it, never replace it. NOTE:
+  `backfillWorkCollectionIds` is narrowed to `id` ONLY — it must not resurrect
+  stripped system keys with uuids.
+- **`injectPackages.ts`** — sibling of `injectPraise.ts`; maps `facts.work.groups[]`
+  `items` VERBATIM → per-tier packages `bullets` (facts order, clamped, stripped when
+  facts silent — zero fabrication). Wired in `parseWorkCopy` via an optional `groups`
+  4th arg, threaded on first-gen (`generate-copy/route.ts`) AND regen
+  (`scopedRegen.ts`) exactly like praise.
+
+Auto-derive / default stamps for the other Wave-2 fields (about `signature`, hero
+`slides`, footer nav) live at first-gen in `wizard/generation/work.llm.ts`
+`runFanOut` (NOT in `parseCopy.ts` — a parse-time inject would re-emit on every
+story regen and clobber a user value). They are empty-only / never-overwrite writes.
+
 ## Key pitfalls
 
 - **Praise → `proof.quotes` is work-LOCAL.** Do NOT "reuse" the service

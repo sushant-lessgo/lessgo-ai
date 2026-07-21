@@ -192,7 +192,7 @@ async function workCopyHandler(req: NextRequest): Promise<Response> {
         facts,
         sections: targetPage.sections,
       }) as Record<string, SectionCopy>;
-      const processed = parseWorkCopy(mockRaw, pageUiblocks, facts.praise);
+      const processed = parseWorkCopy(mockRaw, pageUiblocks, facts.praise, facts.groups);
       const { complete, missingSections } = validateWorkCopyCompleteness(
         processed,
         pageUiblocks
@@ -298,8 +298,11 @@ async function workCopyHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    // 5. Parse: contract defaults + VERBATIM praise injection + id backfill.
-    const processed = parseWorkCopy(sections, pageUiblocks, facts.praise);
+    // 5. Parse: contract defaults + VERBATIM praise injection + verbatim package
+    //    bullets (facts.groups) + id backfill. `facts.groups` is threaded here on
+    //    the SAME first-gen path as `facts.praise` (mirrors the injectPraise data-
+    //    flow) so injectPackages' facts-verbatim bullets are LIVE on first-gen.
+    const processed = parseWorkCopy(sections, pageUiblocks, facts.praise, facts.groups);
     const { complete, missingSections } = validateWorkCopyCompleteness(processed, pageUiblocks);
     if (!complete) {
       logger.warn('[work-generate-copy] Copy incomplete, missing sections:', missingSections);

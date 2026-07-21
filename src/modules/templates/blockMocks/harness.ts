@@ -50,6 +50,9 @@ export function buildStoreState(sections: HarnessSection[]) {
     sections: sectionIds,
     pages: {},
     mode: 'preview',
+    // Token-scoped id read by the work edit ctx (→ MediaPickerModal). Static stub
+    // so the media-picker-wired Img primitive resolves a tokenId under jsdom.
+    tokenId: 'harness-token',
     forms: [],
     updateElementContent: () => {},
     setSection: () => {},

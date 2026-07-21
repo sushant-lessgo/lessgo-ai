@@ -44,6 +44,7 @@ import {
   resolveWorkRoute,
   workCopyEngineEnabled,
   WORK_COPY_ENGINE_TEMPLATES,
+  stampAboutSignature,
 } from './work.llm';
 import { templateMeta } from '@/modules/templates/templateMeta';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
@@ -408,5 +409,57 @@ describe('workCopyEngineEnabled + resolveWorkRoute (allow-list guard)', () => {
 
   it('(d) atelier multipage ⇒ llm-fanout', () => {
     expect(resolveWorkRoute({ isWorkMultipage: true, templateId: 'atelier' })).toBe('llm-fanout');
+  });
+});
+
+// ── About signature default (Wave 2 About lane / Phase 3) ─────────────────────
+// First-gen ONLY, only-when-empty, never clobbers a user-set signature. Fires
+// regardless of photos (unlike the works stamps) — a name-only default.
+
+describe('stampAboutSignature — first-gen signature default', () => {
+  const aboutSection = (signature?: string) => ({
+    id: 'about-abc12345',
+    elements: { heading: 'The person behind the work', bio: 'A short story.', ...(signature !== undefined ? { signature } : {}) },
+  });
+
+  it('stamps the seller name into an empty signature (flat home content)', () => {
+    const fc: any = { content: { 'about-abc12345': aboutSection() }, pages: {} };
+    stampAboutSignature(fc, 'Kristina Kundius');
+    expect(fc.content['about-abc12345'].elements.signature).toBe('Kristina Kundius');
+  });
+
+  it('never clobbers a user-customized signature', () => {
+    const fc: any = { content: { 'about-abc12345': aboutSection('My Studio, hand-signed') }, pages: {} };
+    stampAboutSignature(fc, 'Kristina Kundius');
+    expect(fc.content['about-abc12345'].elements.signature).toBe('My Studio, hand-signed');
+  });
+
+  it('stamps about sections that live inside a page (not just flat home)', () => {
+    const fc: any = {
+      content: {},
+      pages: { about: { content: { 'about-def67890': aboutSection() } } },
+    };
+    stampAboutSignature(fc, 'Kristina Kundius');
+    expect(fc.pages.about.content['about-def67890'].elements.signature).toBe('Kristina Kundius');
+  });
+
+  it('no-op when the name is empty/missing (no fabricated signature)', () => {
+    const fc: any = { content: { 'about-abc12345': aboutSection() }, pages: {} };
+    stampAboutSignature(fc, '');
+    stampAboutSignature(fc, undefined);
+    expect(fc.content['about-abc12345'].elements.signature).toBeUndefined();
+  });
+
+  it('touches only about-* sections, never hero/proof/etc.', () => {
+    const fc: any = {
+      content: {
+        'hero-abc12345': { id: 'hero-abc12345', elements: { name: 'Studio' } },
+        'about-abc12345': aboutSection(),
+      },
+      pages: {},
+    };
+    stampAboutSignature(fc, 'Kristina Kundius');
+    expect(fc.content['hero-abc12345'].elements.signature).toBeUndefined();
+    expect(fc.content['about-abc12345'].elements.signature).toBe('Kristina Kundius');
   });
 });

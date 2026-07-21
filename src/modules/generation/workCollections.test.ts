@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { slugify } from '@/lib/normalize';
 import type { WorkFacts } from '@/lib/schemas/workFacts.schema';
-import { deriveWorksEntries, stampWorkGalleryBinding, WORKS_PHOTOS_PER_GROUP_CAP } from './workCollections';
+import { deriveWorksEntries, stampWorkGalleryBinding, stampHeroSlides, WORKS_PHOTOS_PER_GROUP_CAP } from './workCollections';
 import { buildCollectionCatalogSlice, buildCollectionItemSlice } from '@/hooks/editStore/archetypes';
 
 function photo(i: number, over: Partial<{ url: string; cover: boolean; alt: string }> = {}) {
@@ -285,5 +285,112 @@ describe('deriveWorksEntries — stable slug (survives a board rename)', () => {
       facts([{ name: 'Portraits', kind: 'category', price: { mode: 'on-request' } }] as any)
     );
     expect(legacy[0].slug).toBe(slugify('Portraits'));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// work-contract-wave2 phase 4 — hero-slides auto-derive (first-gen only).
+//   One slide per works-group cover; reuses deriveWorksEntries → pickCover so a
+//   hidden photo never becomes a slide; no-op when groups/covers empty AND when
+//   the hero already carries user-edited slides (never clobber).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Minimal fc with ONE home hero section (optionally pre-seeded with slides). */
+function fcWithHero(
+  existingSlides?: any[],
+  opts: { pages?: Record<string, any> } = {}
+) {
+  return {
+    content: {
+      'hero-xyz': {
+        id: 'hero-xyz',
+        elements: {
+          name: 'Studio Name',
+          ...(existingSlides ? { slides: existingSlides } : {}),
+        },
+      },
+    },
+    pages: opts.pages ?? {},
+  };
+}
+
+describe('stampHeroSlides — auto-derive from works covers', () => {
+  it('stamps one slide per group cover (cover:true else first), slug-derived id', () => {
+    const entries = deriveWorksEntries(
+      facts([
+        { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos: [photo(1), photo(2, { cover: true })] },
+        { name: 'Portraits', kind: 'category', price: { mode: 'on-request' }, photos: [photo(3)] },
+      ] as any)
+    );
+    const fc = fcWithHero();
+    stampHeroSlides(fc, entries);
+    const slides = fc.content['hero-xyz'].elements.slides;
+    expect(slides).toHaveLength(2);
+    expect(slides[0].image).toBe('https://cdn/2.jpg'); // the cover:true photo
+    expect(slides[0].id).toBe('slide-weddings');
+    expect(slides[1].image).toBe('https://cdn/3.jpg');
+  });
+
+  it('drops groups that have no cover (no photos → no slide)', () => {
+    const entries = deriveWorksEntries(
+      facts([
+        { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos: [photo(1)] },
+        { name: 'Bare', kind: 'category', price: { mode: 'on-request' } }, // no photos
+      ] as any)
+    );
+    const fc = fcWithHero();
+    stampHeroSlides(fc, entries);
+    expect(fc.content['hero-xyz'].elements.slides).toHaveLength(1);
+    expect(fc.content['hero-xyz'].elements.slides[0].image).toBe('https://cdn/1.jpg');
+  });
+
+  it('respects hidden photos (hidden cover falls back; hidden-only group → no slide)', () => {
+    const entries = deriveWorksEntries(
+      facts([
+        { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos: [{ id: 'p1', url: 'https://cdn/1.jpg', cover: true, hidden: true }, photo(2)] },
+        { name: 'Secret', kind: 'category', price: { mode: 'on-request' }, photos: [{ id: 'h', url: 'https://cdn/secret.jpg', hidden: true }] },
+      ] as any)
+    );
+    const fc = fcWithHero();
+    stampHeroSlides(fc, entries);
+    const slides = fc.content['hero-xyz'].elements.slides;
+    expect(slides).toHaveLength(1); // hidden-only group yields no cover → no slide
+    expect(slides[0].image).toBe('https://cdn/2.jpg'); // hidden cover fell back to first visible
+    expect(JSON.stringify(slides)).not.toContain('secret');
+  });
+
+  it('no-op when no entries, and when entries carry no covers', () => {
+    const fc = fcWithHero();
+    const before = JSON.stringify(fc);
+    stampHeroSlides(fc, []);
+    expect(JSON.stringify(fc)).toBe(before); // no entries → untouched
+
+    const bare = deriveWorksEntries(
+      facts([{ name: 'Bare', kind: 'category', price: { mode: 'on-request' } }] as any)
+    );
+    stampHeroSlides(fc, bare); // entries but no covers → still no slides key
+    expect(fc.content['hero-xyz'].elements.slides).toBeUndefined();
+  });
+
+  it('NEVER overwrites user-edited slides (hero already has slides → no-op)', () => {
+    const entries = deriveWorksEntries(
+      facts([{ name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos: [photo(1)] }] as any)
+    );
+    const userSlides = [{ id: 'u1', image: 'https://cdn/mine.jpg' }];
+    const fc = fcWithHero(userSlides);
+    stampHeroSlides(fc, entries);
+    expect(fc.content['hero-xyz'].elements.slides).toEqual(userSlides); // untouched
+  });
+
+  it('stamps in-page hero sections too', () => {
+    const entries = deriveWorksEntries(
+      facts([
+        { name: 'A', kind: 'category', price: { mode: 'on-request' }, photos: [photo(1)] },
+        { name: 'B', kind: 'category', price: { mode: 'on-request' }, photos: [photo(2)] },
+      ] as any)
+    );
+    const fc: any = { content: {}, pages: { 'page-home': { content: { 'hero-p': { id: 'hero-p', elements: {} } } } } };
+    stampHeroSlides(fc, entries);
+    expect(fc.pages['page-home'].content['hero-p'].elements.slides).toHaveLength(2);
   });
 });

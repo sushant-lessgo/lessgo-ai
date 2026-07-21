@@ -22,4 +22,15 @@ export const WORK_FOOTER_STYLES = `
 .wk-footer__social{ color:inherit; text-decoration:none; font-family:var(--wk-ff-body); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.82; }
 .wk-footer__social:hover{ opacity:1; }
 .wk-footer__bottom{ margin-top:28px; font-family:var(--wk-ff-mono); font-size:11px; letter-spacing:0.06em; color:var(--wk-on-dark-soft); }
+
+/* Wave 2 (phase 5) — DERIVED footer columns (marker footer_nav_mode:'derived').
+   Only ever present in the derived branch → legacy footer markup carries none of
+   these nodes, so a non-marked (Kundius) footer is byte-identical. */
+.wk-footer__cols{ display:flex; flex-wrap:wrap; gap:clamp(28px,5vw,64px); margin-top:36px; }
+.wk-footer__col{ display:flex; flex-direction:column; gap:10px; min-width:140px; }
+.wk-footer__col-head{ font-family:var(--wk-ff-body); font-weight:600; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--wk-on-dark-soft); }
+.wk-footer__col-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.wk-footer__col-link{ color:inherit; text-decoration:none; font-family:var(--wk-ff-body); font-size:14px; opacity:0.82; }
+.wk-footer__col-link:hover{ opacity:1; }
+.wk-footer__contact-line{ font-family:var(--wk-ff-body); font-size:14px; color:var(--wk-on-dark-soft); }
 `;

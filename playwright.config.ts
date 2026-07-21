@@ -44,6 +44,7 @@ export default defineConfig({
         /generation\.spec\.ts/,
         /render\.spec\.ts/,
         /parity\.spec\.ts/,
+        /workWave2\.spec\.ts/,
         /ui-isolation\.spec\.ts/,
         /forms-forgery\.spec\.ts/,
         /xfo-headers\.spec\.ts/,

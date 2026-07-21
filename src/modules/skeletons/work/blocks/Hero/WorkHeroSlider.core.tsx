@@ -14,14 +14,21 @@
 // (see styles.ts). The root carries `data-sid` (the [data-sid] style-token hook)
 // + `data-section-id` (editor Section-toolbar selection).
 //
-// D1 renders the STATIC first-slide state (single portrait_image). The multi-slide
-// slider behavior lands in phase 5 (work.v1.js) and degrades to exactly this.
+// FORK (Wave 2): with ≥2 `slides` the core emits the multi-slide slider markup +
+// the EXACT hooks the shipped `work.v1.js` (workBehaviors.js L42-72) queries —
+// `.wk-hero__slide`/`.is-active`, `[data-wk-prev]`/`[data-wk-next]`,
+// `[data-wk-dots]` (empty → JS injects `.wk-hero__dot`), `[data-wk-interval]` on
+// the root. With 0/1 slide (incl. Kundius) it emits TODAY'S single
+// `wk-hero__media`/`wk-hero__media-in` DOM byte-identically, so the JS bails
+// (<2 slides) and existing drafts are unchanged. No hook is renamed/invented — a
+// new hook would force a `work.v2.js` (forbidden this wave).
 
 import React from 'react';
 import type { WorkPrimitives } from '../primitives';
 import { WORK_HERO_STYLES } from './styles';
 
 export interface WorkHeroSocial { id: string; network?: string; href?: string; label?: string }
+export interface WorkHeroSlide { id: string; image?: string }
 
 export interface WorkHeroSliderContent {
   role_line?: string;
@@ -30,8 +37,15 @@ export interface WorkHeroSliderContent {
   portrait_image?: string;
   cta_label?: string;
   cta_href?: string;
+  cta2_label?: string;
+  cta2_href?: string;
   socials?: WorkHeroSocial[];
+  slides?: WorkHeroSlide[];
 }
+
+// Autoplay dwell (ms) — read by both the published `work.v1.js` and the editor
+// slider effect off `[data-wk-interval]`; without it autoplay never runs.
+const SLIDER_INTERVAL_MS = 5000;
 
 const MEDIA_PH = (
   <span className="wk-hero__ph" aria-hidden="true">Hero image — full-bleed work</span>
@@ -41,14 +55,43 @@ export function WorkHeroSliderCore({
   content, E, sectionId,
 }: { content: WorkHeroSliderContent; E: WorkPrimitives; sectionId: string }) {
   const socials = content.socials || [];
+  const slides = (content.slides || []).filter(Boolean);
+  // FORK: ≥2 slides → the multi-slide slider; else TODAY'S single-media DOM
+  // (byte-identical — do NOT rewrap the single portrait in `.wk-hero__slide`).
+  const isSlider = slides.length >= 2;
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: WORK_HERO_STYLES }} />
-      <section className="wk-hero" data-sid={sectionId} data-section-id={sectionId} data-wk-hero-slider="">
-        <div className="wk-hero__media">
-          <E.Img elementKey="portrait_image" src={content.portrait_image} alt={content.name}
-            className="wk-hero__media-in" placeholder={MEDIA_PH} eager />
-        </div>
+      <section
+        className="wk-hero"
+        data-sid={sectionId}
+        data-section-id={sectionId}
+        data-wk-hero-slider=""
+        {...(isSlider ? { 'data-wk-interval': String(SLIDER_INTERVAL_MS) } : {})}
+      >
+        {isSlider ? (
+          <>
+            {/* Slide set — the FIRST slide carries `is-active` so it shows with no
+                JS; the JS/editor effect then toggles `is-active` across the set. */}
+            <div className="wk-hero__slides">
+              {slides.map((slide, i) => (
+                <div key={slide.id ?? i} className={`wk-hero__slide${i === 0 ? ' is-active' : ''}`}>
+                  <E.Img elementKey={`slides.${slide.id}.image`} src={slide.image} alt={content.name}
+                    className="wk-hero__slide-media" placeholder={MEDIA_PH} eager={i === 0} />
+                </div>
+              ))}
+            </div>
+            {/* Prev/next arrows + the EMPTY dots container the JS populates. */}
+            <button type="button" className="wk-hero__arrow wk-hero__arrow--prev" data-wk-prev="" aria-label="Previous slide">‹</button>
+            <button type="button" className="wk-hero__arrow wk-hero__arrow--next" data-wk-next="" aria-label="Next slide">›</button>
+            <div className="wk-hero__dots" data-wk-dots="" aria-hidden="true" />
+          </>
+        ) : (
+          <div className="wk-hero__media">
+            <E.Img elementKey="portrait_image" src={content.portrait_image} alt={content.name}
+              className="wk-hero__media-in" placeholder={MEDIA_PH} eager />
+          </div>
+        )}
         <div className="wk-hero__scrim" aria-hidden="true" />
         {/* Giant background slide numeral (Atelier "cover" signature). Rendered in
             BOTH renderers identically; CSS-gated OFF by default via
@@ -71,6 +114,16 @@ export function WorkHeroSliderCore({
               <E.Txt elementKey="cta_label" value={content.cta_label}
                 className="wk-hero__cta-label" isButton placeholder="Start a project" />
             </E.Link>
+            {/* Second CTA renders ONLY when its href is set (a button needs a
+                destination; `cta2_label` is AI-drafted / `cta2_href` manual — gating
+                on label alone would ship a dead hrefless button on fresh gen). Empty
+                label falls back to a sensible default. */}
+            {content.cta2_href && (
+              <E.Link hrefKey="cta2_href" href={content.cta2_href} className="wk-hero__cta wk-hero__cta--ghost">
+                <E.Txt elementKey="cta2_label" value={content.cta2_label}
+                  className="wk-hero__cta-label" isButton placeholder="Learn more" />
+              </E.Link>
+            )}
           </div>
 
           {(socials.length > 0) && (
