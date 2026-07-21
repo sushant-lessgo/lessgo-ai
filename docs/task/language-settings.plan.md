@@ -123,7 +123,7 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
 
 ## Progress log
 
-- phase 1 locale contracts + store actions: done (commit pending-sha, review loops 1, VERDICT ship)
+- phase 1 locale contracts + store actions: done (commit 41a9b749, review loops 1, VERDICT ship)
   - carries into phase 2: keep the DEFAULT locale non-removable in `LanguagesPanel`
     (`i18nActions.ts:74-91` clears a non-English site's config if its default is removed —
     unreachable today only because the picker excludes it; a `if (code === cfg.defaultLocale) return;`
@@ -132,7 +132,15 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     codes (`'nl'` → null) — respect this when mapping the work engine's `facts.languages[0]`
   - note: store-action signatures went on `MetaActions` (not `ContentActions`) — plan pointer was
     impossible; precedent `actions.ts:442-448`. No type-checked caller until phase 2.
-- phase 2 Languages panel in Site Settings + retire globe: pending
+- phase 2 Languages panel in Site Settings + retire globe: done (commit pending-sha, review
+  loops 1, VERDICT ship) — ⛔ AWAITING FOUNDER SIGN-OFF at the human gate
+  - owed → phase 7 (now in its Files touched): the `removeLocale` default-locale guard in
+    `i18nActions.ts` (UI-only enforcement today) + the dead `LanguageToggle` re-export
+  - `switcherStyle` is WRITE-ONLY until phase 5 emits it — the segmented control looks live on
+    a multi-locale project but nothing consumes it yet. If phase 5 were ever dropped, this
+    becomes a genuine fake control.
+  - manual-QA only (not provable in jsdom): nested `confirmDialog` portal stacking above the
+    settings `Dialog` (z-index / focus trap)
 - phase 3 onboarding site-language capture: pending
 - phase 4 generation output-language directive: pending
 - phase 5 switcher.v2 asset + publish emission: pending
@@ -885,6 +893,26 @@ NOT touched in this phase.
 - `docs/architecture/copyEngines.md`
 - `src/lib/i18n/README.md` (new or updated)
 - `src/modules/templates/fit.ts` (comment-only)
+- `src/hooks/editStore/i18nActions.ts` — **owed from phase 2** (see step below)
+- `src/hooks/editStore/i18nStoreState.test.ts` — pin the new guard
+- `src/app/edit/[token]/components/editor/LanguageToggle.tsx` — drop the dead re-export
+
+**Owed cleanup carried into this phase (added by orchestrator after the phase-2 gate)**
+
+1. **Default-locale removal guard (correctness, not cosmetic).** Add
+   `if (code === cfg.defaultLocale) return;` at the top of `removeLocale` in
+   `src/hooks/editStore/i18nActions.ts`. Today the invariant "you cannot remove the site's
+   default language" is enforced **only in the UI** (`LanguagesPanel.tsx` renders no menu on
+   the default card + `onRemove` early-returns at `:116`) because `i18nActions.ts` was outside
+   phase 2's scope. These are now public store actions; without the guard, any future caller
+   that removes a non-English default silently clears `localeConfig` and erases the site's
+   declared language — the exact ruling-10 data loss, re-entering through a different door.
+   Pin it with a test that calls `removeLocale(defaultLocale)` directly on the store (NOT
+   through the panel) and asserts the config is unchanged.
+2. **Dead re-export.** `LanguageToggle.tsx:21` re-exports `LOCALE_DISPLAY_NAMES`/`localeLabel`
+   "so existing importers (LocaleSettings, retired in phase 2) keep compiling" — that importer
+   no longer exists. Remove the re-export and repoint any remaining consumer at
+   `src/lib/i18n/localeNames.ts` directly.
 
 **Verification**
 - Commands above, all green. Reviewer asserts: docs match shipped behavior (no aspirational

@@ -23,10 +23,17 @@ import { AppTooltip } from "./tooltip"
  *   → greyed, aria-disabled, click/keyboard inert, tooltip "Coming soon — page CMS"
  *
  * NEVER grey something that works today (decision 10 — `Social & sharing` is
- * wired; also Design, SEO, Languages, Domain, undo/redo, Edit/Preview, Publish,
- * Back to dashboard, Help & support, page switcher, mobile panel toggle,
- * UserButton). This component is for controls the handoff draws but nothing
- * implements — "render greyed, never omitted".
+ * wired; also Design, SEO, Languages, undo/redo, Edit/Preview, Publish, Back to
+ * dashboard, Help & support, page switcher, mobile panel toggle, UserButton).
+ * This component is for controls the handoff draws but nothing implements —
+ * "render greyed, never omitted".
+ *
+ * Two corrections to that list (language-settings phase 2): `Domain` has NO
+ * entry point in the editor and IS greyed (SeoSettingsModal's rail row).
+ * `Languages` is wired — the rail row and the LanguagesPanel work — but two
+ * controls INSIDE that panel are greyed here: Auto-translate (nothing translates
+ * anything until Spec 2; the designer's mock draws it live and ON) and the
+ * change-site-language affordance on the default-locale card.
  */
 
 export interface ComingProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> {

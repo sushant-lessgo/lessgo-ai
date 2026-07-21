@@ -149,7 +149,10 @@ export function DebugPanel({
       )}
 
       {/* i18n-phase-1: the 3b dev-only locale switch was removed in Phase 4 —
-          the real LanguageToggle + LocaleSettings in the editor header replace it. */}
+          the real LanguageToggle in the editor header replaces it. (The
+          LocaleSettings globe that used to sit beside it was retired in
+          language-settings phase 2; declaring languages lives in Site settings →
+          Languages.) */}
 
       {/* Storage Monitor */}
       <StorageMonitor position="bottom-right" collapsed={true} />

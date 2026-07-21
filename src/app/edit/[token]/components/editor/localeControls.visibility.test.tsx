@@ -1,11 +1,19 @@
-// bilingual-editing phase 2 — locale-control VISIBILITY + real-store interaction (jsdom).
+// locale-control VISIBILITY + real-store interaction (jsdom).
 //
-// Locks the phase-1 re-mount: the two editor-chrome locale controls
-// (LanguageToggle + LocaleSettings) must render IFF the project is multi-locale
-// (isMultiLocale(localeConfig)), and clicking a locale pill must drive the REAL
-// store's `activeLocale` — not merely fire a handler. The click case asserts
-// store state + aria-pressed, so a no-op `setActiveLocale` or a detached handler
-// fails it (inert-assertion lesson: mutate the real thing or it isn't a test).
+// language-settings phase 2 rewrote this file. It used to lock TWO header
+// controls; there is only ONE now — the globe (`LocaleSettings`) was RETIRED and
+// its job moved into Site settings → Languages (`ui/LanguagesPanel.tsx`), where
+// a monolingual project can actually reach it. So this file locks:
+//
+//  1. `LanguageToggle` renders IFF the project is multi-locale
+//     (isMultiLocale(localeConfig)) — unchanged contract, it is still the only
+//     `setActiveLocale` UI;
+//  2. clicking a pill drives the REAL store's `activeLocale` (store state +
+//     aria-pressed are asserted, so a no-op setActiveLocale or a detached
+//     handler fails — inert-assertion lesson: mutate the real thing);
+//  3. the globe is GONE from the header cluster at every locale state — asserted
+//     against the real `EditorDesignControls`, not against absence of an import,
+//     so re-mounting any globe/"Languages" popover in the bar fails here.
 //
 // The store is REAL (`createEditStore`) — only the EditProvider plumbing is mocked
 // (vi.mock re-points useEditStore/useEditStoreApi at the test instance via zustand
@@ -35,9 +43,15 @@ vi.mock("@/hooks/useEditStore", () => ({
   useEditStoreApi: () => store,
 }))
 
-// Imported AFTER the mock is registered (vi.mock is hoisted, but keep it explicit).
+// `useReviewState` is only used by the OTHER cluster in EditHeader.tsx, but the
+// module is imported at load time — stub it so this file needs no review plumbing.
+vi.mock("@/hooks/useReviewState", () => ({
+  useReviewState: () => ({ allComplete: true }),
+}))
+
+// Imported AFTER the mocks are registered (vi.mock is hoisted, but keep it explicit).
 import { LanguageToggle } from "./LanguageToggle"
-import { LocaleSettings } from "./LocaleSettings"
+import { EditorDesignControls } from "../layout/EditHeader"
 
 const BILINGUAL = { locales: ["en", "nl"], defaultLocale: "en" } as const
 const SINGLE = { locales: ["en"], defaultLocale: "en" } as const
@@ -64,6 +78,11 @@ function setConfig(config: unknown) {
     store.setState((s: any) => {
       s.localeConfig = config
       s.activeLocale = (config as any)?.defaultLocale ?? "en"
+      // writer/template-module ⇒ EditorDesignControls renders NO design popover,
+      // so the globe assertions below are about the locale controls only and
+      // this file doesn't drag in the theme-popover tree.
+      s.audienceType = "writer"
+      s.templateId = "granth"
     })
   })
 }
@@ -86,40 +105,24 @@ function pills(): HTMLButtonElement[] {
 }
 
 describe("locale controls — visibility gate", () => {
-  // (a) bilingual → BOTH controls render.
-  it("renders both locale pills AND the LocaleSettings globe when the project is multi-locale", () => {
+  // (a) bilingual → the pill group renders.
+  it("renders the locale pills when the project is multi-locale", () => {
     setConfig(BILINGUAL)
     mount(<LanguageToggle />)
     const labels = pills().map((b) => b.textContent?.trim())
     expect(labels).toEqual(["EN", "NL"])
-
-    // Fresh subtree for LocaleSettings so the two mounts don't collide.
-    act(() => root.render(<LocaleSettings />))
-    const globe = container.querySelector('button[aria-haspopup="dialog"]')
-    expect(globe, "LocaleSettings globe trigger should render when multi-locale").not.toBeNull()
-    expect(globe!.getAttribute("title")).toBe("Languages")
   })
 
-  // (b) single-locale AND null → BOTH render null (empty container).
-  it("renders NOTHING for a single-locale project (both controls self-hide)", () => {
+  // (b) single-locale AND null → renders null (empty container).
+  it("renders NOTHING for a single-locale project (the toggle self-hides)", () => {
     setConfig(SINGLE)
-    mount(
-      <>
-        <LanguageToggle />
-        <LocaleSettings />
-      </>,
-    )
+    mount(<LanguageToggle />)
     expect(container.innerHTML).toBe("")
   })
 
   it("renders NOTHING when localeConfig is null (legacy project)", () => {
     setConfig(null)
-    mount(
-      <>
-        <LanguageToggle />
-        <LocaleSettings />
-      </>,
-    )
+    mount(<LanguageToggle />)
     expect(container.innerHTML).toBe("")
   })
 
@@ -145,5 +148,41 @@ describe("locale controls — visibility gate", () => {
     ;[en, nl] = pills()
     expect(en.getAttribute("aria-pressed")).toBe("false")
     expect(nl.getAttribute("aria-pressed")).toBe("true")
+  })
+})
+
+describe("the header globe is retired", () => {
+  // Mounted against the REAL left cluster, so this fails if anyone re-mounts a
+  // languages popover in the bar — not merely if an import comes back.
+  for (const [name, config] of [
+    ["multi-locale", BILINGUAL],
+    ["single-locale", SINGLE],
+    ["legacy (null config)", null],
+  ] as const) {
+    it(`renders no globe / Languages popover trigger in the header (${name})`, () => {
+      setConfig(config)
+      mount(<EditorDesignControls />)
+
+      expect(
+        container.querySelector('button[title="Languages"]'),
+        "the retired LocaleSettings globe is back in the header",
+      ).toBeNull()
+      expect(
+        container.querySelector('[role="dialog"][aria-label="Languages"]'),
+        "a Languages popover is back in the header",
+      ).toBeNull()
+      // The globe was the header's only `aria-haspopup="dialog"` trigger.
+      expect(container.querySelector('button[aria-haspopup="dialog"]')).toBeNull()
+      expect(container.textContent).not.toContain("Languages")
+    })
+  }
+
+  it("still mounts the LanguageToggle pills in the header when multi-locale", () => {
+    setConfig(BILINGUAL)
+    mount(<EditorDesignControls />)
+    expect(
+      container.querySelector('[role="group"][aria-label="Editing language"]'),
+      "LanguageToggle must SURVIVE the globe retirement — it is the only setActiveLocale UI",
+    ).not.toBeNull()
   })
 })
