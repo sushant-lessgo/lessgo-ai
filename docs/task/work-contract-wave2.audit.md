@@ -476,3 +476,88 @@ The derived keys are STAMPED into stored content but NOT declared in the footer 
 - The derived footer is inert on existing drafts (no marker) by design; the LIVE Kundius opt-in remains the documented HUMAN GATE — NOT performed here.
 - FOOTER_WORK_LINK_CAP=12 caps the work column; a collection with >12 detail pages shows the first 12 by page order. Adjust if designers want an "all work" overflow link.
 - Pre-existing atelier2 parity timeouts remain (orthogonal; flag at merge gate).
+
+---
+
+## Phase 6 — Hardening, e2e consolidation, docs
+
+### Files changed
+
+- `e2e/workWave2.spec.ts` — added a 4th describe block: `work-wave2 graceful-empty sweep` (one test walking all five Wave-2 sections on the published band, asserting legacy markup with no Wave-2 node leakage); refreshed the file header comment to reflect the full consolidated coverage.
+- `docs/architecture/copyEngines.md` — NEW section "Work contract — Wave-2 fields + source lanes" (the shipped field table + fillMode per field, the 3 lane mechanisms: `fillMode:'system'` manual lane, the `stripSystemKeys` parse-time strip, the footer assembly stamp).
+- `src/modules/audience/work/README.md` — NEW section "Wave-2 contract fields + the parse-time system-key strip" (documents `stripSystemKeys` + `injectPackages` + the first-gen stamp placement rule).
+- `docs/task/work-contract-wave2.plan.md` — progress log final state (phase 6 done).
+- `docs/task/work-contract-wave2.audit.md` — this section.
+
+NOT created: `src/modules/skeletons/work/README.md` — it does NOT exist; the plan says extend the local READMEs "only if they exist", so it was left absent (do-not-create-report-files rule).
+
+NO code files edited this phase (the acceptance sweep found no code straggler needing a fix).
+
+### e2e — what `workWave2.spec.ts` now covers (4 tests, all pass)
+
+1. **packages quad** (filled parity edit↔published + empty-tier legacy card).
+2. **hero slider** (multi-slide emits the exact `work.v1.js` hooks `.wk-hero__slide`/`[data-wk-prev]`/`[data-wk-next]`/`[data-wk-dots]`/root `[data-wk-interval]` + 2nd CTA; single-image band = today's `.wk-hero__media`, no slide wrapper, no interval hook → JS bails).
+3. **footer derived columns** (marked footer = 3-col derived shape tracking the page list + contact in BOTH bands; un-marked footer = legacy, no `.wk-footer__cols`).
+4. **graceful-empty sweep** (NEW): legacy/empty published band per section renders today's markup with NO Wave-2 node leakage —
+   - **header:** no fixture sets `logo_image` → every `[data-wk-logo]` is the text wordmark, zero `<img>` under any header logo.
+   - **hero:** single-image band = one `.wk-hero__media`, no `.wk-hero__slide`, no `[data-wk-interval]`, no `.wk-hero__cta--ghost`.
+   - **packages:** the pk3 empty tier = no `__img-el`/`__bullet`/`__flag`/`__cat`.
+   - **about:** the stage ships ONLY a filled about fixture (`atelier.ts` is outside Phase-6 file scope, so no empty-about band could be added) → the fully-empty about state stays owned by the jsdom `oldContentFallback`/`kundiusPages` tripwires; the sweep cross-checks the complementary guarantee that the legacy about skeleton (`.wk-about__heading` + `.wk-about__bio`) still renders (Wave-2 fields are ADDITIVE).
+   - **footer:** the un-marked band = `.wk-footer` present, no `.wk-footer__cols`.
+
+### Acceptance-criteria sweep (spec L72-80) — RESULT
+
+- **[MET] Packages designer-parity cards (image/dash-bullets/most-booked flag/category) + clean when empty** — Phase 2/2b renderers; `renderParity.work` + `workWave2` packages test + parity `atelier/packages [#19] = 0.697%`.
+- **[MET] About 4:5 portrait + signature + badge (own text) + graceful without portrait** — Phase 3; `.wk-about__portrait:empty` collapse; parity `atelier/about [#20] = 0.413%`.
+- **[MET] Hero multi-slide in editor AND published (arrows/dots/autoplay) from picked slides; single-image = today's static slide** — Phase 4; `workWave2` hero test asserts the exact hooks + single-image bail; parity `atelier/hero [#1]=0.014% (single) / [#2]=0.375% (multi)`.
+- **[MET] Header `logo_image` when set; text wordmark default unchanged** — Phase 1; `imgPicker` test + graceful-empty sweep (wordmark, zero logo `<img>`).
+- **[MET] Footer columns/contact derive from live page list + facts; track CMS detail-page changes** — Phase 5; `workFooterDerive` (14/14, incl. a `resyncWorkContent` add-detail-page case) + `workWave2` footer test.
+- **[MET] AI-lane fields generated fresh AND regenerable (section + element); facts-lane fields flow verbatim** — `injectPackages` wired on first-gen (`generate-copy/route.ts`) AND regen (`scopedRegen.ts`); `badge`/`category`/`cta2_label` are `manual_preferred` → normally regenerable; `injectPackages.test.ts` proves verbatim mapping + clamp + empty-strip.
+- **[MET] All image fields use the MediaAsset picker** — Phase 1 rewired `Img` (and `Logo` via delegation) to `MediaPickerModal`; `imgPicker` test asserts it, incl. the published-path no-import invariant.
+- **[MET] Existing drafts (incl. Kundius) render byte-identical until new fields filled** — every field optional + graceful-empty; footer marker-gated; tripwires `kundiusPages`/`oldContentFallback` green untouched across all phases; legacy footer band `[#6] = 0.179%`.
+- **[MET] Gates green (tsc/test:run/build/parity <3%/non-work untouched)** — see final gate below.
+
+**Deferred (documented, NOT Phase-6 blocking):**
+- **Hero add/remove-slides editor affordance** — the editor exposes per-slide pick/replace only; slide count is auto-derived (`stampHeroSlides`). Documented fast-follow (Phase-4 audit + plan progress log). Not a spec acceptance criterion.
+- **About fully-empty proof at e2e** — deferred to the jsdom `oldContentFallback`/`kundiusPages` tripwires because the parity stage has only a filled about fixture and `atelier.ts` is outside the Phase-6 Files-touched (adding an empty-about band would be out of scope). The byte-identical guarantee is authoritatively covered by those tripwires; the e2e sweep proves the additive/non-destructive complement.
+
+### Final full gate (actual numbers)
+
+- `npx tsc --noEmit` — CLEAN (0 errors; no `founder.jpg` phantom).
+- `npm run test:run` — **290 files passed | 1 skipped; 4678 tests passed | 15 skipped** (unchanged from Phase 5 — Phase 6 added no vitest surface).
+- `npm run lint` — clean (only pre-existing `<img>`/exhaustive-deps warnings, zero errors, none in touched files).
+- `npm run build` — SUCCEEDED. `public/assets/` clean (git status empty); `work.v1.js` present, no new asset filename.
+- `npx playwright test e2e/workWave2.spec.ts` — **4 passed** (packages quad · hero slider · footer derived · graceful-empty sweep).
+- `npx playwright test e2e/parity.spec.ts` — **5 passed, 2 failed**. All 25 atelier per-section bands < 3%:
+
+  | # | band | % | | # | band | % |
+  |---|---|---|---|---|---|---|
+  | 0 | header | 0.000 | | 13 | hero | 0.135 |
+  | 1 | hero (single) | 0.014 | | 14 | hero | 0.054 |
+  | 2 | hero (multi) | 0.375 | | 15 | work | 0.279 |
+  | 3 | work | 1.137 | | 16 | work | 0.727 |
+  | 4 | proof | 1.738 | | 17 | proof | 0.221 |
+  | 5 | contact | 0.000 | | 18 | proof | 0.027 |
+  | 6 | footer (legacy) | 0.179 | | 19 | packages | 0.697 |
+  | 7 | footer (derived) | 0.854 | | 20 | about | 0.413 |
+  | 8 | header | 0.142 | | 21 | faq | 0.000 |
+  | 9 | header | 0.000 | | 22 | results | 0.046 |
+  | 10 | header | 0.000 | | 23 | workcatalog | 0.523 |
+  | 11 | header | 0.000 | | 24 | workdetail | 0.150 |
+  | 12 | hero | 0.067 | | | | |
+
+  Max = `atelier/proof [#4] = 1.738%` (< 3%). The ONLY 2 failures are the **pre-existing `atelier2` stale-registry timeouts** (`atelier2` is not in `templateRegistry` → 404 → `waitForSelector` timeout); reproduced since Phase 2b, `parity.spec.ts`/`registry.ts` outside scope. Both atelier negative controls (seeded-break detection) pass.
+
+### Non-work-untouched proof
+
+`git diff --stat main...HEAD` (committed Phases 1-5) + the uncommitted Phase-6 docs: every `src/` path is work-scoped — `audience/work/*`, `engines/workSections.ts`, `skeletons/work/*`, `templates/blockMocks/{atelier,harness}.ts`, `wizard/{generation/work.llm,work/questionGating}*`, `app/api/audience/work/*` — plus the shared generation/editor plumbing the wave legitimately threaded one work-scoped line into (`generation/scopedRegen.ts`, `generation/workCollections|workFooterDerive|workLibrarySync.ts`, `hooks/editStore/aiActions.ts`). NO `src/modules/templates/{meridian,techpremium,hearth,lex}/…`; NO product/service audience code. Confirmed clean.
+
+### Surprises
+
+- The uncommitted `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` is the PRE-EXISTING CRLF artifact flagged in the task brief (present in the initial working tree) — NOT touched or staged by this phase.
+- `src/modules/skeletons/work/README.md` does not exist (only `audience/work/README.md`) — left uncreated per the "extend only if they exist" rule.
+
+### Open risks
+
+- Merge to main is the HUMAN GATE (plain merge, user pushes; QA on preview per release-train discipline). The 2 `atelier2` parity timeouts are a stale-registry cleanup owed separately (out of this wave's scope).
+- The LIVE Kundius derived-footer opt-in + any Kundius content migration remain the documented founder gates — never performed by this pipeline.

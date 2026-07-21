@@ -141,6 +141,59 @@ codebase (3-tier model, type contracts, dispatch, `Project.audienceType` column)
 decision yet commits to deleting the field. **`work` is the pilot engine** for this
 reorganization; the other four engines' onboarding step-content comes later (E5+).
 
+## Work contract — Wave-2 fields + source lanes
+
+The frozen work-engine content contract (`src/modules/engines/workSections.ts`,
+`workElementContract`) gained a wave of designer-parity fields (work-contract-wave2).
+Every field declares a **source lane** — how it gets filled — and every field is
+**optional with graceful-empty** (empty → today's markup exactly, so existing drafts
+incl. Kundius render byte-identical until filled). All image fields ride the shared
+`MediaAsset` media-library picker (no parallel upload path).
+
+| Section | Field(s) | Lane | fillMode |
+|---|---|---|---|
+| Packages | per-tier `image` | MediaAsset picker (manual) | `system` |
+| Packages | per-tier `bullets` (newline-delimited) | facts-verbatim (group `items`) or AI-drafted when facts silent | `manual_preferred` |
+| Packages | per-tier `featured` ("most booked" flag) | manual toggle (`E.Toggle`) | `system` |
+| Packages | per-tier `category` | AI-drafted, editable (no facts source) | `manual_preferred` |
+| About | `portrait_image` (4:5) | MediaAsset picker (manual) | `system` |
+| About | `signature` | manual/facts; defaults to name at first-gen (`stampAboutSignature`) | `system` |
+| About | `badge` (distinct from eyebrow) | AI-drafted, editable | `manual_preferred` |
+| Hero | `slides[]` (`{id,image}`) | MediaAsset picker per slide; auto-derived from works-group covers at first-gen (`stampHeroSlides`) | `system` (items) |
+| Hero | `cta2_label` | AI-drafted / manual | `manual_preferred` |
+| Hero | `cta2_href` | manual | `system` |
+| Header | `logo_image` | MediaAsset picker (text wordmark stays default) | `system` |
+| Footer | nav columns + contact | **DERIVED from live page list + facts — NO contract field** (assembly-time stamp, marker `footer_nav_mode:'derived'`) | n/a |
+
+**The three lane mechanisms (load-bearing):**
+
+1. **`fillMode:'system'` = the manual lane.** System fields are hard-excluded from the
+   AI spec by `isSystemField` in `buildWorkSectionSpec` (`copyPrompt.ts`), get no
+   `applySchemaDefaults` injection, and drop out of scoped-regen element lists — exactly
+   manual-lane behavior. This is THE named mechanism for every image field + `cta2_href`
+   + `featured` + `signature` + `logo_image`.
+2. **The parse-time system-key strip** (`stripSystemKeys` in
+   `src/modules/audience/work/parseCopy.ts`) is the UNIFORM guard: prompt-side skip is
+   not enough because `applyAllSchemaDefaults` keeps all non-null AI keys, so a confused
+   AI response during section regen could surface system keys. The strip deletes any
+   AI-emitted value whose contract field is `fillMode:'system'` (except `id`) — covering
+   first-gen + ALL regen routes. Per-merge belts (e.g. the story-regen `signature` skip
+   in `aiActions.ts`) complement it, never replace it.
+3. **The footer derivation stamp** (`src/modules/generation/workFooterDerive.ts`) is
+   assembly-time, not render-time: `stampWorkFooterNav` computes nav columns + contact
+   ONCE from the complete `fc.pages` set (post fan-out, in `work.llm.ts` `runFanOut`) and
+   writes them + the marker into the stored footer content, so BOTH renderers read the
+   SAME data (no dual-renderer divergence). `resyncWorkContent` re-stamps
+   (`onlyIfMarked:true`) when the CMS page-set changes, so columns track detail-page
+   add/remove. No marker → legacy footer, byte-identical.
+
+Facts-verbatim / auto-derive stamps (`injectPackages`, `stampAboutSignature`,
+`stampHeroSlides`, `stampWorkFooterNav`) all live at first-gen sites in scope of facts
+(`work.llm.ts` `runFanOut`, or at parse via `injectPackages`) and NEVER clobber a
+user-edited value (idempotent, empty-only writes) — regen paths cannot reach the
+first-gen stamps by construction. Deferred fast-follow: the hero editor exposes
+per-slide pick/replace but no add/remove-slides affordance.
+
 ## Pointers
 - Dispatch: `src/lib/workCopyEngine.ts` (`resolveCopyEngine` → `product` | `service` | `work`).
 - Per-audience builders/parsers: `src/modules/audience/{product,service,work}/`.

@@ -7,7 +7,12 @@ import { test, expect } from '@playwright/test';
 //     bullets, "most booked" flag, per-tier category label) in BOTH renderers;
 //   • an unfilled tier renders EXACTLY today's legacy card (no image / bullets /
 //     flag) — the graceful-empty guarantee that keeps existing drafts byte-stable.
-// (Phase 4/6 grow this file: hero multi-slide hooks + the full graceful-empty sweep.)
+// It also proves the hero multi-slide hooks + single-image bail, the derived vs
+// legacy footer, and a GRACEFUL-EMPTY SWEEP over all five Wave-2 sections (packages,
+// about, hero, header, footer) — a legacy/empty band renders today's markup with
+// NONE of the new Wave-2 nodes leaking. (The byte-identical guarantee itself is
+// owned authoritatively by the jsdom tripwires kundiusPages/oldContentFallback; this
+// sweep is the deterministic DOM cross-check on the shared parity stage.)
 
 const STAGE = '/dev/blocks/atelier';
 
@@ -128,5 +133,61 @@ test.describe('work-wave2 footer derived columns', () => {
       await expect(legacy.locator('.wk-footer'), `${kind}: legacy footer renders`).toHaveCount(1);
       await expect(legacy.locator('.wk-footer__cols'), `${kind}: legacy footer has no derived cols`).toHaveCount(0);
     }
+  });
+});
+
+test.describe('work-wave2 graceful-empty sweep', () => {
+  // A legacy / empty band for each of the five Wave-2 sections renders TODAY's markup
+  // with NONE of the new Wave-2 nodes present. All checks run on the PUBLISHED band
+  // (deterministic — no editor affordance nodes; empty optional fields render null /
+  // collapse, exactly as they ship on a real published page).
+  test('legacy/empty bands render legacy markup with no Wave-2 node leakage', async ({ page }) => {
+    await page.goto(STAGE, { waitUntil: 'load' });
+    await page.waitForSelector('[data-parity-band="published"][data-parity-section="footer"]');
+
+    const pub = (section: string) =>
+      page.locator(`[data-parity-band="published"][data-parity-section="${section}"]`);
+
+    // ── HEADER: no fixture sets logo_image → EVERY header logo is the text wordmark
+    // (legacy). The picker-wired logo emits an <img> ONLY when logo_image is set, so
+    // zero <img> under any [data-wk-logo] proves the graceful default.
+    await expect(pub('header').first().locator('[data-wk-logo]'), 'header logo renders').not.toHaveCount(0);
+    await expect(pub('header').locator('[data-wk-logo] img'), 'no logo image node when logo_image empty').toHaveCount(0);
+    await expect(pub('header').getByText('Kristina Kundius').first(), 'text wordmark renders').toBeVisible();
+
+    // ── HERO: the single-image band (no `slides`) is EXACTLY today's single-media DOM
+    // — no slide wrapper, no autoplay interval hook (the slider JS bails < 2 slides).
+    const heroLegacy = pub('hero').filter({ has: page.locator('.wk-hero__media') }).first();
+    await expect(heroLegacy.locator('.wk-hero__media'), 'single-media node').toHaveCount(1);
+    await expect(heroLegacy.locator('.wk-hero__slide'), 'no slide wrapper').toHaveCount(0);
+    await expect(heroLegacy.locator('[data-wk-interval]'), 'no autoplay hook').toHaveCount(0);
+    await expect(heroLegacy.locator('.wk-hero__cta--ghost'), 'no 2nd CTA when cta2_href empty').toHaveCount(0);
+
+    // ── PACKAGES: the unfilled tier (pk3) renders the legacy card — no image, no
+    // bullets, no "most booked" flag, no category kicker.
+    const pkgEmpty = pub('packages').locator('.wk-packages__card', { hasText: 'Portrait & business shoot' }).first();
+    await expect(pkgEmpty, 'empty tier renders').toHaveCount(1);
+    await expect(pkgEmpty.locator('.wk-packages__img-el'), 'no tier image').toHaveCount(0);
+    await expect(pkgEmpty.locator('.wk-packages__bullet'), 'no bullets').toHaveCount(0);
+    await expect(pkgEmpty.locator('.wk-packages__flag'), 'no featured flag').toHaveCount(0);
+    await expect(pkgEmpty.locator('.wk-packages__cat'), 'no category kicker').toHaveCount(0);
+
+    // ── ABOUT: the stage ships only a FILLED about fixture (atelier.ts is outside the
+    // Phase-6 file scope, so no empty-about band was added), so the fully-empty
+    // graceful-empty state is owned by the jsdom oldContentFallback/kundiusPages
+    // tripwires. Here we cross-check the complementary guarantee: the Wave-2 fields are
+    // ADDITIVE — the legacy about skeleton (eyebrow · heading · bio) still renders,
+    // and the empty-portrait CSS collapse (.wk-about__portrait:empty) means the head
+    // column never reflows when a portrait is absent.
+    const about = pub('about').first();
+    await expect(about.locator('.wk-about'), 'about renders').toHaveCount(1);
+    await expect(about.locator('.wk-about__heading'), 'legacy about heading').toHaveCount(1);
+    await expect(about.locator('.wk-about__bio'), 'legacy about bio').toHaveCount(1);
+
+    // ── FOOTER: the un-marked footer (no footer_nav_mode) is the legacy footer — no
+    // derived-columns block.
+    const footerLegacy = pub('footer').filter({ hasNot: page.locator('.wk-footer__cols') }).first();
+    await expect(footerLegacy.locator('.wk-footer'), 'legacy footer renders').toHaveCount(1);
+    await expect(footerLegacy.locator('.wk-footer__cols'), 'legacy footer has no derived cols').toHaveCount(0);
   });
 });
