@@ -11,13 +11,12 @@
 import React from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 import { isMultiLocale } from '@/lib/i18n/localeContent';
-import { LOCALE_DISPLAY_NAMES, localeLabel } from '@/lib/i18n/localeNames';
-
-// language-settings phase 1: the display-name map + localeLabel MOVED to the
+// language-settings phase 1: the display-name map + localeLabel live in the
 // plain module `@/lib/i18n/localeNames` (server prompt builders need names and
-// may not import this `'use client'` file). Re-exported here so existing
-// importers (LocaleSettings, retired in phase 2) keep compiling.
-export { LOCALE_DISPLAY_NAMES, localeLabel };
+// may not import this `'use client'` file). Import them FROM there — this file
+// no longer re-exports them (phase 7: the back-compat re-export existed only for
+// LocaleSettings, retired in phase 2).
+import { localeLabel } from '@/lib/i18n/localeNames';
 
 // TODO(i18n): unauthored-field affordance (Phase 4 step 4) is deferred. Marking
 // fields that show base fallback (no overlay value yet) in a non-default locale

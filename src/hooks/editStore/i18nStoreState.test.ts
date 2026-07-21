@@ -483,6 +483,39 @@ describe('i18n Phase 3a — store state layer', () => {
       expect(s.localeContent).toEqual({}); // no overlay was created
     });
 
+    // ---- ruling 10, branch C: the DEFAULT locale is not removable (phase 7) ----
+    // Driven DIRECTLY on the store, not through LanguagesPanel: the panel hides
+    // the menu on the default card, so a panel-level test would pass even with
+    // the guard deleted. These are public store actions — the invariant has to
+    // hold for any caller.
+    it('removeLocale(defaultLocale) is a NO-OP on a non-English default (the declaration survives)', () => {
+      const proj = storeWith({ locales: ['nl', 'en'], defaultLocale: 'nl' }, 'tok-rm-default-nl');
+      const before = proj.getState().localeConfig;
+      proj.getState().removeLocale('nl');
+      const s = proj.getState();
+      // Without the guard this would fall into drop-to-single with def='en'
+      // ⇒ localeConfig = null ⇒ the Dutch site language is erased.
+      expect(s.localeConfig).toEqual(before);
+      expect(s.activeLocale).toBe('nl');
+    });
+
+    it('removeLocale(defaultLocale) is a NO-OP on an English default too', () => {
+      const proj = storeWith(CONFIG_EN_NL, 'tok-rm-default-en');
+      proj.getState().removeLocale('en');
+      expect(proj.getState().localeConfig).toEqual({ locales: ['en', 'nl'], defaultLocale: 'en' });
+    });
+
+    it('removeLocale(defaultLocale) leaves the OTHER locales and their overlays intact', () => {
+      const proj = storeWith({ locales: ['nl', 'en'], defaultLocale: 'nl' }, 'tok-rm-default-ovl');
+      proj.getState().setActiveLocale('en');
+      proj.getState().updateElementContent(HERO, 'headline', 'Hello');
+      proj.getState().removeLocale('nl');
+      // Unguarded this collapses to localeConfig === null (throwing on `.locales`)
+      // while the EN overlay is orphaned.
+      expect(proj.getState().localeConfig!.locales).toEqual(['nl', 'en']);
+      expect(proj.getState().localeContent.en).toBeTruthy();
+    });
+
     it('multi→multi removeLocale keeps every surviving locale', () => {
       const proj = storeWith({ locales: ['en', 'nl', 'de'], defaultLocale: 'en' }, 'tok-multi');
       proj.getState().removeLocale('nl');

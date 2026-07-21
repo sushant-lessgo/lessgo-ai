@@ -212,7 +212,7 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     no onboarding language control at all (they set it in Site Settings).
   - optional hardening (phase 7): the freeze guard asserts existence only; a content hash of
     `scripts/legacy/switcher.v1.src.js` would make an accidental edit to the frozen source fail loudly
-- phase 6 publish persistence + /p SSR locale awareness + e2e: done (commit pending-sha, review
+- phase 6 publish persistence + /p SSR locale awareness + e2e: done (commit 90df111c, review
   loops 1, VERDICT ship)
   - **the round-1 fatal defect is CLOSED**: `publishedContent` feeds both row writes AND the
     export; monolingual = the SAME object reference (no spread) so zero-diff holds; late seeding
@@ -228,7 +228,17 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
   - phase-7 doc lines owed: `<html lang>` is not per-locale on the SSR path (App Router root-layout
     constraint; blob docs DO carry it — a genuine SSR-vs-blob delta) · pages published BEFORE this
     feature carry no `localeConfig`, so `/p/{slug}/nl` 404s and no switcher appears until republish
-- phase 7 docs + acceptance sweep: pending
+- phase 7 docs + acceptance sweep + owed cleanups: done (commit e1d444ca, review loops 1, VERDICT ship)
+  - e2e REGISTERED and genuinely runs: 5/5 green through the shipped config (was unrunnable —
+    testMatch is an allowlist)
+  - all 4 owed cleanups landed: removeLocale default-locale guard (mutation-verified, closes the
+    last ruling-10 door), dead LanguageToggle re-export removed, fit.ts v1→v2 comments, and the
+    v1 freeze guard now asserts a sha256 CONTENT hash (was existence-only)
+  - acceptance: 5/6 boxes satisfied by artifacts+tests; box 2 is CODE-DONE/QUALITY-UNPROVEN
+    (real-LLM behavior = founder QA); box 4 = blob path automated, SSR path wired + helper-tested,
+    serving proof owed to founder QA
+  - known nit (not fixed, out of phase scope): src/lib/i18n/localeNames.ts:14 comment still says
+    LanguageToggle "re-exports it for back-compat" — that re-export died in this phase
 
 ## Load-bearing design rulings (the sharp edges, decided up front)
 

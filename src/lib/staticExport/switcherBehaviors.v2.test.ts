@@ -12,10 +12,12 @@
 //  • target-path building re-prepends the base path (pill clicks + geo redirect);
 //  • `style: 'none'` ⇒ no pill AND no redirect;
 //  • the once-per-session redirect guard survived the v2 rewrite;
-//  • the v1 FREEZE: scripts/legacy/switcher.v1.src.js exists and nothing emits v1.
+//  • the v1 FREEZE: scripts/legacy/switcher.v1.src.js exists, is byte-frozen
+//    (content hash — phase 7), and nothing emits v1.
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { readFileSync, existsSync } from 'fs';
+import { createHash } from 'crypto';
 import path from 'path';
 
 const ROOT = path.join(__dirname, '..', '..', '..'); // src/lib/staticExport → repo root
@@ -336,6 +338,21 @@ describe("switcher v2 — switcherStyle 'none'", () => {
 describe('switcher v1 FREEZE (immutable-asset contract)', () => {
   it('scripts/legacy/switcher.v1.src.js exists — old blobs keep their original bytes', () => {
     expect(existsSync(path.join(ROOT, 'scripts', 'legacy', 'switcher.v1.src.js'))).toBe(true);
+  });
+
+  // phase 7 hardening: existence alone does NOT protect the frozen asset — an
+  // in-place edit to the v1 source would silently change behavior for every
+  // ALREADY-PUBLISHED blob (they load /assets/switcher.v1.js forever). Pin the
+  // content. EOL-normalized so a CRLF checkout doesn't false-fail.
+  // If this test fails you have edited a FROZEN asset: revert it and ship a NEW
+  // versioned filename instead (contract: scripts/buildAssets.js).
+  it('scripts/legacy/switcher.v1.src.js is byte-frozen (content hash)', () => {
+    const raw = readFileSync(
+      path.join(ROOT, 'scripts', 'legacy', 'switcher.v1.src.js'),
+      'utf8'
+    ).replace(/\r\n/g, '\n');
+    const hash = createHash('sha256').update(raw, 'utf8').digest('hex');
+    expect(hash).toBe('0a1750737d6347f5f45d0fd3a666b1bc77e12b186755ffb7d80ddd646db3fbe5');
   });
 
   it('the generator no longer emits switcher.v1.js', () => {

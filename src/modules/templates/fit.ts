@@ -29,7 +29,7 @@ import { sharedBlockCapabilities } from '@/modules/generatedLanding/sharedBlocks
  * checked FIRST and are unaffected by shared blocks.
  *
  * i18n-phase-1 D5: `bilingual` is a PLATFORM-LEVEL capability — the content
- * locale layer (overlay resolver + per-locale export + shared `switcher.v1.js`)
+ * locale layer (overlay resolver + per-locale export + shared `switcher.v2.js`)
  * is template-agnostic and works on ANY non-retired template, so `fit()` treats
  * it as satisfied everywhere via `PLATFORM_CAPABILITIES` (same "available
  * regardless of pick" pattern as shared blocks, but backed by the platform i18n
@@ -58,7 +58,7 @@ export function fit(
  * machinery that runs on every non-retired template rather than by a template
  * block or a shared block. `bilingual` = the content-locale layer (overlay
  * resolver, per-locale static export, reciprocal hreflang, shared
- * `switcher.v1.js`). Kept separate from `sharedBlockCapabilities` (that map is
+ * `switcher.v2.js`). Kept separate from `sharedBlockCapabilities` (that map is
  * provably in sync with the shared-block component registries — bilingual is
  * NOT a shared block). Honesty check: `src/lib/i18n/i18nHonesty.test.ts`.
  */

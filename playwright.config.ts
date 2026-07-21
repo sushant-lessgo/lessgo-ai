@@ -37,7 +37,21 @@ export default defineConfig({
     // Public, no-auth smokes.
     {
       name: 'public',
-      testMatch: [/generation\.spec\.ts/, /render\.spec\.ts/, /parity\.spec\.ts/, /ui-isolation\.spec\.ts/, /forms-forgery\.spec\.ts/, /xfo-headers\.spec\.ts/],
+      // NOTE: testMatch is an explicit ALLOWLIST (see the `authed` project note
+      // below) — an unregistered spec silently matches no project and the suite
+      // goes green having never run it.
+      testMatch: [
+        /generation\.spec\.ts/,
+        /render\.spec\.ts/,
+        /parity\.spec\.ts/,
+        /ui-isolation\.spec\.ts/,
+        /forms-forgery\.spec\.ts/,
+        /xfo-headers\.spec\.ts/,
+        // language-settings (phase 6): published language-switcher behavior.
+        // Fully route-intercepted (fixture docs + the switcher source), so it
+        // needs no auth and no seeded project — hence `public`.
+        /i18n-switcher\.spec\.ts/,
+      ],
       use: { ...devices['Desktop Chrome'] },
     },
     // Clerk sign-in → saves storageState.

@@ -1380,3 +1380,267 @@ here — flagged for the founder QA gate.
   relative SSR asset src, and the v2 config shape now including `basePath`.
 - Phase-5's note stands: `src/modules/templates/fit.ts:32,:61` still name `switcher.v1.js` in
   comments (phase-7 sweep).
+
+---
+
+# Phase 7 — docs + acceptance sweep + owed cleanups (FINAL)
+
+## Files changed
+
+- `playwright.config.ts` — **step 0**: register `e2e/i18n-switcher.spec.ts` in the `public` project
+- `src/hooks/editStore/i18nActions.ts` — owed-from-phase-2: default-locale removal guard
+- `src/hooks/editStore/i18nStoreState.test.ts` — 3 new store-level tests pinning that guard
+- `src/app/edit/[token]/components/editor/LanguageToggle.tsx` — owed-from-phase-2: drop the dead re-export
+- `src/modules/templates/fit.ts` — comment sweep `switcher.v1.js` → `switcher.v2.js` (2 sites)
+- `src/lib/staticExport/switcherBehaviors.v2.test.ts` — optional hardening: v1 freeze = content hash
+- `docs/architecture/publishArch.md` — new "Multi-locale publishing" section
+- `docs/architecture/copyEngines.md` — new "Output language (all three live engines)" section
+- `src/lib/i18n/README.md` (**new**) — module map, the two seams, asset immutability, known limits
+- `docs/task/language-settings.audit.md` — this section
+
+NOT touched (dirty in the worktree from unrelated work, pre-existing at phase start):
+`src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap`,
+`docs/task/language-settings.plan.md` (orchestrator's own edit).
+
+## Step 0 — the e2e was genuinely unrunnable; now it runs
+
+`e2e/i18n-switcher.spec.ts` matched NO Playwright project: `testMatch` is an allowlist and
+phase 6 could not edit the config. `npm run test:e2e` was silently skipping the only coverage
+of the published switcher. Added `/i18n-switcher\.spec\.ts/` to the `public` project (it is
+fully `page.route`-intercepted — no auth, no seeded project, no asset build needed) and
+copied the "allowlist ⇒ false confidence" warning comment onto that project too, since only
+the `authed` project carried it.
+
+**REAL run** (`E2E_PORT=3411 npx playwright test --project=public i18n-switcher`), verbatim:
+
+```
+Running 5 tests using 1 worker
+  ✓  1 [public] › e2e\i18n-switcher.spec.ts:93:7 › published locale switcher (switcher.v2) › host-root document: the pill renders both locales and NL goes to /nl (318ms)
+  ✓  2 [public] › e2e\i18n-switcher.spec.ts:107:7 › published locale switcher (switcher.v2) › /p/{slug} document: NL goes to /p/{slug}/nl — never /nl/p/{slug} (167ms)
+  ✓  3 [public] › e2e\i18n-switcher.spec.ts:120:7 › published locale switcher (switcher.v2) › the chosen locale is remembered (localStorage) (151ms)
+  ✓  4 [public] › e2e\i18n-switcher.spec.ts:129:7 › published locale switcher (switcher.v2) › geo/preference auto-redirect respects the base path (101ms)
+  ✓  5 [public] › e2e\i18n-switcher.spec.ts:141:7 › published locale switcher (switcher.v2) › switcherStyle 'none': no pill AND no geo redirect (621ms)
+
+  5 passed (26.2s)
+```
+
+A real run against a real dev server through the real config — not phase 6's scratch config.
+
+## Owed cleanup 1 — default-locale removal guard
+
+`i18nActions.ts` `removeLocale` now opens with `if (code === cfg.defaultLocale) return;`.
+
+Rationale (recorded in the code comment): the "you cannot remove the site's default language"
+invariant was UI-only (`LanguagesPanel` renders no overflow menu on the default card). These
+are public store actions; without the guard a future caller removing a **non-English** default
+falls into the drop-to-single branch with `def = 'en'` ⇒ `localeConfig = null` ⇒ the declared
+site language is erased — ruling-10 data loss through a different door.
+
+Pinned by 3 tests **driven directly on the store** (`storeWith(...).getState().removeLocale(def)`),
+not through the panel — a panel-level test would pass with the guard deleted:
+- non-English default ⇒ config unchanged, `activeLocale` still `nl`;
+- English default ⇒ config unchanged;
+- other locales and their overlays survive (unguarded, `localeConfig` collapses to null and the
+  EN overlay is orphaned).
+
+**Mutation check** (the tests can fail): changed the guard to
+`if (code === cfg.defaultLocale + 'MUTANT') return;` → `Tests  3 failed | 40 passed (43)`,
+exactly the three new tests. Reverted by editing the line back (never `git checkout`).
+
+## Owed cleanup 2 — dead re-export
+
+`LanguageToggle.tsx:21` re-exported `LOCALE_DISPLAY_NAMES`/`localeLabel` "so LocaleSettings keeps
+compiling" — that file was deleted in phase 2. Grepped every consumer: `LanguagesPanel.tsx` and
+`IdentitySlot.tsx` already import from `@/lib/i18n/localeNames` directly, so nothing needed
+repointing. Removed the re-export and the now-unused `LOCALE_DISPLAY_NAMES` import; the comment
+now says "import them FROM there".
+
+## Owed cleanup 3 — comment sweep
+
+`src/modules/templates/fit.ts:32,:61` (the `bilingual` PLATFORM_CAPABILITIES rationale) said
+`switcher.v1.js`. Both now say `switcher.v2.js`. Comment-only; no behavior.
+
+Remaining `switcher.v1.js` mentions in the tree are all legitimate: `scripts/legacy/*`,
+`scripts/buildAssets.js`'s FROZEN entry, the freeze tests, and the new publishArch section that
+documents the freeze.
+
+## Owed cleanup 4 (optional hardening) — the freeze guard now asserts CONTENT
+
+`switcherBehaviors.v2.test.ts` previously only asserted that `scripts/legacy/switcher.v1.src.js`
+**exists** — which cannot catch the failure that matters (an in-place edit to the frozen source
+silently changing behavior for every already-published blob). Added a sha256 content assertion,
+EOL-normalized (CRLF → LF) so a CRLF checkout does not false-fail:
+
+```
+0a1750737d6347f5f45d0fd3a666b1bc77e12b186755ffb7d80ddd646db3fbe5
+```
+
+with a comment telling the next agent to revert and ship a NEW versioned filename instead.
+
+**Scope note / deviation:** `src/lib/staticExport/switcherBehaviors.v2.test.ts` is not literally
+on the plan's phase-7 Files-touched list, but the hardening is owed item 4 in the orchestrator's
+phase brief and phase 5's carry note explicitly assigns it here. Flagged for the reviewer.
+
+## Docs
+
+**`docs/architecture/publishArch.md`** — new section "Multi-locale publishing
+(language-settings, 2026-07-21)", before "Future Enhancements". All SHIPPED behavior only
+(auto-translate / change-site-language are explicitly called out as greyed placeholders):
+- publish-time persistence: the single `publishedContent` object feeding both row writes and the
+  export, presence-gated ⇒ monolingual zero-diff; the verify-dns `localeConfig` pass-through;
+- the ruling-10 "non-null ≠ multi-locale" note;
+- the v1-frozen / v2-live asset table + the content-hash pin;
+- the `window.__lessgoLocales` shape (`slug`, `style`, SSR-only `basePath`), the two emitters,
+  **why `basePath` is server-stamped** (v2's hostname gate excludes `*.vercel.app` ⇒ preview QA
+  would rebuild `/nl/p/{slug}`), and **why the SSR script src is relative** (an absolute prod URL
+  would load the wrong build on a preview deployment);
+- `style:'none'` = no pill AND no geo redirect, hreflang unaffected;
+- the `/p/{slug}` SSR locale routes, the shared `renderPublishedRoot`, the single overlay
+  implementation, and the ISR-preservation note;
+- **the `<html lang>` SSR-vs-blob delta** as a flagged known gap (blob docs DO carry per-locale
+  `lang`; the `/p` pages cannot — App Router root-layout constraint);
+- **the republish caveat** as its own flagged block (pre-feature blobs keep frozen v1; pre-feature
+  rows lack `localeConfig`/`localeContent` ⇒ `/p/{slug}/nl` 404s, no switcher, verify-dns regen
+  degrades to today's behavior; one republish heals all three).
+
+**`src/lib/i18n/README.md`** (new) — module table; the overlay content model; the ruling-10
+invariant; the two name maps and why prompts get exonyms; the two generation seams
+(`resolvePromptLanguage` first-gen vs `readDefaultLocale` regen) and why they differ; the
+publish/serve seams; the **asset-immutability rule** for the switcher; and a Known-limits list:
+work multi-select declares only `languages[0]`; unmapped labels (Hindi) generate but declare no
+`defaultLocale`; work regen with a bare code renders `## OUTPUT LANGUAGE — en`; work/granth get
+no onboarding picker (Site Settings instead); no translation; no per-locale meta / RTL /
+base-swap; no per-item or nav-label localization.
+
+**`docs/architecture/copyEngines.md`** — new "Output language" section: the directive is emitted
+unconditionally (English included) and why; English-exonym values; the two sources
+(client-sent validated code for first-gen, server-read `defaultLocale` for regen) and why they
+differ; the work reconcile rule; pointer to the i18n README.
+
+## Acceptance sweep (spec `## Acceptance`, line by line)
+
+| # | Acceptance | Status | Satisfied by |
+|---|---|---|---|
+| 1 | Fresh monolingual project can open Site Settings → Languages and **add a language** | **DONE (automated)** | Phase 2: `LanguagesPanel.tsx` ships with NO `isMultiLocale` gate; `languagesPanel.test.tsx` "monolingual project can add a language" + the Languages rail row in `SeoSettingsModal.tsx` (reachable even with no pages). Phase 2b adds the header Site-settings → Languages entry. Founder signed off phases 2 + 2b at the human gate. |
+| 2 | Non-English onboarding ⇒ base copy in that language, `defaultLocale` reflects it ("picked English → English") | **CODE DONE / QUALITY = FOUNDER QA** | Mechanism fully pinned: `identityLanguage.test.tsx` (exact saveDraft body, call-absence for `en`, explicit `null` on revert), `payloadLanguage.test.ts` (**all 7** audience call sites carry `language`, incl. the 3 inline fan-out bodies + the resume paths), `workLocale.test.ts` (4 work save sites), `projectLocale.test.ts`, `product|service/copyPrompt.language.test.ts`, the two audience route tests (body `nl` ⇒ Dutch directive in the built prompt; garbage ⇒ `English`, raw string appears nowhere), `scopedRegen.test.ts` (regen + work reconcile). **NOT tickable in-pipeline:** whether a real LLM actually WRITES Dutch/English on command → **founder merge-gate QA**. |
+| 3 | No language globe in the editor header; Languages reachable only via Site Settings | **DONE (automated)** | Phase 2: `LocaleSettings.tsx` deleted, `EditHeader.tsx` mount removed; `localeControls.visibility.test.tsx` asserts no globe at any locale state and that `LanguageToggle` stays multi-locale-gated; zero remaining `LocaleSettings` imports (grep). |
+| 4 | Published page **and** `/p/{slug}` preview both show a working switcher; "None" hides it | **DONE (automated) — with the republish caveat** | Blob: `htmlGenerator.test.ts` + `i18nStaticExport.test.ts` (v2 src, config carries `slug`/`style`, `none` ⇒ no script/config but hreflang intact). SSR: `publishedLocale.test.ts` + the `/p` route wiring (locale routes, switcher injection, hreflang). Behavior: `switcherBehaviors.v2.test.ts` (basePath matrix) and **`e2e/i18n-switcher.spec.ts`, now actually registered and passing** — pins `/p/{slug}` ⇒ `/p/{slug}/nl` (never `/nl/p/{slug}`) and `none` ⇒ no pill, no redirect. ⚠️ **Holds for pages published AFTER this feature**; older blobs keep the frozen v1 and older rows carry no `localeConfig` ⇒ one republish required. No automated test renders the `/p` SSR pages end-to-end against a real published row → founder-QA item. |
+| 5 | "Change site language" visibly greyed with a coming-soon affordance (not missing, not fake) | **DONE (automated)** | Phase 2: the default card's change-language affordance and the Auto-translate row are wrapped in `<Coming>` with `aria-disabled`; `languagesPanel.test.tsx` asserts both render present-but-greyed. Founder saw them at the phase-2 gate (recorded deviation: the mock draws Auto-translate live; we ship it greyed per the greyed-placeholder rule). |
+| 6 | Monolingual / single-locale projects: zero visual/storage diff (regression test) | **DONE (automated)** | Store: `i18nStoreState.test.ts` (never-engaged save OMITS `localeConfig`; engaged-without-`switcherStyle` serializes without the key; `setSwitcherStyle` no-ops with a null config). Onboarding: `identityLanguage.test.tsx` asserts the saveDraft **call never fires** for `en` (call absence, not key absence). Publish: `publish/route.test.ts` — monolingual persisted content has NEITHER key. Export: `htmlGenerator.test.ts` byte-identical pin for absent/single config; the `i18nStaticExport.test.ts:224` inert assertion was fixed to target v2. SSR: non-locale requests take the exact pre-change path (ISR untouched — `headers()` sits behind the multi-locale + style gates). |
+
+### Left to founder QA at the merge gate (NOT ticked here)
+
+1. **Real-LLM language spot check** (acceptance 2's quality half): Dutch one-liner + English pick
+   ⇒ English copy; `nl` pick ⇒ Dutch copy. Product AND service. Mocks cannot prove this.
+2. **`/p` SSR end-to-end on the preview host** (acceptance 4's serving half): direct-load
+   `/p/{slug}/nl`; pill click on `/p/{slug}`; Switcher style = None ⇒ no pill on **both** the blob
+   and SSR surfaces (dual-renderer parity). Preview QA specifically exercises the `*.vercel.app`
+   host that motivated the server-stamped `basePath`.
+3. **Nested `confirmDialog` portal stacking** above the settings `Dialog` (z-index / focus trap) —
+   phase-2 carry, not provable in jsdom.
+4. **Custom-domain bilingual smoke** if a bilingual custom-domain site exists (the e2e covers the
+   path shapes, not a live custom domain).
+
+## Verification (verbatim tails)
+
+`npx tsc --noEmit`
+```
+TSC_EXIT=0
+```
+(no output = clean)
+
+`npm run test:run`
+```
+ Test Files  299 passed | 1 skipped (300)
+      Tests  4833 passed | 15 skipped (4848)
+   Duration  76.62s
+```
+Phase-6 baseline was 4829 passed / 15 skipped; +4 = the 3 removal-guard tests + the freeze
+content-hash test. No regressions.
+
+`npm run lint`
+```
+LINT_EXIT=0     (errors: 0)
+```
+Only pre-existing warnings remain (`@next/next/no-img-element` across template blocks, one
+`react-hooks/exhaustive-deps` in `ph-provider.tsx`) — none in files this feature touched.
+This matters: lint runs in the pre-push hook and has blocked a push before.
+
+`npm run build` — green (full pipeline: `build:published-css` → `build:assets` → `next build`).
+Asset hashes across the rebuild:
+```
+169c32dde19ccc7709e636460518c226 *public/assets/switcher.v1.js   (UNCHANGED — matches phase 5)
+afdab6a4033062b3034134563c78f42d *public/assets/switcher.v2.js
+```
+The frozen v1 asset is byte-identical after a full rebuild ⇒ no already-published blob can
+change behavior.
+
+## Deviations from the plan
+
+1. **Extra file touched:** `src/lib/staticExport/switcherBehaviors.v2.test.ts` (owed item 4, the
+   optional freeze hardening). Assigned to phase 7 by phase 5's carry note and by the phase brief,
+   but not literally on the plan's Files-touched list. Test-only, additive.
+2. **`playwright.config.ts` `public` project reformatted** from a one-line array to a multi-line
+   array plus the allowlist warning comment. Cosmetic, but it puts the trap that caused this owed
+   item in front of the project that was missing the warning.
+3. Nothing else. No production behavior outside the `removeLocale` guard changed in this phase.
+
+## Residual risk for the merge gate
+
+- The four founder-QA items above (real-LLM quality + `/p` SSR on the preview host are the two
+  that matter).
+- The republish caveat is a **support/comms** item, not a bug: existing bilingual customers see no
+  change until they republish once.
+- `<html lang>` on `/p/{slug}/nl` stays `en` (App Router root-layout constraint). Documented;
+  blob-served pages are correct.
+
+## E2E (`npm run test:e2e`) — real results
+
+### Run A — the `public` project (the one this phase edited), full
+
+`E2E_PORT=3411 npx playwright test --project=public`
+
+```
+  ✓  12 [public] › e2e\i18n-switcher.spec.ts:93:7  › host-root document: the pill renders both locales and NL goes to /nl (276ms)
+  ✓  13 [public] › e2e\i18n-switcher.spec.ts:107:7 › /p/{slug} document: NL goes to /p/{slug}/nl — never /nl/p/{slug} (141ms)
+  ✓  14 [public] › e2e\i18n-switcher.spec.ts:120:7 › the chosen locale is remembered (localStorage) (144ms)
+  ✓  15 [public] › e2e\i18n-switcher.spec.ts:129:7 › geo/preference auto-redirect respects the base path (85ms)
+  ✓  16 [public] › e2e\i18n-switcher.spec.ts:141:7 › switcherStyle 'none': no pill AND no geo redirect (604ms)
+  ...
+  3 failed
+  26 passed (7.5m)
+```
+
+**All 5 i18n-switcher tests pass through the real config** — the registration works.
+`render.spec.ts`, `generation.spec.ts`, `ui-isolation`, `xfo-headers`, `forms-forgery` all green.
+
+The 3 failures are `parity.spec.ts` on the **atelier / atelier2** templates only:
+```
+1) atelier: edit↔published visual parity per section
+   Error: atelier/header [#0]: edit↔published diff 4.94% exceeds 3%
+2) atelier2: edit↔published visual parity per section        (3.0m timeout)
+3) atelier2 parityBreak negative control                     (3.0m timeout)
+```
+meridian + hearth parity pass, and both parity **negative controls** that do run (meridian,
+atelier) pass. Not attributable to this phase: nothing here touches an atelier block, a published
+renderer, or any template CSS — the whole phase is one store guard, one dead re-export, two
+comments, a test-only hash pin, config registration and docs. **Honest caveat: I did not run a
+baseline on `main`**, so "pre-existing" is inference from the diff, not measurement. The
+orchestrator should confirm against the last known-good `next`/`main` e2e run.
+
+### Run B — the full suite (`npm run test:e2e`), for completeness
+
+```
+  15 failed
+  9 skipped
+  26 did not run
+  111 passed (52.5m)
+```
+Failures: the 3 atelier parity ones above + 12 **authed** specs (billing-beta, cms-authoring,
+dashboard-redirects / rollups-inbox / shell / workspace, editor-preview-mode, link-picker,
+toolbar-regen, work-binding, work-onboarding, workPlan). The authed failures are seeding /
+180s-timeout failures waiting for UI that never appeared (e.g. `waiting for
+getByTestId('journey-next')`, `seedBoundAtelier2Preview` throwing) — the local-env classic for
+specs that need real seeded projects. "26 did not run" = `describe.serial` groups skipped after
+their first failure. None of them touch a locale/i18n/publish-locale surface. Again: not baselined
+against `main`, so flagged rather than dismissed.

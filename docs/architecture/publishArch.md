@@ -1055,6 +1055,137 @@ the rewrite target), the window doesn't exist and the UI copy should be TIGHTENE
 
 ---
 
+## Multi-locale publishing (language-settings, 2026-07-21)
+
+How a bilingual site is published, served, and switched. Everything below describes
+**shipped** behavior. (Auto-translate and "change the site language" are NOT shipped —
+they are greyed `<Coming>` placeholders in Site Settings → Languages, pending Spec 2.)
+
+### The data that gets published
+
+`Project.content` carries the locale layer: `localeConfig`
+(`{ locales, defaultLocale, switcherStyle? }`) and `localeContent` (per-locale TEXT
+overlays; base `content` IS the default locale's copy).
+
+`POST /api/publish` builds ONE enriched object and uses it for **both** the
+`PublishedPage` row write and the static export:
+
+```ts
+publishedContent = localeConfig
+  ? { ...content, localeConfig, ...(overlay ? { localeContent: sanitizeLocaleOverlay(overlay) } : {}) }
+  : content;   // same object reference — monolingual rows are byte-identical
+```
+
+- **Presence-gated ⇒ zero-diff.** A project with no `localeConfig` writes exactly the
+  content it always did: no new keys on `PublishedPage.content`.
+- Persisting it is what makes the `/p/{slug}` SSR fallback and the custom-domain go-live
+  regen (`/api/domains/verify-dns`, which now passes
+  `localeConfig: page.content?.localeConfig ?? null`) locale-aware — previously
+  `localeConfig` was only ever handed to `renderPublishedExport` and never stored.
+- `switcherStyle` lives INSIDE `LocaleConfig`; there is no parallel generator param.
+
+**Note on `LocaleConfig` (ruling 10): non-null ≠ multi-locale.**
+`{ locales: ['nl'], defaultLocale: 'nl' }` is legal and means "this site's declared
+language is Dutch". Every multi-locale surface (switcher, locale docs, hreflang, locale
+routes) gates on `isMultiLocale()`, never on `localeConfig != null`.
+
+### The switcher asset: v1 is FROZEN, v2 is live
+
+Same immutable-asset contract as `form.v*.js` / `a.v*.js` (`scripts/buildAssets.js`):
+
+| File | Source | Status |
+|---|---|---|
+| `public/assets/switcher.v1.js` | `scripts/legacy/switcher.v1.src.js` | **FROZEN** — already-published blobs load it forever; never edit |
+| `public/assets/switcher.v2.js` | `src/lib/staticExport/switcherBehaviors.js` | live; what new publishes embed |
+
+The v1 source is byte-pinned by a content-hash assertion in
+`src/lib/staticExport/switcherBehaviors.v2.test.ts` — an accidental edit fails the suite
+loudly instead of silently changing behavior for every old blob. Any semantic change to
+the switcher ships as a NEW filename (`switcher.v3.js`), never in place.
+
+### `window.__lessgoLocales` — the stamped config
+
+```jsonc
+{
+  "locales": ["en", "nl"],
+  "defaultLocale": "en",
+  "current": "nl",          // the locale of THIS document
+  "slug": "acme",           // v2: lets the runtime derive its base path
+  "style": "dropdown",      // v2: 'dropdown' | 'none'
+  "basePath": "/p/acme"     // SSR ONLY — server-stamped (see below); absent on blobs
+}
+```
+
+Two emitters, deliberately identical (dual-renderer parity):
+
+- **Blob** — `htmlGenerator.ts` stamps the first five keys and references
+  `{assetBase}/assets/switcher.v2.js` (ABSOLUTE: blobs are served from publish
+  subdomains and custom domains, where a relative `/assets/*` would 404).
+- **SSR (`/p/{slug}`)** — `src/lib/i18n/publishedLocale.ts` (`switcherTagsForSsr`) adds
+  `basePath` and uses a **RELATIVE** `/assets/switcher.v2.js` src: that document is
+  served by the app itself on whatever host the visitor used, so a relative src always
+  resolves against the deployment actually serving the page (preview deployments
+  included — an absolute prod URL would load the wrong build).
+
+**Why `basePath` is server-stamped on the SSR path.** v2's client-side detection is
+hostname-gated to `lessgo.ai` / `lessgo.site` / `localhost`. On a preview deployment
+(`*.vercel.app/p/{slug}`) that gate yields `basePath=''`, so the pill would rebuild
+`/nl/p/{slug}` — a 404, in exactly the QA sandbox we rely on. The server knows its mount
+path for certain (`resolveSsrBasePath`: published subdomain or custom domain ⇒ `''`
+because middleware rewrote internally; any other host ⇒ `/p/{slug}`), so it stamps it.
+Client detection remains as the fallback for already-published blobs, which stamp none.
+
+### `switcherStyle: 'none'`
+
+"None" means **no automatic locale behavior at all**: `htmlGenerator` omits the entire
+switcher block (config + script), and `switcherTagsForSsr` returns null — so there is no
+pill **and no geo auto-redirect** (a page that silently geo-redirects with no visible way
+back is a support trap). v2 additionally early-returns on `cfg.style === 'none'` as
+defense in depth. **hreflang/canonical emission is unaffected** — SEO does not depend on
+widget style.
+
+### `/p/{slug}` SSR locale routes
+
+`/p/{slug}/[...subpath]` resolves the first segment through `resolvePublishedLocale`
+BEFORE the subpage lookup (mirrors v2's `segAt`: only a declared, NON-default locale
+counts; the default locale has no `/en` doc):
+
+- `/p/{slug}/nl` ⇒ the ROOT content rendered with the `nl` overlay (previously a 404);
+- `/p/{slug}/nl/about` ⇒ the `about` subpage with the `nl` overlay;
+- no locale match ⇒ the exact pre-change code path, byte for byte.
+
+Both `/p` roots render through the shared `src/app/p/[slug]/renderPublishedRoot.tsx`
+helper so the default-locale and locale-root documents cannot drift. Overlays are applied
+by calling the shared `resolveLocaleElements` (`src/lib/i18n/localeContent.ts`) directly —
+the same function `renderPublishedExport` uses. One implementation, no wrapper.
+`generateMetadata` adds `alternates.languages` (reciprocal + `x-default`) when multi-locale.
+
+ISR is preserved: `headers()` (which would opt the route out of static rendering) is
+reached only AFTER the multi-locale + style gates, so a monolingual page never touches it.
+
+### ⚠️ Known gap: `<html lang>` is not per-locale on the SSR path
+
+A genuine SSR-vs-blob delta. Blob documents carry the right `lang` (the generator emits
+the whole document, and `renderPublishedExport` passes `localeConfig.defaultLocale` for
+the default doc and the locale for each locale doc). The `/p/{slug}` SSR pages do NOT:
+`<html lang>` comes from the App Router **root layout**, which a page segment cannot
+override. So `/p/{slug}/nl` renders Dutch content under `lang="en"`. Accepted — the `/p`
+path is the preview/fallback surface, not the canonical serving surface; hreflang and the
+switcher config are correct on both.
+
+### ⚠️ Republish caveat (pages published BEFORE this feature)
+
+Old blobs and old rows are untouched by design. Until a page is **republished once**:
+
+- its blob embeds the frozen `switcher.v1.js` — still broken on the `/p/{slug}` path
+  (that is the immutability contract working as intended, not a regression);
+- its `PublishedPage.content` carries no `localeConfig`/`localeContent`, so the SSR locale
+  routes have no data source: **`/p/{slug}/nl` 404s and no switcher is injected**, and the
+  verify-dns go-live regen passes `null` (i.e. exactly today's behavior);
+- one republish heals all three.
+
+---
+
 ## Future Enhancements
 
 1. **Optimize Tailwind CSS**: Generate minimal CSS with only used classes

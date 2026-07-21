@@ -66,6 +66,14 @@ export const createI18nActions = (set: any, get: () => EditStore) => {
       set((s: any) => {
         const cfg = s.localeConfig;
         if (!cfg) return;
+        // The site's DEFAULT locale is not removable — it IS the declaration of
+        // the site language, and base `content` is its copy. Enforced HERE (not
+        // only in LanguagesPanel, which hides the menu on the default card):
+        // these are public store actions, so a future caller removing a
+        // non-English default would otherwise fall into the drop-to-single
+        // branch and erase the declaration — ruling-10 data loss through a
+        // different door.
+        if (code === cfg.defaultLocale) return;
         const remaining: string[] = cfg.locales.filter((l: string) => l !== code);
         // Drop the removed locale's overlay so it never rides a save.
         if (s.localeContent && s.localeContent[code]) {
