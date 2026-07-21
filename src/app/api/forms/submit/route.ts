@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { ConvertKitIntegration, mapFormDataToSubscriber } from '@/lib/integrations/convertkit';
 import { sendLeadNotification } from '@/lib/email/sendLeadNotification';
 import { resolveOwnerEmail } from '@/lib/email/resolveOwnerEmail';
-import { sendVisitorAutoReply } from '@/lib/email/sendVisitorAutoReply';
+import { sendVisitorAutoReply, pickVisitorEmail } from '@/lib/email/sendVisitorAutoReply';
 import { BLOG_SUBSCRIBE_FORM_ID } from '@/lib/blog/buildBlogPages';
 import { FormSubmissionSchema, sanitizeForLogging } from '@/lib/validation';
 import { isServingPublishState } from '@/lib/publishState';
@@ -314,80 +314,115 @@ async function formSubmitHandler(request: NextRequest) {
         (projTitle && projTitle !== 'Untitled Project' ? projTitle : '') ||
         'Your website';
 
-      // Set when the owner's Clerk email resolved; the auto-reply needs it as
-      // Reply-To and is skipped without it.
-      let resolvedOwnerEmail: string | null = null;
+      // lead-emails review fix 3 — ENV SHORT-CIRCUIT. Sending is opt-in per
+      // environment (sendEmail returns 'skipped' with no RESEND_API_KEY). Gate the
+      // WHOLE block here, not just the send: otherwise every submission pays a live
+      // Clerk `getUser` it can never use, and a Clerk hiccup would write notifyError
+      // on rows in an environment where email is deliberately switched off. With the
+      // key absent, "unconfigured" must mean a clean row — exactly as it did before
+      // the owner-routing change.
+      if (!process.env.RESEND_API_KEY) {
+        console.log('[forms/submit] email disabled (RESEND_API_KEY unset):', {
+          formId,
+          pageId: publishedPageId,
+        });
+      } else {
+        // Set when the owner's Clerk email resolved; the auto-reply needs it as
+        // Reply-To and is skipped without it.
+        let resolvedOwnerEmail: string | null = null;
 
-      try {
-        // Owner's Clerk email is the recipient. A lookup failure is an outcome,
-        // never an exception — the lead row is already saved either way.
-        const ownerEmail = await resolveOwnerEmail(ownerUserId);
-        if (!('error' in ownerEmail)) {
-          resolvedOwnerEmail = ownerEmail.email;
-        }
-        const outcome = 'error' in ownerEmail
-          ? { status: 'failed' as const, error: ownerEmail.error }
-          : await sendLeadNotification({
-              formName,
-              data: data as Record<string, string>,
-              fields: formConfig?.fields,
-              replyTo: (data as any)?.email,
-              pageId: publishedPageId,
-              to: ownerEmail.email,
-              businessName,
+        try {
+          // Owner's Clerk email is the recipient. A lookup failure is an outcome,
+          // never an exception — the lead row is already saved either way.
+          const ownerEmail = await resolveOwnerEmail(ownerUserId);
+          if (!('error' in ownerEmail)) {
+            resolvedOwnerEmail = ownerEmail.email;
+          }
+          // lead-emails review fix 2 — Reply-To on the OWNER notification. `data.email`
+          // alone only works for the conventional `email` key; FormBuilder-authored
+          // fields get ids like `field-1699…`, so the owner's lead mail arrived with NO
+          // Reply-To. Reuse the auto-reply's picker (first `type: 'email'` field → its
+          // value) so replying to a lead works for builder-made forms too. `data.email`
+          // stays as the fallback, so behaviour is unchanged wherever it exists today.
+          const visitorReplyTo =
+            pickVisitorEmail(autoReplyForm, data as Record<string, unknown>) ??
+            (data as any)?.email;
+          const outcome = 'error' in ownerEmail
+            ? { status: 'failed' as const, error: ownerEmail.error }
+            : await sendLeadNotification({
+                formName,
+                data: data as Record<string, string>,
+                fields: formConfig?.fields,
+                replyTo: visitorReplyTo,
+                pageId: publishedPageId,
+                to: ownerEmail.email,
+                businessName,
+              });
+          if ('error' in ownerEmail) {
+            console.warn('[forms/submit] owner email unresolved; notification skipped:', {
+              userId: ownerUserId.substring(0, 8) + '...',
+              reason: ownerEmail.error,
             });
-        if ('error' in ownerEmail) {
-          console.warn('[forms/submit] owner email unresolved; notification skipped:', {
-            userId: ownerUserId.substring(0, 8) + '...',
-            reason: ownerEmail.error,
-          });
+          }
+          if (outcome.status === 'sent') {
+            await prisma.formSubmission.update({
+              where: { id: submission.id },
+              data: { notifiedAt: new Date() },
+            });
+          } else if (outcome.status === 'failed') {
+            await prisma.formSubmission.update({
+              where: { id: submission.id },
+              data: { notifyError: outcome.error.slice(0, 300) },
+            });
+          }
+          // 'skipped' → leave notifiedAt/notifyError null (feature unconfigured)
+        } catch (notifyErr) {
+          // Helper never throws; a failed status-write must not 500 a saved lead.
+          console.warn('[forms/submit] notify outcome write failed (non-fatal):', notifyErr);
         }
-        if (outcome.status === 'sent') {
-          await prisma.formSubmission.update({
-            where: { id: submission.id },
-            data: { notifiedAt: new Date() },
-          });
-        } else if (outcome.status === 'failed') {
-          await prisma.formSubmission.update({
-            where: { id: submission.id },
-            data: { notifyError: outcome.error.slice(0, 300) },
-          });
-        }
-        // 'skipped' → leave notifiedAt/notifyError null (feature unconfigured)
-      } catch (notifyErr) {
-        // Helper never throws; a failed status-write must not 500 a saved lead.
-        console.warn('[forms/submit] notify outcome write failed (non-fatal):', notifyErr);
-      }
 
-      // Visitor auto-reply (lead-emails phase 2). ON by default; disabled per form
-      // via `autoReply.enabled === false`. Same env gate as the owner notification
-      // (no RESEND_API_KEY ⇒ 'skipped'). Outcome is LOGGED ONLY — no DB column:
-      // notifiedAt/notifyError keep their owner-notification meaning (Decision 4).
-      // Skipped when the owner email did not resolve: without an owner Reply-To a
-      // visitor's reply would black-hole, so we say nothing rather than something
-      // unanswerable.
-      try {
-        if (!resolvedOwnerEmail) {
-          console.warn('[forms/submit] auto-reply skipped: owner email unresolved', {
-            formId,
-            pageId: publishedPageId,
-          });
-        } else {
-          const autoReplyOutcome = await sendVisitorAutoReply({
-            form: autoReplyForm,
-            data: data as Record<string, unknown>,
-            businessName,
-            ownerEmail: resolvedOwnerEmail,
-          });
-          console.log('[forms/submit] auto-reply outcome:', {
-            status: autoReplyOutcome.status,
-            formId,
-            pageId: publishedPageId,
-          });
+        // Visitor auto-reply (lead-emails phase 2). ON by default; disabled per form
+        // via `autoReply.enabled === false`. Outcome is LOGGED ONLY — no DB column:
+        // notifiedAt/notifyError keep their owner-notification meaning (Decision 4).
+        // Skipped when the owner email did not resolve: without an owner Reply-To a
+        // visitor's reply would black-hole, so we say nothing rather than something
+        // unanswerable.
+        try {
+          if (formId === BLOG_SUBSCRIBE_FORM_ID) {
+            // lead-emails review fix 1 — NEVER auto-reply to a newsletter subscribe.
+            // The blog-subscribe form is synthesized into the published blob only
+            // (buildBlogPages), so it never exists in Project.content(.finalContent)
+            // .forms: `autoReplyForm` is null, the ON-by-default rule would apply, and
+            // the subscriber would get "…received your message and will reply soon"
+            // for a message nobody sent — with no way for the owner to turn it off,
+            // since this form never appears in FormBuilder. Owner notification and the
+            // blogSubscriber upsert above are unaffected.
+            console.log('[forms/submit] auto-reply skipped: blog subscribe form', {
+              formId,
+              pageId: publishedPageId,
+            });
+          } else if (!resolvedOwnerEmail) {
+            console.warn('[forms/submit] auto-reply skipped: owner email unresolved', {
+              formId,
+              pageId: publishedPageId,
+            });
+          } else {
+            const autoReplyOutcome = await sendVisitorAutoReply({
+              form: autoReplyForm,
+              data: data as Record<string, unknown>,
+              businessName,
+              ownerEmail: resolvedOwnerEmail,
+            });
+            console.log('[forms/submit] auto-reply outcome:', {
+              status: autoReplyOutcome.status,
+              formId,
+              pageId: publishedPageId,
+            });
+          }
+        } catch (autoReplyErr) {
+          // Helper never throws; this is belt-and-braces so a saved lead can't 500.
+          console.warn('[forms/submit] auto-reply failed (non-fatal):', autoReplyErr);
         }
-      } catch (autoReplyErr) {
-        // Helper never throws; this is belt-and-braces so a saved lead can't 500.
-        console.warn('[forms/submit] auto-reply failed (non-fatal):', autoReplyErr);
       }
 
       // A09: Security Logging - Safe success logging

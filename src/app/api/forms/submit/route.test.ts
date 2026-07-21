@@ -12,7 +12,7 @@
 // BODY still forges `userId: 'user_1'` on purpose — every assertion expects the
 // DERIVED owner `'owner_1'` (from PublishedPage.userId) instead. That asymmetry IS
 // the forged-id regression case; do not "fix" the body.
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -31,7 +31,13 @@ vi.mock('@/lib/email/resolveOwnerEmail', () => ({ resolveOwnerEmail: vi.fn() }))
 // (src/lib/email/sendVisitorAutoReply.test.ts) covers rendering/sanitization; this
 // file only pins the ROUTE's wiring (called after the owner notification, with the
 // stored form config, and skipped when the owner email is unresolved).
-vi.mock('@/lib/email/sendVisitorAutoReply', () => ({ sendVisitorAutoReply: vi.fn() }));
+// NOTE: only the SENDER is mocked. `pickVisitorEmail` keeps its real implementation
+// because the route now uses it to resolve the owner notification's Reply-To
+// (review fix 2) — mocking it away would make that test assert nothing.
+vi.mock('@/lib/email/sendVisitorAutoReply', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/email/sendVisitorAutoReply')>();
+  return { ...actual, sendVisitorAutoReply: vi.fn() };
+});
 vi.mock('@/lib/integrations/convertkit', () => ({
   ConvertKitIntegration: vi.fn(),
   mapFormDataToSubscriber: vi.fn(() => ({})),
@@ -50,6 +56,7 @@ import { sendLeadNotification } from '@/lib/email/sendLeadNotification';
 import { resolveOwnerEmail } from '@/lib/email/resolveOwnerEmail';
 import { sendVisitorAutoReply } from '@/lib/email/sendVisitorAutoReply';
 import { checkLimit } from '@/lib/planManager';
+import { BLOG_SUBSCRIBE_FORM_ID } from '@/lib/blog/buildBlogPages';
 import { POST } from './route';
 
 const db = prisma as any;
@@ -73,9 +80,17 @@ function makeReq(body: any) {
 const BODY = { formId: 'contact', data: { email: 'a@b.com', name: 'Asha' }, userId: 'user_1', publishedPageId: 'page_1' };
 const PAGE = { userId: 'owner_1', projectId: 'proj_1', publishState: 'published' };
 
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
 describe('/api/forms/submit — notify outcome row flag (F30b)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // lead-emails review fix 3: the route now short-circuits the whole email block
+    // (Clerk lookup included) when RESEND_API_KEY is unset. These suites exercise the
+    // configured path, so the key must be present.
+    vi.stubEnv('RESEND_API_KEY', 're_test');
     db.publishedPage.findUnique.mockResolvedValue(PAGE);
     db.project.findUnique.mockResolvedValue(null); // no formConfig; keeps the path minimal
     db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
@@ -132,6 +147,10 @@ describe('/api/forms/submit — notify outcome row flag (F30b)', () => {
 describe('/api/forms/submit — monthly submission cap (pricing-v2 phase 2)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // lead-emails review fix 3: the route now short-circuits the whole email block
+    // (Clerk lookup included) when RESEND_API_KEY is unset. These suites exercise the
+    // configured path, so the key must be present.
+    vi.stubEnv('RESEND_API_KEY', 're_test');
     db.publishedPage.findUnique.mockResolvedValue(PAGE);
     db.project.findUnique.mockResolvedValue(null);
     db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
@@ -179,6 +198,10 @@ describe('/api/forms/submit — monthly submission cap (pricing-v2 phase 2)', ()
 describe('/api/forms/submit — server-side owner derivation (secrets-forms-security phase 1)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // lead-emails review fix 3: the route now short-circuits the whole email block
+    // (Clerk lookup included) when RESEND_API_KEY is unset. These suites exercise the
+    // configured path, so the key must be present.
+    vi.stubEnv('RESEND_API_KEY', 're_test');
     db.publishedPage.findUnique.mockResolvedValue(PAGE);
     db.project.findUnique.mockResolvedValue(null);
     db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
@@ -286,6 +309,10 @@ describe('/api/forms/submit — server-side owner derivation (secrets-forms-secu
 describe('/api/forms/submit — owner-email routing (lead-emails phase 1)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // lead-emails review fix 3: the route now short-circuits the whole email block
+    // (Clerk lookup included) when RESEND_API_KEY is unset. These suites exercise the
+    // configured path, so the key must be present.
+    vi.stubEnv('RESEND_API_KEY', 're_test');
     db.publishedPage.findUnique.mockResolvedValue({ ...PAGE, title: 'Naayom Farms' });
     db.project.findUnique.mockResolvedValue({ content: null, title: 'Naayom' });
     db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
@@ -361,6 +388,10 @@ describe('/api/forms/submit — visitor auto-reply wiring (lead-emails phase 2)'
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // lead-emails review fix 3: the route now short-circuits the whole email block
+    // (Clerk lookup included) when RESEND_API_KEY is unset. These suites exercise the
+    // configured path, so the key must be present.
+    vi.stubEnv('RESEND_API_KEY', 're_test');
     db.publishedPage.findUnique.mockResolvedValue({ ...PAGE, title: 'Naayom Farms' });
     db.project.findUnique.mockResolvedValue({ content: null, title: 'Naayom' });
     db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
@@ -447,5 +478,142 @@ describe('/api/forms/submit — visitor auto-reply wiring (lead-emails phase 2)'
     await POST(makeReq(BODY));
 
     expect(order).toEqual(['owner', 'visitor']);
+  });
+});
+
+// ── Review-round fixes ──────────────────────────────────────────────────────────
+
+// REVIEW FIX 1 (blocking regression). The blog-subscribe form is synthesized into
+// the published blob only (buildBlogPages), so it never exists in the project's
+// forms map — the ON-by-default rule would fire and send a NEWSLETTER subscriber
+// "…received your message and will reply soon", with no owner-facing switch to turn
+// it off (it never appears in FormBuilder). The blog pilot is live on a custom
+// domain, so this must stay pinned.
+describe('/api/forms/submit — blog-subscribe never gets a lead auto-reply (review fix 1)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv('RESEND_API_KEY', 're_test');
+    db.publishedPage.findUnique.mockResolvedValue({ ...PAGE, title: 'Naayom Farms' });
+    db.project.findUnique.mockResolvedValue({ content: null, title: 'Naayom' });
+    db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
+    db.formSubmission.update.mockResolvedValue({ id: 'sub_1' });
+    db.formSubmission.count.mockResolvedValue(3);
+    db.blogSubscriber.upsert.mockResolvedValue({});
+    limit.mockResolvedValue({ allowed: true, limit: 25, current: 3 });
+    notify.mockResolvedValue({ status: 'sent' });
+    resolveOwner.mockResolvedValue({ email: OWNER_EMAIL });
+    autoReply.mockResolvedValue({ status: 'sent' });
+  });
+
+  it('does NOT auto-reply to a blog-subscribe submission', async () => {
+    const res: any = await POST(
+      makeReq({ ...BODY, formId: BLOG_SUBSCRIBE_FORM_ID, data: { email: 'reader@example.com' } })
+    );
+
+    expect(res.__body.success).toBe(true);
+    expect(autoReply).not.toHaveBeenCalled();
+    // …while everything else about a subscribe is untouched:
+    expect(db.blogSubscriber.upsert).toHaveBeenCalledTimes(1);
+    expect(notify).toHaveBeenCalledTimes(1); // owner notification unchanged
+    expect(db.formSubmission.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('DOES auto-reply to an ordinary form submission (the guard is formId-scoped)', async () => {
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__body.success).toBe(true);
+    expect(autoReply).toHaveBeenCalledTimes(1);
+    expect(db.blogSubscriber.upsert).not.toHaveBeenCalled();
+  });
+});
+
+// REVIEW FIX 2. FormBuilder-authored fields get generated ids (`field-1699…`), so
+// the previous `replyTo: data.email` resolved to undefined and the owner's lead mail
+// had NO Reply-To. The route now reuses the auto-reply's `pickVisitorEmail` (real
+// implementation — see the module mock at the top of this file).
+describe('/api/forms/submit — owner Reply-To for builder-made forms (review fix 2)', () => {
+  const BUILDER_FORM = {
+    id: 'contact',
+    name: 'Contact',
+    fields: [
+      { id: 'field-1699000000001', type: 'text', label: 'Your name' },
+      { id: 'field-1699000000002', type: 'email', label: 'Email address' },
+    ],
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv('RESEND_API_KEY', 're_test');
+    db.publishedPage.findUnique.mockResolvedValue({ ...PAGE, title: 'Naayom Farms' });
+    db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
+    db.formSubmission.update.mockResolvedValue({ id: 'sub_1' });
+    db.formSubmission.count.mockResolvedValue(3);
+    limit.mockResolvedValue({ allowed: true, limit: 25, current: 3 });
+    notify.mockResolvedValue({ status: 'sent' });
+    resolveOwner.mockResolvedValue({ email: OWNER_EMAIL });
+    autoReply.mockResolvedValue({ status: 'skipped' });
+  });
+
+  it('resolves Reply-To from the typed email field when its id is NOT "email"', async () => {
+    db.project.findUnique.mockResolvedValue({
+      content: { finalContent: { forms: { contact: BUILDER_FORM } } },
+      title: 'Naayom',
+    });
+
+    await POST(
+      makeReq({
+        ...BODY,
+        // No conventional `email` key at all — exactly what FormBuilder produces.
+        data: { 'field-1699000000001': 'Asha', 'field-1699000000002': 'visitor@typed.com' },
+      })
+    );
+
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(notify.mock.calls[0][0].replyTo).toBe('visitor@typed.com');
+  });
+
+  it('is unchanged for forms with a literal "email" key and no stored config', async () => {
+    db.project.findUnique.mockResolvedValue({ content: null, title: 'Naayom' });
+
+    await POST(makeReq(BODY));
+
+    expect(notify.mock.calls[0][0].replyTo).toBe('a@b.com');
+  });
+});
+
+// REVIEW FIX 3. With RESEND_API_KEY unset nothing can be sent, so the route must not
+// spend a live Clerk getUser per submission — and a Clerk failure must not stamp
+// notifyError on rows in an environment where email is deliberately switched off.
+describe('/api/forms/submit — email switched off (review fix 3)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv('RESEND_API_KEY', '');
+    db.publishedPage.findUnique.mockResolvedValue({ ...PAGE, title: 'Naayom Farms' });
+    db.project.findUnique.mockResolvedValue({ content: null, title: 'Naayom' });
+    db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
+    db.formSubmission.update.mockResolvedValue({ id: 'sub_1' });
+    db.formSubmission.count.mockResolvedValue(3);
+    limit.mockResolvedValue({ allowed: true, limit: 25, current: 3 });
+    resolveOwner.mockResolvedValue({ email: OWNER_EMAIL });
+  });
+
+  it('never calls Clerk, never sends, and leaves the row unflagged', async () => {
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__body.success).toBe(true);
+    expect(db.formSubmission.create).toHaveBeenCalledTimes(1);
+    expect(resolveOwner).not.toHaveBeenCalled();
+    expect(notify).not.toHaveBeenCalled();
+    expect(autoReply).not.toHaveBeenCalled();
+    expect(db.formSubmission.update).not.toHaveBeenCalled();
+  });
+
+  it('a Clerk outage cannot write notifyError while email is off', async () => {
+    resolveOwner.mockResolvedValue({ error: 'owner lookup failed: clerk down' });
+
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__body.success).toBe(true);
+    expect(db.formSubmission.update).not.toHaveBeenCalled();
   });
 });

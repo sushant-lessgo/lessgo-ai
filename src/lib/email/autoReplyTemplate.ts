@@ -88,6 +88,11 @@ export interface AutoReplyTokens {
  *   like {email} are left LITERAL on purpose (owner typo ⇒ visible, not a data leak).
  * - Missing name collapses gracefully: the token and one leading space are removed,
  *   so "Thanks {name} — X" becomes "Thanks — X" (never "Thanks  — X").
+ * - Replacements use a FUNCTION, never a string. A string replacement makes
+ *   String.replace interpret `$&`, "$`", `$'`, `$1`, `$$` inside the SUBSTITUTED
+ *   value — so a visitor named "$&" would re-emit the literal "{name}" (and, but
+ *   for the sanitizer stripping backticks/quotes, could splice in surrounding
+ *   template text). A replacer function kills that whole class outright.
  */
 export function renderAutoReply(template: string, tokens: AutoReplyTokens): string {
   const source = typeof template === 'string' && template.trim() ? template : '';
@@ -96,9 +101,9 @@ export function renderAutoReply(template: string, tokens: AutoReplyTokens): stri
 
   let out = source;
   out = name
-    ? out.replace(/\{name\}/g, name)
-    : out.replace(/[ \t]*\{name\}/g, '');
-  out = out.replace(/\{business\}/g, business);
+    ? out.replace(/\{name\}/g, () => name)
+    : out.replace(/[ \t]*\{name\}/g, () => '');
+  out = out.replace(/\{business\}/g, () => business);
 
   // Tidy up spacing left behind by a collapsed token (never touches newlines).
   return out.replace(/[ \t]{2,}/g, ' ').replace(/[ \t]+$/gm, '');

@@ -547,3 +547,172 @@ Suite re-run green after reverting both.
   mock-only assertion — but it is the one place the tests reach into store internals.
 - Founder gate still owed (plan): preview end-to-end — custom text arrives in a real inbox,
   toggle-off actually stops the auto-reply, owner notification unaffected.
+
+---
+
+## Review fixes (post whole-diff review, standard tier)
+
+Branch: `feature/lead-emails` (verified via `git branch --show-current` before any edit).
+
+### Files changed
+
+- `src/app/api/forms/submit/route.ts` (modified — fixes 1, 2, 3)
+- `src/app/api/forms/submit/route.test.ts` (modified — regression tests for fixes 1, 2, 3)
+- `src/lib/email/autoReplyTemplate.ts` (modified — fix 4)
+- `src/lib/email/autoReplyTemplate.test.ts` (**NEW** — fixes 4 and 5)
+- `docs/task/lead-emails.audit.md` (this section appended)
+
+Nothing else. `src/lib/email/sendVisitorAutoReply.ts` and `sendVisitorAutoReply.test.ts` were in
+the allowed list but needed no change — `pickVisitorEmail` was already exported, so fix 2 reuses
+it as-is with no duplicated logic.
+(`git status` also shows `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap`
+as modified; `git diff --numstat` reports **zero** changed lines for it — it is a pre-existing
+CRLF/LF normalisation artifact in this worktree, not an edit of mine.)
+
+### FIX 1 — blog-subscribe never gets a lead auto-reply (BLOCKING)
+
+`route.ts`: the auto-reply block now starts with
+`if (formId === BLOG_SUBSCRIBE_FORM_ID) { …log skip… } else if (!resolvedOwnerEmail) …`.
+The constant is imported (it already was, for the `blogSubscriber.upsert`) — no string literal.
+The skip is logged at `console.log` with `formId` + `pageId`. The owner notification, the
+`FormSubmission` row and the `blogSubscriber` upsert are all untouched.
+
+Rationale recorded in a code comment: the blog-subscribe form is synthesized into the published
+blob only (`buildBlogPages.ts`), so it never exists in `Project.content(.finalContent).forms` ⇒
+`autoReplyForm` is `null` ⇒ the ON-by-default rule fired ⇒ a newsletter subscriber received
+"…received your message and will reply soon", with no owner-facing way to disable it (the form
+never appears in FormBuilder).
+
+Regression tests (`route.test.ts`, new describe "blog-subscribe never gets a lead auto-reply"):
+1. blog-subscribe submission ⇒ `sendVisitorAutoReply` NOT called, while `blogSubscriber.upsert`,
+   `sendLeadNotification` and `formSubmission.create` each still ran exactly once.
+2. ordinary form submission ⇒ `sendVisitorAutoReply` IS called (proves the guard is formId-scoped
+   and did not just disable the feature).
+
+**Mutation proof.** Replacing `if (formId === BLOG_SUBSCRIBE_FORM_ID)` with `if (false as boolean)`
+and re-running `npm run test:run -- src/app/api/forms`:
+
+```
+ Test Files  1 failed (1)
+      Tests  1 failed | 34 passed (35)
+
+ FAIL … > does NOT auto-reply to a blog-subscribe submission
+   expect(autoReply).not.toHaveBeenCalled()   → Number of calls: 1
+```
+Guard restored and re-run green.
+
+### FIX 2 — owner-notification Reply-To for FormBuilder-built forms
+
+`route.ts` now computes
+`const visitorReplyTo = pickVisitorEmail(autoReplyForm, data) ?? (data as any)?.email;`
+and passes that as `sendLeadNotification({ replyTo })`. `pickVisitorEmail` is imported from
+`sendVisitorAutoReply.ts` (already exported there) — the picker is shared, not duplicated.
+
+**Deviation / judgment call:** the plan-of-fixes said "reuse the picker"; I kept `data.email` as a
+`??` fallback rather than replacing it outright. Reason: `pickVisitorEmail` returns `null` when a
+form *declares* a typed email field but that field's submitted value is missing/invalid (phase-2
+Deviation 4). Without the fallback, such a submission would silently LOSE a Reply-To it has today.
+With it, behaviour is a strict superset: unchanged wherever `data.email` exists, newly correct for
+builder-made ids.
+
+Tests (new describe "owner Reply-To for builder-made forms"):
+- stored form with fields `field-1699000000001` (text) / `field-1699000000002` (email), body data
+  carrying NO `email` key ⇒ `notify.mock.calls[0][0].replyTo === 'visitor@typed.com'`.
+- literal `email` key + no stored config ⇒ `replyTo === 'a@b.com'` (unchanged).
+
+**Mutation proof:** reverting to `replyTo: (data as any)?.email` fails
+"resolves Reply-To from the typed email field when its id is NOT \"email\"".
+
+Note for the reviewer: `route.test.ts`'s module mock for `@/lib/email/sendVisitorAutoReply` was
+changed to `importOriginal()`-spread + `sendVisitorAutoReply: vi.fn()`, so the REAL
+`pickVisitorEmail` runs in the route test. A blanket factory mock would have made this test inert.
+
+### FIX 3 — no Clerk call when email is switched off
+
+`route.ts`: the owner-notification try AND the auto-reply try are now inside
+`if (!process.env.RESEND_API_KEY) { …log… } else { … }`. With the key absent nothing is resolved,
+nothing is sent, and `notifiedAt`/`notifyError` are never written — "unconfigured" is a clean row
+again, and no `users.getUser` is spent per submission.
+
+Tests (new describe "email switched off"):
+- `RESEND_API_KEY` stubbed to `''` ⇒ `resolveOwnerEmail`, `sendLeadNotification` and
+  `sendVisitorAutoReply` all uncalled, `formSubmission.update` never called, response still 200.
+- Clerk resolver returning `{error}` while email is off ⇒ still no `formSubmission.update`
+  (the exact bug: `notifyError` on rows in an email-disabled env).
+
+Harness change this forced: all five pre-existing `beforeEach` blocks now
+`vi.stubEnv('RESEND_API_KEY', 're_test')` (they exercise the configured path), plus a file-level
+`afterEach(() => vi.unstubAllEnvs())`. No assertion was weakened.
+
+**Mutation proof:** replacing the gate with `if (false as boolean)` fails both new tests.
+
+### FIX 4 — `$&`-class replacement-pattern hole
+
+`autoReplyTemplate.ts` `renderAutoReply` now uses replacer FUNCTIONS for all three substitutions
+(`() => name`, `() => ''`, `() => business`) instead of string replacements, plus a doc-comment
+explaining why. Confirmed the hole was real: `sanitizeNameToken` does not strip `$`, so a visitor
+named `$&` previously emitted the literal `{name}` into the email body.
+
+Tests (`autoReplyTemplate.test.ts`, describe "replacement-pattern safety"): a sanitized `$&` name
+renders as `Thanks $&` and the output contains no `{name}`; a parameterised case asserts exact
+output for `` $& / $$ / $' / $` / $1 `` fed **raw** (bypassing the sanitizer on purpose — the
+renderer must be safe on its own, not only because the sanitizer happens to delete backticks and
+quotes today); one case covers the `{business}` token.
+
+**Mutation proof:** reverting to string replacements fails 6 of the 12 tests in that file.
+
+### FIX 5 — enforceable zero-import invariant
+
+New `autoReplyTemplate.test.ts` describe "zero-import invariant" reads the module's own source
+(`resolve(process.cwd(), 'src/lib/email/autoReplyTemplate.ts')` — `import.meta.url` is not a
+`file:` URL under this vitest transform), strips block and line comments (so the file's own prose
+"Adding an import of Sentry…" cannot trip it), then asserts: no `^import` statement, no
+`import(`/`require(`, no `export … from '…'` re-export. Two anti-inert guards accompany it: one
+test asserts the source actually contains the expected exports (catches an empty/wrong read), and
+one asserts a PLANTED `import * as Sentry from '@sentry/nextjs';` appended to the stripped source
+does match the regex (catches a regex that can never fire).
+
+### Verification (verbatim, run in WORKDIR)
+
+```
+npx tsc --noEmit
+TSC_EXIT=0
+```
+
+```
+npm run test:run
+
+ Test Files  297 passed | 1 skipped (298)
+      Tests  4769 passed | 15 skipped (4784)
+   Duration  94.93s
+EXIT=0
+```
+(Reviewer baseline was 296 files / 4751 passed. +1 file = the new `autoReplyTemplate.test.ts`;
++18 tests = 12 there and 6 in `route.test.ts`, which goes 29 → 35. No regressions.)
+
+```
+npm run lint
+EXIT=0
+```
+(only the pre-existing `@next/next/no-img-element` warnings across template files and the one
+`react-hooks/exhaustive-deps` warning in `src/providers/ph-provider.tsx`; filtering the full
+output for `Error:` / `submit` / `autoReply` returns nothing.)
+
+### Open risks after these fixes
+
+- **Other synthesized/system forms.** Fix 1 closes `blog-subscribe` specifically. Any FUTURE form
+  id that is injected straight into a published blob without a `Project.content.forms` entry will
+  inherit the same ON-by-default auto-reply. The guard is an explicit allow/deny by id, not a
+  structural rule; a structural rule ("only auto-reply when a stored form definition was found")
+  would be safer but would silently disable the auto-reply for legacy frozen `form.v1` blobs,
+  which the spec explicitly requires to keep working. Left as-is deliberately.
+- **Fix 3 changes an env-shaped behaviour**, not just a code path: on an environment that HAS
+  `RESEND_API_KEY`, nothing changes at all. There is no way to unit-test the "no Clerk call in
+  prod" claim beyond the mock assertion above.
+- `$`-patterns are now inert in the renderer, but `sanitizeNameToken` still passes `$` through, so
+  a visitor named `$&` sees `$&` in their own confirmation email. Cosmetic, not a security issue.
+- The zero-import test is a source-text check, so it is blind to a transitive import added via a
+  path alias trick or a `.d.ts`. It catches the realistic mistake (someone adds
+  `import * as Sentry`), which is what the invariant is about.
+- Founder gates from the plan are still owed (live send on preview: owner inbox, Reply-To, custom
+  auto-reply text, toggle-off) — unchanged by this round.
