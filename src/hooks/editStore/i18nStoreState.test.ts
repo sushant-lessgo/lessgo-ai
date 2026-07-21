@@ -299,7 +299,11 @@ describe('i18n Phase 3a — store state layer', () => {
   // ===== Phase-4 fix: engaged flag + clear-contract emission + dirty gate =====
   describe('engaged flag / clear-contract (Phase 4)', () => {
     const realFetch = global.fetch;
-    afterEach(() => { global.fetch = realFetch; });
+    afterEach(() => {
+      global.fetch = realFetch;
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    });
 
     async function captureSaveBody(s: Store): Promise<any> {
       const fetchMock = vi.fn(async () => ({ ok: true, json: async () => ({}) }) as any);
@@ -321,13 +325,16 @@ describe('i18n Phase 3a — store state layer', () => {
     });
 
     it('clearing config while engaged sends EXPLICIT null localeConfig + empty {} localeContent (so the route clears both)', async () => {
-      // simulate LocaleSettings.removeLocale dropping back to single-locale
-      store.setState((s: any) => {
-        s.localeConfig = null;
-        s.localeContent = {};
-        s.localeEngaged = true;
-        s.persistence.isDirty = true;
-      });
+      // language-settings phase 1: driven through the REAL removeLocale action
+      // (this used to simulate LocaleSettings' closure with its own setState
+      // recipe — a drift trap). en-default ⇒ drop-to-single clears to null.
+      // Fake timers so the action's own triggerAutoSave flush leaves no stray
+      // real 2s timer behind after the test.
+      vi.useFakeTimers();
+      store.getState().setActiveLocale('nl');
+      store.getState().updateElementContent(HERO, 'headline', 'Hallo');
+      store.getState().removeLocale('nl');
+      expect(store.getState().localeConfig).toBeNull();
       const body = await captureSaveBody(store);
       expect(body.localeConfig).toBeNull();               // explicit clear signal
       expect(body.finalContent.localeContent).toEqual({}); // explicit map replace
@@ -351,32 +358,206 @@ describe('i18n Phase 3a — store state layer', () => {
       expect('localeContent' in (legacy.getState().export() as any)).toBe(false);
     });
 
-    it('dirty gate: a locale change marks isDirty so the debounced triggerAutoSave fires (declare-then-leave persists)', async () => {
-      const proj = createEditStore('tok-dirty');
-      seed(proj); // isDirty=false after load
-      // simulate LocaleSettings.addLocale (config + engaged + the CRITICAL isDirty)
-      proj.setState((s: any) => {
-        s.localeConfig = { locales: ['en', 'nl'], defaultLocale: 'en' };
-        s.localeEngaged = true;
-        s.persistence.isDirty = true;
-      });
-      expect(proj.getState().persistence.isDirty).toBe(true); // the #1 fix
-
+    it('dirty gate: the REAL addLocale action marks isDirty and its own flush actually saves (declare-then-leave persists)', async () => {
       // The live triggerAutoSave (uiActions) debounces via setTimeout(2000) and
-      // only schedules when isDirty — so without the isDirty set it would no-op.
+      // only schedules when isDirty — without addLocale's isDirty set it no-ops
+      // and nothing is ever persisted.
       vi.useFakeTimers();
       const fetchMock = vi.fn(async () => ({ ok: true, json: async () => ({}) }) as any);
       global.fetch = fetchMock as any;
-      try {
-        proj.getState().triggerAutoSave();
-        await vi.advanceTimersByTimeAsync(2100);
-      } finally {
-        vi.useRealTimers();
-      }
+
+      const proj = createEditStore('tok-dirty');
+      seed(proj); // legacy: no config, isDirty=false after load
+      proj.getState().addLocale('nl'); // real action: seeds config + engaged + isDirty + flush
+      expect(proj.getState().persistence.isDirty).toBe(true); // the #1 fix
+
+      await vi.advanceTimersByTimeAsync(2100);
+
       const call = fetchMock.mock.calls.find((c: any) => String(c[0]).includes('/api/saveDraft'));
       expect(call).toBeTruthy(); // the debounced save actually fired (was isDirty)
       const body = JSON.parse((call![1] as any).body);
       expect(body.localeConfig).toEqual({ locales: ['en', 'nl'], defaultLocale: 'en' });
+    });
+  });
+
+  // ===== language-settings phase 1 — the extracted locale mutator ACTIONS =====
+  // These replace LocaleSettings' component closures. The load-bearing case is
+  // ruling 10: drop-to-single must PRESERVE a declared non-English site language
+  // (localeConfig is its only durable record) while still clearing to null for
+  // an English default (legacy zero-diff).
+  describe('locale mutator actions (addLocale / removeLocale / setSwitcherStyle)', () => {
+    const realFetch = global.fetch;
+    beforeEach(() => {
+      vi.useFakeTimers(); // actions call triggerAutoSave → 2s debounce
+    });
+    afterEach(() => {
+      global.fetch = realFetch;
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    });
+
+    async function captureSaveBody(s: Store): Promise<any> {
+      const fetchMock = vi.fn(async () => ({ ok: true, json: async () => ({}) }) as any);
+      global.fetch = fetchMock as any;
+      await s.getState().save();
+      const call = fetchMock.mock.calls.find((c: any) => String(c[0]).includes('/api/saveDraft'));
+      return call ? JSON.parse((call[1] as any).body) : null;
+    }
+
+    function storeWith(localeConfig: any, token = 'tok-mut') {
+      const s = createEditStore(token);
+      seed(s, { localeConfig });
+      return s;
+    }
+
+    it('addLocale on a legacy store seeds [default, added] with the original language as default', () => {
+      const legacy = createEditStore('tok-add-legacy');
+      seed(legacy);
+      legacy.getState().addLocale('nl');
+      const s = legacy.getState();
+      expect(s.localeConfig).toEqual({ locales: ['en', 'nl'], defaultLocale: 'en' });
+      expect(s.localeEngaged).toBe(true);
+    });
+
+    it('addLocale on an existing config appends and never duplicates', () => {
+      const proj = storeWith(CONFIG_EN_NL, 'tok-add-existing');
+      proj.getState().addLocale('de');
+      expect(proj.getState().localeConfig!.locales).toEqual(['en', 'nl', 'de']);
+      proj.getState().addLocale('de'); // idempotent
+      expect(proj.getState().localeConfig!.locales).toEqual(['en', 'nl', 'de']);
+    });
+
+    it('addLocale on a declared single-NL project keeps NL as the default (base copy is Dutch)', () => {
+      const proj = storeWith({ locales: ['nl'], defaultLocale: 'nl' }, 'tok-add-nl');
+      proj.getState().addLocale('en');
+      expect(proj.getState().localeConfig).toEqual({ locales: ['nl', 'en'], defaultLocale: 'nl' });
+    });
+
+    // ---- ruling 10, branch A: English default ⇒ clear ----
+    it('removeLocale down to a single EN default CLEARS the config to null and drops the overlay', () => {
+      const proj = storeWith(CONFIG_EN_NL, 'tok-drop-en');
+      proj.getState().setActiveLocale('nl');
+      proj.getState().updateElementContent(HERO, 'headline', 'Hallo');
+      expect(proj.getState().localeContent.nl).toBeTruthy();
+
+      proj.getState().removeLocale('nl');
+      const s = proj.getState();
+      expect(s.localeConfig).toBeNull();          // en default ⇒ platform default ⇒ null
+      expect(s.localeContent.nl).toBeUndefined(); // removed overlay never rides a save
+      expect(s.activeLocale).toBe('en');
+      expect(s.localeEngaged).toBe(true);         // so the save sends an EXPLICIT null
+    });
+
+    // ---- ruling 10, branch B: non-English default ⇒ PRESERVE ----
+    it('removeLocale down to a single NL default PRESERVES {locales:[nl],defaultLocale:nl} (the site language is NOT lost)', () => {
+      const proj = storeWith({ locales: ['nl', 'en'], defaultLocale: 'nl' }, 'tok-drop-nl');
+      proj.getState().setActiveLocale('en');
+      proj.getState().updateElementContent(HERO, 'headline', 'Hello');
+
+      proj.getState().removeLocale('en');
+      const s = proj.getState();
+      expect(s.localeConfig).not.toBeNull(); // the pre-ruling-10 behavior would be null here
+      expect(s.localeConfig).toEqual({ locales: ['nl'], defaultLocale: 'nl' });
+      expect(s.localeContent.en).toBeUndefined();
+      expect(s.activeLocale).toBe('nl');
+    });
+
+    it('the preserved NL declaration is actually SENT on save (not just held in memory)', async () => {
+      const proj = storeWith({ locales: ['nl', 'en'], defaultLocale: 'nl' }, 'tok-drop-nl-save');
+      proj.getState().removeLocale('en');
+      const body = await captureSaveBody(proj);
+      expect(body.localeConfig).toEqual({ locales: ['nl'], defaultLocale: 'nl' });
+      expect(body.localeConfig).not.toBeNull();
+    });
+
+    it('a preserved single-NL declaration routes text writes to BASE (activeLocale === default ⇒ no overlay)', () => {
+      // Proves the six audited readers (aiActions/generationActions/contentActions/
+      // historyHelpers/uiActions, all `localeConfig?.defaultLocale ?? "en"`) stay
+      // correct with a non-null single-locale config: regen is unblocked and edits
+      // go to base exactly as on a legacy project — now with the right language.
+      const proj = storeWith({ locales: ['nl'], defaultLocale: 'nl' }, 'tok-single-nl');
+      expect(proj.getState().activeLocale).toBe('nl');
+      proj.getState().updateElementContent(HERO, 'headline', 'Hallo daar');
+      const s = proj.getState();
+      expect(s.content[HERO].elements.headline).toBe('Hallo daar');
+      expect(s.localeContent).toEqual({}); // no overlay was created
+    });
+
+    // ---- ruling 10, branch C: the DEFAULT locale is not removable (phase 7) ----
+    // Driven DIRECTLY on the store, not through LanguagesPanel: the panel hides
+    // the menu on the default card, so a panel-level test would pass even with
+    // the guard deleted. These are public store actions — the invariant has to
+    // hold for any caller.
+    it('removeLocale(defaultLocale) is a NO-OP on a non-English default (the declaration survives)', () => {
+      const proj = storeWith({ locales: ['nl', 'en'], defaultLocale: 'nl' }, 'tok-rm-default-nl');
+      const before = proj.getState().localeConfig;
+      proj.getState().removeLocale('nl');
+      const s = proj.getState();
+      // Without the guard this would fall into drop-to-single with def='en'
+      // ⇒ localeConfig = null ⇒ the Dutch site language is erased.
+      expect(s.localeConfig).toEqual(before);
+      expect(s.activeLocale).toBe('nl');
+    });
+
+    it('removeLocale(defaultLocale) is a NO-OP on an English default too', () => {
+      const proj = storeWith(CONFIG_EN_NL, 'tok-rm-default-en');
+      proj.getState().removeLocale('en');
+      expect(proj.getState().localeConfig).toEqual({ locales: ['en', 'nl'], defaultLocale: 'en' });
+    });
+
+    it('removeLocale(defaultLocale) leaves the OTHER locales and their overlays intact', () => {
+      const proj = storeWith({ locales: ['nl', 'en'], defaultLocale: 'nl' }, 'tok-rm-default-ovl');
+      proj.getState().setActiveLocale('en');
+      proj.getState().updateElementContent(HERO, 'headline', 'Hello');
+      proj.getState().removeLocale('nl');
+      // Unguarded this collapses to localeConfig === null (throwing on `.locales`)
+      // while the EN overlay is orphaned.
+      expect(proj.getState().localeConfig!.locales).toEqual(['nl', 'en']);
+      expect(proj.getState().localeContent.en).toBeTruthy();
+    });
+
+    it('multi→multi removeLocale keeps every surviving locale', () => {
+      const proj = storeWith({ locales: ['en', 'nl', 'de'], defaultLocale: 'en' }, 'tok-multi');
+      proj.getState().removeLocale('nl');
+      expect(proj.getState().localeConfig).toEqual({ locales: ['en', 'de'], defaultLocale: 'en' });
+    });
+
+    // ---- switcherStyle ----
+    it('setSwitcherStyle round-trips into the config and the save payload', async () => {
+      const proj = storeWith(CONFIG_EN_NL, 'tok-style');
+      proj.getState().setSwitcherStyle('none');
+      expect(proj.getState().localeConfig!.switcherStyle).toBe('none');
+      const body = await captureSaveBody(proj);
+      expect(body.localeConfig).toEqual({ locales: ['en', 'nl'], defaultLocale: 'en', switcherStyle: 'none' });
+    });
+
+    it('setSwitcherStyle is a NO-OP with no localeConfig (never materializes one — zero-diff)', async () => {
+      const legacy = createEditStore('tok-style-legacy');
+      seed(legacy);
+      legacy.getState().setSwitcherStyle('none');
+      expect(legacy.getState().localeConfig).toBeNull();
+      expect(legacy.getState().localeEngaged).toBe(false); // still never engaged
+      expect(legacy.getState().persistence.isDirty).toBe(false);
+      const body = await captureSaveBody(legacy);
+      expect('localeConfig' in body).toBe(false); // key ABSENT, not null
+    });
+
+    it('an engaged config without switcherStyle serializes WITHOUT the key (absent ⇒ dropdown)', async () => {
+      const proj = storeWith(CONFIG_EN_NL, 'tok-style-absent');
+      proj.getState().addLocale('de');
+      const body = await captureSaveBody(proj);
+      expect('switcherStyle' in body.localeConfig).toBe(false);
+    });
+
+    it('switcherStyle survives the ruling-10 drop-to-single preservation', () => {
+      const proj = storeWith({ locales: ['nl', 'en'], defaultLocale: 'nl' }, 'tok-style-drop');
+      proj.getState().setSwitcherStyle('none');
+      proj.getState().removeLocale('en');
+      expect(proj.getState().localeConfig).toEqual({
+        locales: ['nl'],
+        defaultLocale: 'nl',
+        switcherStyle: 'none',
+      });
     });
   });
 

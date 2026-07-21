@@ -1,9 +1,34 @@
 /* switcherBehaviors.js — shared, TEMPLATE-AGNOSTIC published locale switcher.
- * Built to public/assets/switcher.v1.js (scripts/buildAssets.js) and injected by
+ * Built to public/assets/switcher.v2.js (scripts/buildAssets.js) and injected by
  * htmlGenerator.ts ONLY when a project declares >1 locale (multi-locale). It renders
  * its OWN minimal floating pill — it does NOT depend on any template markup (per D2:
  * templates stay untouched). Reads window.__lessgoLocales = { locales, defaultLocale,
- * current } stamped inline just before this tag.
+ * current, slug, style, basePath? } stamped inline just before this tag.
+ *
+ * ⚠️ IMMUTABLE-ASSET CONTRACT (scripts/buildAssets.js:10-29): published blobs hardcode
+ * an asset filename. `switcher.v1.js` is FROZEN at scripts/legacy/switcher.v1.src.js and
+ * still serves every page published before language-settings. THIS file ships as
+ * switcher.v2.js — any further SEMANTIC change here needs a switcher.v3.js, never an
+ * in-place edit under the v2 name.
+ *
+ * v2 adds (language-settings phase 5):
+ *  • basePath awareness. v1 assumed the site is served at the HOST ROOT, so on the
+ *    `/p/{slug}` preview path it read `p` as the locale segment and built `/nl/p/{slug}`
+ *    → 404 (and the geo redirect did the same on first paint). v2 derives a `basePath`
+ *    from `cfg.slug` at runtime — ONE stamped config serves every surface (blob at host
+ *    root, custom domain via middleware rewrite, and the direct /p/{slug} path) — then
+ *    does all locale segment work relative to it and re-prepends it on every built URL.
+ *    HOSTNAME-GATED: the `/p/{slug}` shape only counts as a base path on a lessgo host,
+ *    so a custom-domain site that happens to own a page literally at `/p/{slug}` is not
+ *    misread (middleware rewrites are internal — the browser pathname on the custom-domain
+ *    SSR fallback carries no `/p` prefix).
+ *    phase 6: an explicitly STAMPED `cfg.basePath` (emitted by the `/p/{slug}` SSR
+ *    renderer, which knows its mount path for certain) always wins over the hostname
+ *    heuristic — that is what makes preview hosts (*.vercel.app) correct without
+ *    widening the host regex. Blobs stamp no basePath ⇒ detection, exactly as before.
+ *  • `style: 'none'` ⇒ NO pill AND NO geo redirect ("None" means no automatic locale
+ *    behavior at all). Defense in depth: the generator already omits the whole block.
+ *    Absent style ⇒ 'dropdown' ⇒ exactly v1 behavior.
  *
  * Boot: localStorage['lessgo.lang'] -> geo-country cookie -> navigator.language. If the
  * resolved locale exists in the list AND differs from this doc's `current`, redirect
@@ -18,6 +43,8 @@
 
   var cfg = window.__lessgoLocales;
   if (!cfg || !cfg.locales || cfg.locales.length < 2) return;
+  // switcherStyle 'none' = no widget AND no automatic redirect.
+  if (cfg.style === 'none') return;
 
   var locales = cfg.locales;
   var def = cfg.defaultLocale;
@@ -25,26 +52,57 @@
   var LS_KEY = 'lessgo.lang';
   var SESS_KEY = 'lessgo.langRedirected';
 
+  // ---- basePath: '' at host root, '/p/{slug}' on the lessgo preview path ----
+  var basePath = (function () {
+    // STAMPED wins (language-settings phase 6): the `/p/{slug}` SSR renderer knows
+    // its own mount path with certainty and stamps `cfg.basePath`, so no hostname
+    // guess is needed there — this is what makes preview deployments
+    // (*.vercel.app/p/{slug}, outside the host regex below) build correct targets.
+    // Runtime detection stays as the fallback for docs that stamp no basePath.
+    if (typeof cfg.basePath === 'string') return cfg.basePath;
+    var slug = cfg.slug;
+    if (!slug) return '';
+    var host = location.hostname || '';
+    var onLessgo = /(^|\.)lessgo\.(ai|site)$/.test(host) || host === 'localhost';
+    if (!onLessgo) return '';
+    var pfx = '/p/' + slug;
+    var p = location.pathname || '/';
+    return p === pfx || p.indexOf(pfx + '/') === 0 ? pfx : '';
+  })();
+
+  /** Strip the base path off a served pathname (always leading-slash'd). */
+  function relPath(pathname) {
+    var p = pathname || '/';
+    if (basePath && (p === basePath || p.indexOf(basePath + '/') === 0)) {
+      p = p.slice(basePath.length);
+    }
+    return p || '/';
+  }
+
   function readCookie(name) {
     var m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
     return m ? decodeURIComponent(m[1]) : '';
   }
 
   // Split a served pathname into [nonDefaultLocalePrefix | null, barePath].
-  // Only treats the FIRST segment as a locale when it is a declared non-default
-  // locale (so '/about' stays bare and '/nl/about' -> ['nl','/about']).
+  // Only treats the FIRST segment AFTER the base path as a locale when it is a
+  // declared non-default locale (so '/about' stays bare and '/nl/about' ->
+  // ['nl','/about'], and on '/p/slug/nl/about' -> ['nl','/about']).
   function segAt(pathname) {
-    var m = pathname.match(/^\/([^\/]+)(\/.*)?$/);
+    var rel = relPath(pathname);
+    var m = rel.match(/^\/([^\/]+)(\/.*)?$/);
     if (m && locales.indexOf(m[1]) !== -1 && m[1] !== def) {
       return [m[1], m[2] || '/'];
     }
-    return [null, pathname];
+    return [null, rel];
   }
 
+  // Build a SERVED path (base path re-prepended) for `loc` + a bare subpage path.
   function buildPath(loc, barePath) {
     var bp = barePath || '/';
-    if (loc === def) return bp;
-    return bp === '/' ? '/' + loc : '/' + loc + bp;
+    var rel = loc === def ? bp : bp === '/' ? '/' + loc : '/' + loc + bp;
+    if (!basePath) return rel;
+    return rel === '/' ? basePath : basePath + rel;
   }
 
   function isKnown(loc) {

@@ -109,7 +109,11 @@ export interface ContentActions {
   // across a switch — undo/redo restore is locale-aware (each entry carries
   // `entry.locale`; uiActions routes to base vs the overlay).
   setActiveLocale: (locale: string) => void;
-  
+  // NOTE — the locale DECLARATION mutators (addLocale/removeLocale/
+  // setSwitcherStyle) are declared on MetaActions, not here: `createContentActions`
+  // is annotated `: ContentActions`, so members added here must be implemented in
+  // that file. Same reason the CMS actions live on MetaActions.
+
   // AI Generation
   regenerateSection: (sectionId: string, userGuidance?: string, options?: { suppressHistory?: boolean }) => Promise<void>;
   regenerateElement: (sectionId: string, elementKey: string, variationCount?: number) => Promise<void>;
@@ -410,6 +414,31 @@ export interface ValidationActions {
  * ===== META ACTIONS INTERFACE =====
  */
 export interface MetaActions {
+  // ===== LOCALE DECLARATION (language-settings phase 1) =====
+  // Implemented in `src/hooks/editStore/i18nActions.ts` — extracted from
+  // LocaleSettings' local `api.setState` closures so the LanguagesPanel (and any
+  // future caller) shares ONE copy of the engaged/isDirty/autosave choreography.
+  // Declared on MetaActions for the same reason as the CMS actions below:
+  // `createContentActions` (which owns `setActiveLocale`) is annotated
+  // `: ContentActions`, so a member added there must be implemented there.
+  // Confirmation (confirmDialog) stays in the UI layer — these are silent.
+  /** Declare a locale. First declaration seeds `[default, code]`. */
+  addLocale: (code: string) => void;
+  /**
+   * Remove a declared locale + its overlay. Dropping back to ONE locale keeps
+   * `{locales:[def],defaultLocale:def}` when `def !== 'en'` — that config is the
+   * ONLY durable record of a non-English site language (ruling 10) — and clears
+   * to `null` when it is `'en'` (English = platform default; null keeps the
+   * legacy zero-diff contract).
+   */
+  removeLocale: (code: string) => void;
+  /**
+   * Published-switcher widget style (publish layer only). NO-OP when there is no
+   * `localeConfig` — materializing one would break zero-diff for a monolingual
+   * project.
+   */
+  setSwitcherStyle: (style: 'dropdown' | 'none' | undefined) => void;
+
   // ===== CMS COLLECTIONS (cms-collections phase 3) =====
   // Implemented in `src/hooks/editStore/cmsActions.ts`. Declared HERE rather than
   // on LayoutActions because `createLayoutActions` is annotated `: LayoutActions`

@@ -46,6 +46,7 @@ vi.mock("@/hooks/useEditStore", () => ({
 }))
 
 import { FormBuilder, FIELD_TYPES, PUBLISHED_SUPPORTED_FIELD_TYPES } from "./FormBuilder"
+import { DEFAULT_AUTO_REPLY_SUBJECT, DEFAULT_AUTO_REPLY_BODY } from "@/lib/email/autoReplyTemplate"
 
 let container: HTMLDivElement
 let root: Root
@@ -75,6 +76,29 @@ function renderedFieldLabels(): string[] {
   return Array.from(
     document.querySelectorAll<HTMLInputElement>('[data-testid="form-field-row"] input[placeholder="Enter field label"]'),
   ).map((el) => el.value)
+}
+
+/** React-controlled input: set the value through the native setter, then fire `input`. */
+function typeInto(el: Element | null, value: string) {
+  if (!el) throw new Error("expected input to exist")
+  const proto =
+    el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype
+  const setter = Object.getOwnPropertyDescriptor(proto, "value")!.set!
+  act(() => {
+    setter.call(el, value)
+    el.dispatchEvent(new Event("input", { bubbles: true }))
+  })
+}
+
+function q<T extends Element = HTMLElement>(testid: string): T | null {
+  return document.querySelector<T>(`[data-testid="${testid}"]`)
+}
+
+function clickSave() {
+  const save = Array.from(document.querySelectorAll("button")).find(
+    (b) => b.textContent?.trim() === "Update Form",
+  )
+  click(save)
 }
 
 function seedForm(fields: { id: string; type: MVPFormFieldType; label: string }[]): string {
@@ -311,5 +335,167 @@ describe("FormBuilder — field types are restricted to what publish renders", (
     )
     click(save)
     expect(store.getState().forms?.[id].fields.map((f) => f.type)).toEqual([...PUBLISHED_SUPPORTED_FIELD_TYPES])
+  })
+})
+
+// ── 4. VISITOR AUTO-REPLY SETTINGS (lead-emails phase 3) ────────────────────
+//
+// The value of these tests is the SAVE assertions: the settings are useless unless
+// they reach `updateForm` (and therefore `Project.content...forms[id].autoReply`,
+// which `/api/forms/submit` reads at submit time). A test that only asserted the
+// inputs re-render would pass even if `handleSave` dropped `autoReply` on the floor.
+// So each behavioural test reads BACK the committed store state AND, for the
+// round-trip case, the exact payload handed to `updateForm`.
+describe("FormBuilder — visitor auto-reply settings", () => {
+  /** Replace `updateForm` with a capturing wrapper that still runs the real action. */
+  function captureUpdateForm(): Array<[string, Partial<MVPForm>]> {
+    const calls: Array<[string, Partial<MVPForm>]> = []
+    const real = store.getState().updateForm
+    act(() => {
+      store.setState({
+        updateForm: (formId: string, updates: Partial<MVPForm>) => {
+          calls.push([formId, updates])
+          real(formId, updates)
+        },
+      } as Partial<EditStore>)
+    })
+    return calls
+  }
+
+  it("renders the section ON by default, with the shipped defaults as placeholders", () => {
+    const id = seedForm([{ id: "f1", type: "email", label: "Email" }])
+    act(() => root.render(<FormBuilder isOpen onClose={() => {}} editingFormId={id} />))
+
+    expect(q("auto-reply-section"), "the auto-reply section did not render").not.toBeNull()
+
+    const toggle = q<HTMLInputElement>("auto-reply-enabled")!
+    // Absent config must READ as ON — this mirrors the server's
+    // `form?.autoReply?.enabled !== false`. If it ever renders unchecked, the UI
+    // would tell owners the feature is off while it is actually sending.
+    expect(toggle.checked, "absent autoReply config must render as enabled").toBe(true)
+
+    const subject = q<HTMLInputElement>("auto-reply-subject")!
+    const body = q<HTMLTextAreaElement>("auto-reply-body")!
+    expect(subject.value).toBe("")
+    expect(body.value).toBe("")
+    // Placeholders come from the SAME constants the send path renders, so a change
+    // to the default wording can never drift from what the UI promises.
+    expect(subject.placeholder).toBe(DEFAULT_AUTO_REPLY_SUBJECT)
+    expect(body.placeholder).toBe(DEFAULT_AUTO_REPLY_BODY)
+    expect(subject.disabled).toBe(false)
+    expect(body.disabled).toBe(false)
+
+    // Token documentation is part of the contract — {name}/{business} are the ONLY
+    // substitutions renderAutoReply performs.
+    const sectionText = q("auto-reply-section")!.textContent || ""
+    expect(sectionText).toContain("{name}")
+    expect(sectionText).toContain("{business}")
+  })
+
+  it("shows the owner's saved subject/body when re-opened", () => {
+    const id = seedForm([{ id: "f1", type: "email", label: "Email" }])
+    act(() =>
+      store.getState().updateForm(id, {
+        autoReply: { enabled: true, subject: "Got it", body: "Hi {name}, thanks." },
+      } as Partial<MVPForm>),
+    )
+    act(() => root.render(<FormBuilder isOpen onClose={() => {}} editingFormId={id} />))
+
+    expect(q<HTMLInputElement>("auto-reply-subject")!.value).toBe("Got it")
+    expect(q<HTMLTextAreaElement>("auto-reply-body")!.value).toBe("Hi {name}, thanks.")
+    expect(q<HTMLInputElement>("auto-reply-enabled")!.checked).toBe(true)
+  })
+
+  it("toggling off greys + disables subject/body, states why, and saves enabled:false", () => {
+    const id = seedForm([{ id: "f1", type: "email", label: "Email" }])
+    act(() => root.render(<FormBuilder isOpen onClose={() => {}} editingFormId={id} />))
+
+    click(q("auto-reply-enabled"))
+
+    const toggle = q<HTMLInputElement>("auto-reply-enabled")!
+    const subject = q<HTMLInputElement>("auto-reply-subject")!
+    const body = q<HTMLTextAreaElement>("auto-reply-body")!
+    expect(toggle.checked).toBe(false)
+    expect(subject.disabled, "subject stayed editable while auto-reply is off").toBe(true)
+    expect(body.disabled, "body stayed editable while auto-reply is off").toBe(true)
+    // Greyed, not hidden — and with a stated reason (project convention).
+    expect(subject.className).toContain("text-gray-400")
+    expect(body.className).toContain("text-gray-400")
+    expect(q("auto-reply-disabled-reason"), "no reason shown for the disabled inputs").not.toBeNull()
+
+    // Still a LOCAL draft — nothing written to the store before Save.
+    expect(
+      store.getState().forms?.[id].autoReply,
+      "the toggle wrote to the store before Save — the draft model forbids it",
+    ).toBeUndefined()
+
+    clickSave()
+    expect(
+      store.getState().forms?.[id].autoReply,
+      "enabled:false did not survive Save — the auto-reply would keep sending",
+    ).toMatchObject({ enabled: false })
+  })
+
+  it("an edited subject + body reach updateForm and survive Save", () => {
+    const id = seedForm([{ id: "f1", type: "email", label: "Email" }])
+    act(() => root.render(<FormBuilder isOpen onClose={() => {}} editingFormId={id} />))
+    const calls = captureUpdateForm()
+
+    typeInto(q("auto-reply-subject"), "Thanks for reaching out")
+    typeInto(q("auto-reply-body"), "Hi {name} — {business} will reply within a day.")
+
+    // Draft only, so far.
+    expect(store.getState().forms?.[id].autoReply).toBeUndefined()
+
+    clickSave()
+
+    // (a) the exact payload handed to the store action
+    expect(calls, "updateForm was never called").toHaveLength(1)
+    expect(calls[0][0]).toBe(id)
+    expect(calls[0][1].autoReply).toEqual({
+      enabled: true,
+      subject: "Thanks for reaching out",
+      body: "Hi {name} — {business} will reply within a day.",
+    })
+
+    // (b) and what actually landed in the store, which is what gets persisted
+    expect(store.getState().forms?.[id].autoReply).toEqual({
+      enabled: true,
+      subject: "Thanks for reaching out",
+      body: "Hi {name} — {business} will reply within a day.",
+    })
+  })
+
+  it("leaves autoReply ABSENT when the owner never touches the section", () => {
+    // Absent config = ON with the default template. Writing `{enabled:true}` on every
+    // save would be harmless but noisy; more importantly, an accidental
+    // `{enabled:false}` default here would silently kill the feature for every form.
+    const id = seedForm([{ id: "f1", type: "email", label: "Email" }])
+    act(() => root.render(<FormBuilder isOpen onClose={() => {}} editingFormId={id} />))
+    clickSave()
+    expect(store.getState().forms?.[id].autoReply).toBeUndefined()
+  })
+
+  it("re-enabling after a save clears enabled:false and keeps the text", () => {
+    const id = seedForm([{ id: "f1", type: "email", label: "Email" }])
+    act(() =>
+      store.getState().updateForm(id, {
+        autoReply: { enabled: false, subject: "Got it", body: "Hi {name}." },
+      } as Partial<MVPForm>),
+    )
+    act(() => root.render(<FormBuilder isOpen onClose={() => {}} editingFormId={id} />))
+
+    expect(q<HTMLInputElement>("auto-reply-enabled")!.checked).toBe(false)
+    expect(q<HTMLInputElement>("auto-reply-subject")!.disabled).toBe(true)
+
+    click(q("auto-reply-enabled"))
+    expect(q<HTMLInputElement>("auto-reply-subject")!.disabled).toBe(false)
+
+    clickSave()
+    expect(store.getState().forms?.[id].autoReply).toEqual({
+      enabled: true,
+      subject: "Got it",
+      body: "Hi {name}.",
+    })
   })
 })

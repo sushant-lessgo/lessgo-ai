@@ -26,6 +26,8 @@
  *   a.v2.js  ← src/lib/staticExport/analyticsGenerator.js  (live: role+placement, v:2)
  *   form.v1.js ← scripts/legacy/form.v1.src.js       (FROZEN: reads data-owner-id, sends userId)
  *   form.v2.js ← src/lib/staticExport/formHandler.js (live: no owner id — server derives it)
+ *   switcher.v1.js ← scripts/legacy/switcher.v1.src.js       (FROZEN i18n-phase-1 switcher: root-relative paths, always-on pill + geo redirect)
+ *   switcher.v2.js ← src/lib/staticExport/switcherBehaviors.js (live: basePath-aware /p/{slug}, switcherStyle 'none')
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -57,7 +59,8 @@ const files = [
   { src: 'naayomBehaviors.js', out: 'naayom.v1.js' }, // Phase 4: TechPremium behaviors
   { src: 'lumenBehaviors.js', out: 'lumen.v1.js' },   // Lumen: lightbox + reveal + EN/NL toggle/geo
   { src: 'atelierSliderBehaviors.js', out: 'slider.v1.js' }, // LEGACY-FROZEN: OLD hand-written Atelier hero cover slider (retired in atelier-skeleton-cutover; new atelier publishes load work.v1.js). Kept ONLY for already-published old blobs. Immutable v1 — behavior change ⇒ slider.v2.js
-  { src: 'switcherBehaviors.js', out: 'switcher.v1.js' }, // i18n: shared template-agnostic locale switcher pill + geo redirect
+  { src: 'switcher.v1.src.js', out: 'switcher.v1.js', dir: legacyDir }, // FROZEN i18n-phase-1 switcher (see contract above) — old blobs hardcode this filename
+  { src: 'switcherBehaviors.js', out: 'switcher.v2.js' }, // live i18n switcher: basePath-aware (/p/{slug}) + switcherStyle 'none'
   { src: 'workBehaviors.js', out: 'work.v1.js' }, // Work skeleton: hero slider + fixed header (lightbox deferred to phase 6). Immutable v1 — behavior change ⇒ work.v2.js
 ];
 

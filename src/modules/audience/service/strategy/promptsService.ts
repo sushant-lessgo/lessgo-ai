@@ -21,6 +21,13 @@ export interface ServiceStrategyPromptInput {
   goal: ServiceGoal;
   offer: string;
   assets: ServiceAssetInput;
+  /**
+   * language-settings phase 4 — output language as an English exonym
+   * (`'English'`, `'Dutch'`, …). Absent ⇒ `'English'`. Mirror of the product
+   * strategy hedge: strategy phrasing is pasted into the copy prompt, so
+   * source-language angle text would otherwise leak into the page.
+   */
+  language?: string;
 }
 
 export function buildServiceStrategyPrompt(input: ServiceStrategyPromptInput): string {
@@ -31,6 +38,8 @@ export function buildServiceStrategyPrompt(input: ServiceStrategyPromptInput): s
   // templateId). Strategy fields must already read in the chosen voice so copy
   // generation builds on the right framing.
   const voice = selectServiceVoice(understanding);
+  // ALWAYS emitted, English included (plan ruling 2).
+  const language = input.language || 'English';
 
   const assetSummary = [
     assets.hasTestimonials && `client testimonials (${assets.testimonialType ?? 'text'})`,
@@ -141,6 +150,8 @@ Advisory hints — final block choice may use heuristics. Provide your best gues
 This page will use a ${voice.toneProfile} voice. Avoid these words: ${voice.lexicon.forbidden.join(', ')}. Prefer: ${voice.lexicon.preferred.join(', ')}. Strategy fields — especially "oneClient.coreDesire", "ourPosition.promise", and "ourPosition.approach" — should already read in this voice; downstream copy generation builds on them.
 
 ---
+
+Write every string in ${language}. The provider information above MAY be in another language — render its MEANING in ${language}; never copy or echo its source-language wording (proper nouns stay as-is).
 
 Output valid JSON only. No explanations or markdown.`;
 }

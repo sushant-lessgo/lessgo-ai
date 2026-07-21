@@ -29,6 +29,7 @@ import {
   buildProductCopyPrompt,
   buildProductCopyRetryPrompt,
 } from '@/modules/audience/product/copyPrompt';
+import { resolvePromptLanguage } from '@/lib/i18n/projectLocale';
 import {
   processProductCopy,
   autoMapLinkHrefs,
@@ -125,6 +126,12 @@ const GenerateProductCopyRequestSchema = z.object({
   // SiteContext lookup key — the SERVER fetches facts/excerpts from the store;
   // never trust a client-passed content blob.
   sourceUrl: z.string().url().optional(),
+  // language-settings phase 4 (ruling 11) — the onboarding-declared site
+  // language, a bare ISO code. Typed `z.unknown()` DELIBERATELY: validation is
+  // SEMANTIC (`resolvePromptLanguage` → 'en' fallback), so no value of any shape
+  // can 400 a paid generation run over language. The raw value never reaches the
+  // prompt — only the validated English exonym does.
+  language: z.unknown().optional(),
 });
 
 async function productCopyHandler(req: NextRequest): Promise<Response> {
@@ -154,6 +161,7 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       page,
       sitePages,
       sourceUrl,
+      language,
     } = validation.data;
 
     // 2. Auth
@@ -258,6 +266,9 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       page,
       sitePages,
       siteContextBlock,
+      // Validated + mapped to an English exonym here; the raw request value
+      // never reaches the prompt (ruling 11).
+      language: resolvePromptLanguage(language),
     });
     logger.dev('[product-generate-copy] PROMPT:', prompt);
 

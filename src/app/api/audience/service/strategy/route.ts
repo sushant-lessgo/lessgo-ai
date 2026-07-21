@@ -25,6 +25,7 @@ import {
 import { generateWithSchema } from '@/lib/aiClient';
 import { ServiceStrategyResponseSchema } from '@/lib/schemas/strategyService.schema';
 import { buildServiceStrategyPrompt } from '@/modules/audience/service/strategy/promptsService';
+import { resolvePromptLanguage } from '@/lib/i18n/projectLocale';
 import { assembleServiceStrategy } from '@/modules/audience/service/strategy/parseStrategyService';
 import { generateMockServiceStrategy } from '@/modules/prompt/mockResponseGeneratorService';
 import {
@@ -71,6 +72,12 @@ const ServiceStrategyRequestSchema = z.object({
   // and is NEVER forwarded to buildServiceStrategyPrompt (assertNoTemplateLeak guards
   // the prompt input). The firewall boundary is the PROMPT, not the route.
   templateId: z.string().max(50).regex(/^[a-z0-9-]+$/, 'Invalid template id').optional(),
+  // language-settings phase 4 (ruling 11) — the onboarding-declared site
+  // language, a bare ISO code. Typed `z.unknown()` DELIBERATELY: validation is
+  // SEMANTIC (`resolvePromptLanguage` → 'en' fallback), so no value of any shape
+  // can 400 a paid generation run over language. The raw value never reaches the
+  // prompt — only the validated English exonym does.
+  language: z.unknown().optional(),
 });
 
 async function serviceStrategyHandler(req: NextRequest): Promise<Response> {
@@ -159,6 +166,8 @@ async function serviceStrategyHandler(req: NextRequest): Promise<Response> {
       goal: data.goal as any,
       offer: data.offer,
       assets: data.assets as any,
+      // Validated + mapped to an English exonym here (ruling 11).
+      language: resolvePromptLanguage(data.language),
     });
     logger.dev('[service-strategy] PROMPT:', prompt);
 

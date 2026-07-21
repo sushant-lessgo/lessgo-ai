@@ -47,7 +47,7 @@ import { runCollectionFanOut } from '@/modules/generation/multiPageAssembly';
 import { templateMeta, type TemplateLook } from '@/modules/templates/templateMeta';
 import { pickSeeded } from '@/modules/generation/spread';
 import type { CollectionsFacts } from '@/modules/brief/collections';
-import { buildFinalContent, saveDraft, type BriefGoal } from './finalize';
+import { buildFinalContent, saveDraft, localeConfigPatch, type BriefGoal } from './finalize';
 import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './index';
 import { trackFailure, failureEventName } from '@/utils/trackTelemetry';
 
@@ -139,11 +139,29 @@ export interface TrustGenerationInput {
   // Mirror of thing.ts; the collections bridge is DORMANT (no service template
   // declares a collection-family capability) — inert until rung-C.
   collections?: CollectionsFacts;
+
+  /**
+   * language-settings phase 3 — the ONBOARDING-declared site language (bare ISO
+   * code, e.g. `'nl'`). Absent ⇒ `'en'`. Rides EVERY service route request body
+   * as `language` (ruling 11 — mirror of `ThingGenerationInput.siteLanguage`).
+   */
+  siteLanguage?: string;
 }
 
 // ---------------------------------------------------------------------------
 // Payload builders — the fidelity surface asserted by trust.test.ts.
 // ---------------------------------------------------------------------------
+
+/**
+ * The `language` value carried by EVERY service-route request body of this run
+ * (strategy, copy, collection-item copy). ONE resolver, called from ALL THREE
+ * call sites — including the INLINE collection-item body — so a fan-out path can
+ * never silently omit it and half-translate the site. Always emitted (ruling 2);
+ * ISO CODE, never an exonym (mapping is server-side, phase 4).
+ */
+export function payloadLanguage(input: Pick<TrustGenerationInput, 'siteLanguage'>): string {
+  return input.siteLanguage || 'en';
+}
 
 /**
  * proof-truth phase 5 — testimonials card-count hint precedence, mirror of
@@ -239,6 +257,8 @@ export function buildStrategyPayload(input: TrustGenerationInput): Record<string
     offer: input.offer,
     assets: buildAssets(input),
     paletteId: effectivePalette(input),
+    // language-settings phase 3 — always sent (ruling 11 / call-site #1 of 3).
+    language: payloadLanguage(input),
     // Selection-only: widens the section SET for templates that declare extra
     // section types (Surge). Server passes it to section selection, NEVER to a
     // prompt builder (firewall preserved).
@@ -271,6 +291,8 @@ export function buildCopyPayload(
     goal: serviceGoalFor(input),
     understanding: buildUnderstanding(input),
     ...(input.importedTestimonials?.length ? { realTestimonials: input.importedTestimonials } : {}),
+    // language-settings phase 3 — always sent (ruling 11 / call-site #2 of 3).
+    language: payloadLanguage(input),
   };
 }
 
@@ -441,6 +463,8 @@ export async function runTrustGeneration(
       variantId,
       ...lookPatch,
       ...briefPatch,
+      // language-settings phase 3 — durable declaration; `{}` for en/absent.
+      ...localeConfigPatch(input.siteLanguage),
       finalContent,
     });
 
@@ -454,7 +478,7 @@ export async function runTrustGeneration(
       collections: (input.collections ?? {}) as CollectionsFacts,
       declaredCapabilities: declaredCaps,
       persist: async (fc) => {
-        await saveDraft({ tokenId, title, paletteId, templateId, variantId, ...lookPatch, ...briefPatch, finalContent: fc });
+        await saveDraft({ tokenId, title, paletteId, templateId, variantId, ...lookPatch, ...briefPatch, ...localeConfigPatch(input.siteLanguage), finalContent: fc });
       },
       generateItemCopy: async (plan) => {
         try {
@@ -469,6 +493,10 @@ export async function runTrustGeneration(
               offer: input.offer,
               goal: serviceGoalFor(input),
               understanding: buildUnderstanding(input),
+              // language-settings phase 3 — call-site #3 of 3 (COLLECTION-ITEM
+              // fan-out). Inline body (not buildCopyPayload) ⇒ explicit field, or
+              // a Dutch site's item pages would come back in English.
+              language: payloadLanguage(input),
               // Record in the payload — AI writes connective copy only; record
               // fields are kept verbatim by the clamp on merge.
               collectionItem: plan.entry,

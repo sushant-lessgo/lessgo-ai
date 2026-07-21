@@ -15,13 +15,13 @@
 //  - the `!allComplete` ReviewPill guard is UNCHANGED (old L70) — it double-gates
 //    with ReviewPill's own self-hide, and BOTH are deliberate (scout §D).
 //
-// LANGUAGES CONTROLS — RE-MOUNTED by the `bilingual-editing` feature (Kundius
-// NL/EN delivery blocker), superseding the earlier phase-4 decision 8b removal.
-// Both `LanguageToggle` and `LocaleSettings` self-hide via
-// `isMultiLocale(localeConfig)`, so single-locale projects (~99%) still render
-// NOTHING here — the 8b "dead weight in the bar" rationale is preserved by the
-// visibility gate, not by absence. They mount inside EditorDesignControls below,
-// after the design popover (order: design → LanguageToggle → LocaleSettings).
+// LANGUAGES CONTROLS — ONE control here now (language-settings phase 2).
+// The globe/config popover (`LocaleSettings`) is RETIRED: declaring languages
+// moved into Site settings → Languages (`ui/LanguagesPanel.tsx`), where a
+// monolingual project can actually reach it (the globe hid itself unless the
+// project was already multi-locale). `LanguageToggle` STAYS — it is the only
+// `setActiveLocale` UI, and it still self-hides via `isMultiLocale(localeConfig)`
+// so single-locale projects (~99%) render NOTHING here.
 // The regen locale-lock in EditHeaderRightPanel is UNAFFECTED: it reads
 // activeLocale/localeConfig from the store, never the toggle component.
 //
@@ -42,13 +42,12 @@ import { useEditStore } from '@/hooks/useEditStore';
 import { useReviewState } from '@/hooks/useReviewState';
 import { usesTemplateModule } from '@/types/service';
 import { LanguageToggle } from '../editor/LanguageToggle';
-import { LocaleSettings } from '../editor/LocaleSettings';
 
 /**
  * Left-cluster editor controls: the design-system popover for this project's
- * audience/template, plus the bilingual locale controls (LanguageToggle +
- * LocaleSettings) which self-hide on single-locale projects — see the
- * LANGUAGES CONTROLS note at the top of this file.
+ * audience/template, plus the editing-language pill group (LanguageToggle),
+ * which self-hides on single-locale projects — see the LANGUAGES CONTROLS note
+ * at the top of this file.
  */
 export function EditorDesignControls() {
   // Render-read: audienceType + templateId select which design-control popover renders.
@@ -85,7 +84,6 @@ export function EditorDesignControls() {
     <div className="flex items-center gap-2">
       {designControls}
       <LanguageToggle />
-      <LocaleSettings />
     </div>
   );
 }

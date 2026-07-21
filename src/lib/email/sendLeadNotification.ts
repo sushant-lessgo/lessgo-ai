@@ -1,23 +1,24 @@
 // src/lib/email/sendLeadNotification.ts
-// Sends an email to a configured inbox whenever a contact/demo form is submitted.
-// Called from /api/forms/submit after the FormSubmission row is saved. Fully
-// env-gated (no-op when unset) and never throws — a lead is always saved even if
-// the email fails. Uses Resend's REST API directly (no SDK dependency).
+// Sends the lead-notification email whenever a contact/demo form is submitted.
+// Called from /api/forms/submit AFTER the FormSubmission row is saved. Never
+// throws — a lead is always saved even if the email fails. The actual HTTP send
+// lives in `sendEmail` (shared with the visitor auto-reply).
+//
+// Recipient: the PAGE OWNER's email, resolved by the caller (`to`) via
+// resolveOwnerEmail(). Multi-tenant as of the lead-emails feature.
 //
 // Env:
-//   RESEND_API_KEY          — Resend API key (required to send)
-//   LEAD_NOTIFICATION_EMAIL — recipient inbox (required to send)
-//   LEAD_NOTIFICATION_FROM  — sender; default 'onboarding@resend.dev' (works pre-domain-verify)
-//
-// NOTE (before customer #2): recipient is a single fixed address — fine for the
-// single-customer pilot. To go multi-tenant, pass an owner-scoped `to` here
-// (resolve from the page owner) instead of reading LEAD_NOTIFICATION_EMAIL.
+//   RESEND_API_KEY          — Resend API key (required to send; see sendEmail)
+//   LEAD_NOTIFICATION_FROM  — sender ADDRESS; default 'onboarding@resend.dev'
+//                             (prod/preview set this to the verified …@mail.lessgo.site)
+//   LEAD_NOTIFICATION_EMAIL — DEPRECATED. Retired from the forms/submit owner path
+//                             (owner email is passed in as `to`). Still honoured as
+//                             the recipient for the legacy founder-notify caller
+//                             (/api/demand-lead) which passes no `to`.
 
-import * as Sentry from '@sentry/nextjs';
 import { logger } from '@/lib/logger';
+import { sendEmail, type EmailSendOutcome } from './sendEmail';
 import type { MVPFormField } from '@/types/core/forms';
-
-const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 
 interface SendLeadNotificationArgs {
   formName: string;
@@ -25,16 +26,18 @@ interface SendLeadNotificationArgs {
   fields?: MVPFormField[];
   replyTo?: string;
   pageId?: string;
+  /**
+   * Recipient — the page owner's resolved email. Optional ONLY for the legacy
+   * founder-notify caller (/api/demand-lead), which falls back to
+   * LEAD_NOTIFICATION_EMAIL. The forms/submit path always passes it.
+   */
+  to?: string;
+  /** From display name, e.g. the site/business title. Omitted ⇒ bare address. */
+  businessName?: string;
 }
 
-// Outcome so the caller (/api/forms/submit) can flag the FormSubmission row:
-//   'skipped' — feature unconfigured (no row flag)
-//   'sent'    — Resend accepted (set notifiedAt)
-//   'failed'  — non-OK response / network error (set notifyError)
-export type LeadNotifyOutcome =
-  | { status: 'skipped' }
-  | { status: 'sent' }
-  | { status: 'failed'; error: string };
+// Re-exported under the historical name so existing callers keep compiling.
+export type LeadNotifyOutcome = EmailSendOutcome;
 
 function isValidEmail(email: unknown): email is string {
   return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -48,6 +51,27 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+// The business name is owner-typed and lands in the From header's display name.
+// Strip anything that could break out of the quoted string or inject a header
+// (quotes, backslashes, CR/LF) and cap the length.
+export function sanitizeDisplayName(raw: unknown): string {
+  if (typeof raw !== 'string') return '';
+  return raw
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/["\\]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 78);
+}
+
+// Build the From header: `"Business Name" <address>`, or a bare address when no
+// usable display name survives sanitization.
+export function buildFromHeader(businessName?: string, address?: string): string {
+  const addr = address || process.env.LEAD_NOTIFICATION_FROM || 'onboarding@resend.dev';
+  const name = sanitizeDisplayName(businessName);
+  return name ? `"${name}" <${addr}>` : addr;
+}
+
 // label for a submitted key — prefer the form field's label, fall back to the raw id.
 function labelFor(key: string, fields?: MVPFormField[]): string {
   const f = fields?.find((x) => x.id === key);
@@ -55,18 +79,18 @@ function labelFor(key: string, fields?: MVPFormField[]): string {
 }
 
 export async function sendLeadNotification(args: SendLeadNotificationArgs): Promise<LeadNotifyOutcome> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.LEAD_NOTIFICATION_EMAIL;
-  const from = process.env.LEAD_NOTIFICATION_FROM || 'onboarding@resend.dev';
-
-  // Gate: feature is opt-in per environment. Silent no-op when unconfigured.
-  if (!apiKey || !to) {
-    logger.dev('sendLeadNotification: skipped (RESEND_API_KEY / LEAD_NOTIFICATION_EMAIL not set)');
-    return { status: 'skipped' };
-  }
-
   try {
-    const { formName, data, fields, replyTo, pageId } = args;
+    const { formName, data, fields, replyTo, pageId, businessName } = args;
+
+    // Owner email (passed in) is the recipient. LEAD_NOTIFICATION_EMAIL remains
+    // only for the legacy founder-notify caller that passes no `to`.
+    const to = args.to || process.env.LEAD_NOTIFICATION_EMAIL || '';
+    if (!to) {
+      logger.dev('sendLeadNotification: skipped (no recipient)');
+      return { status: 'skipped' };
+    }
+
+    const from = buildFromHeader(businessName);
 
     const rows = Object.entries(data || {}).filter(([, v]) => v != null && String(v).trim() !== '');
     const textLines = rows.map(([k, v]) => `${labelFor(k, fields)}: ${v}`);
@@ -89,33 +113,18 @@ export async function sendLeadNotification(args: SendLeadNotificationArgs): Prom
       + `<p style="margin:16px 0 0;color:#888;font-size:12px">Submitted ${escapeHtml(new Date().toISOString())}${pageId ? ` · Page ${escapeHtml(pageId)}` : ''}</p>`
       + `</div>`;
 
-    const payload: Record<string, unknown> = { from, to, subject, text, html };
-    if (isValidEmail(replyTo)) payload.reply_to = replyTo;
-
-    const res = await fetch(RESEND_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
+    return await sendEmail({
+      to,
+      from,
+      replyTo: isValidEmail(replyTo) ? replyTo : undefined,
+      subject,
+      text,
+      html,
+      op: 'sendLeadNotification',
+      extra: { pageId, formName },
     });
-
-    if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      logger.warn(`sendLeadNotification: Resend responded ${res.status}`, () => body.slice(0, 300));
-      // A dropped lead notification is otherwise invisible (F30): surface it to
-      // Sentry so a silently-failing inbox is observable. No-op when DSN unset.
-      Sentry.captureException(new Error(`sendLeadNotification: Resend responded ${res.status}`), {
-        level: 'warning',
-        tags: { area: 'email', op: 'sendLeadNotification' },
-        extra: { status: res.status, body: body.slice(0, 300), pageId: args.pageId, formName: args.formName },
-      });
-      return { status: 'failed', error: `Resend responded ${res.status}`.slice(0, 300) };
-    }
-    return { status: 'sent' };
   } catch (err) {
-    // Never let an email failure affect the saved lead / response.
+    // Belt-and-braces: body assembly must never throw into the submit path.
     const msg = err instanceof Error ? err.message : String(err);
     logger.warn('sendLeadNotification: send failed', () => msg);
     return { status: 'failed', error: `send failed: ${msg}`.slice(0, 300) };

@@ -13,8 +13,12 @@
 //   root page selected → t16 (left nav + SEO pane + side column)
 //   sub-page selected  → t18 (General | SEO | Social tabs, tighter fields)
 //
-// ⚠️ Languages: founder ruling 2026-07-16 removed Languages from the chrome, so
-// the t16 left nav is Domain / SEO / Social & sharing only — no Languages row.
+// language-settings phase 2 — the 2026-07-16 "no Languages row" ruling was
+// REVERSED by the founder: the rail is Domain / SEO / Social & sharing /
+// Languages, and this window is now the ONLY place a project declares its
+// languages (the editor-header globe was retired). `section` state switches the
+// pane; the Languages branch sits BEFORE the `!page` guard because languages are
+// site-level and must stay reachable on a project with no page entries.
 
 import React from 'react';
 import Link from 'next/link';
@@ -35,6 +39,7 @@ import { Switch } from '@/components/ui/switch';
 import { ImagePlaceholder } from '@/components/ui/image-placeholder';
 import { AppIcon } from '@/components/ui/icon';
 import { Coming } from '@/components/ui/coming';
+import { LanguagesPanel } from './LanguagesPanel';
 import { cn } from '@/lib/utils';
 import type { PageSeo, ProjectPageEntry } from '@/types/store';
 
@@ -98,7 +103,19 @@ function SavedPill() {
   );
 }
 
-export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
+/** Which rail pane the window shows. */
+export type SettingsSection = 'seo' | 'languages';
+
+export function SeoSettingsModal({
+  onClose,
+  initialSection = 'seo',
+}: {
+  onClose: () => void;
+  /** Pane to OPEN on (phase 2b — the header's Languages row). Not a lock: the
+   *  rail still switches freely afterwards. Defaults to SEO, so every caller
+   *  that omits it behaves exactly as before. */
+  initialSection?: SettingsSection;
+}) {
   // Render-read: pages (tabs + per-page seo), and the active-page working set
   // (currentPageId/sections/content/slug/title) that feeds the live preview meta.
   // updatePageSeo/triggerAutoSave/uploadImage are handler-only.
@@ -106,7 +123,7 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
   // the sorted list with useMemo OUTSIDE the selector — calling getPagesList()
   // inside the selector returns a fresh array every snapshot, which prevents
   // useSyncExternalStore from stabilizing ("Maximum update depth exceeded").
-  const { pagesMap, currentPageId, sections, content, slug, title } = useEditStore(
+  const { pagesMap, currentPageId, sections, content, slug, title, localeCount } = useEditStore(
     useShallow((s) => ({
       pagesMap: s.pages,
       currentPageId: s.currentPageId,
@@ -114,6 +131,10 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
       content: s.content,
       slug: s.slug,
       title: s.title,
+      // Rail badge only — a PRIMITIVE, so the shallow compare stays stable
+      // (selecting localeConfig itself would be fine too, but the count is all
+      // this component needs; the panel owns the config).
+      localeCount: s.localeConfig?.locales?.length ?? 1,
     })),
   );
   const pages = React.useMemo<ProjectPageEntry[]>(() => {
@@ -128,6 +149,10 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
   const [selectedId, setSelectedId] = React.useState<string>(
     () => pages.find((p) => p.pathSlug === '/')?.id || pages[0]?.id || ''
   );
+  // Which pane the rail is showing. SEO was hardcoded-active until phase 2.
+  // Seeded from `initialSection` (phase 2b) — a starting point only; the rail
+  // owns it from the first click on.
+  const [section, setSection] = React.useState<SettingsSection>(initialSection);
   const [uploading, setUploading] = React.useState<null | 'ogImage' | 'faviconUrl'>(null);
   const [uploadError, setUploadError] = React.useState<string | null>(null);
 
@@ -358,9 +383,13 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
         <div className="flex h-full min-h-0 flex-col bg-app-surface font-app-sans text-app-ink">
           {/* Header — 56, bottom border #eceef2 */}
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-app-border-pane px-5">
-            <AppIcon name="tune" size={18} className="text-app-primary" />
+            <AppIcon
+              name={section === 'languages' ? 'language' : 'tune'}
+              size={18}
+              className="text-app-primary"
+            />
             <DialogTitle className="text-[15px] font-bold tracking-normal text-app-ink">
-              Site settings
+              {section === 'languages' ? 'Site settings · Languages' : 'Site settings'}
             </DialogTitle>
             {/* Radix requires a description (or an explicit opt-out) on every
                 DialogContent and logs a console warning on EVERY open without one.
@@ -381,8 +410,8 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
 
           <div className="flex min-h-0 flex-1">
             {/* Left nav — 196, bg #fafafb, right border #eceef2.
-                Domain / SEO / Social & sharing. NO Languages row: founder ruling
-                2026-07-16 removed Languages from the chrome (t16 draws one). */}
+                Domain / SEO / Social & sharing / Languages (the last per the
+                founder's 2026-07-16 reversal — see the file header). */}
             <nav
               aria-label="Site settings"
               className="w-[196px] shrink-0 space-y-0.5 overflow-y-auto border-r border-app-border-pane bg-app-surface-sunken p-2.5"
@@ -396,14 +425,18 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
                 side="right"
                 className={cn(navItemClasses(false), 'flex gap-3 text-[12.5px]')}
               >
-                <AppIcon name="language" size={20} />
+                {/* `public`, not `language`: the handoff gives `language` to the
+                    Languages row below, and two rails rows sharing a glyph reads
+                    as a bug. The handoff's Domain frame draws `public` too. */}
+                <AppIcon name="public" size={20} />
                 <span>Domain</span>
               </Coming>
               <NavItem
-                active
+                active={section === 'seo'}
                 activeBar
                 icon="search"
                 label="SEO"
+                onClick={() => setSection('seo')}
                 className="text-[12.5px]"
               />
               {/* WIRED — never greyed (decision 10): opens the existing social panel. */}
@@ -413,11 +446,34 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
                 onClick={openSocial}
                 className="text-[12.5px]"
               />
+              {/* Languages + mono count badge (handoff: blue when active). */}
+              <NavItem
+                active={section === 'languages'}
+                activeBar
+                icon="language"
+                onClick={() => setSection('languages')}
+                className="text-[12.5px]"
+              >
+                <span className="flex-1">Languages</span>
+                <span
+                  className={cn(
+                    'font-app-mono text-[10px] font-semibold',
+                    section === 'languages' ? 'text-app-primary' : 'text-app-faint',
+                  )}
+                >
+                  {localeCount}
+                </span>
+              </NavItem>
             </nav>
 
             {/* Pane */}
             <div className="min-h-0 flex-1 overflow-y-auto px-[26px] py-[22px]">
-              {!page ? (
+              {/* Languages FIRST — it is site-level, so it must be reachable on a
+                  project whose `pages` map is empty (the `!page` guard below
+                  would otherwise swallow the whole pane). */}
+              {section === 'languages' ? (
+                <LanguagesPanel />
+              ) : !page ? (
                 <div className="p-10 text-center text-[13px] text-app-dim">No pages found.</div>
               ) : (
                 <>

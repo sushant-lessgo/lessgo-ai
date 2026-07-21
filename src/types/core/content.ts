@@ -71,12 +71,31 @@ export interface AssetAvailability {
  * zero storage/behavior diff (back-compat law).
  */
 
-/** Per-project locale declaration. Absent ⇒ legacy single-locale project. */
+/**
+ * Per-project locale declaration. Absent ⇒ legacy single-locale project.
+ *
+ * ⚠️ NON-NULL ≠ MULTI-LOCALE (language-settings ruling 10). A SINGLE-locale
+ * config — `{ locales: ['nl'], defaultLocale: 'nl' }` — is legal and meaningful:
+ * it is the durable record that the site's declared language is Dutch, written
+ * by onboarding and read by regeneration. It is NOT a signal to switch on any
+ * multi-locale machinery. Gate every multi-locale surface (language pills,
+ * published switcher, hreflang, overlay authoring) on `isMultiLocale()`
+ * (`@/lib/i18n/localeContent`), never on `localeConfig != null`.
+ */
 export interface LocaleConfig {
   /** All declared locale codes (default included). e.g. ['en','nl']. */
   locales: string[];
   /** The locale whose copy lives in the flat `content` map. e.g. 'en'. */
   defaultLocale: string;
+  /**
+   * Published-page language-switcher widget style (publish layer only — it has
+   * no effect in the editor). ABSENT ⇒ `'dropdown'` ⇒ exactly today's behavior
+   * (zero-diff for every existing project). `'none'` suppresses the ENTIRE
+   * switcher block on the published page — pill AND the geo auto-redirect —
+   * because "no switcher" must mean "no automatic locale behavior at all".
+   * hreflang/canonical emission is unaffected by this field.
+   */
+  switcherStyle?: 'dropdown' | 'none';
 }
 
 /**

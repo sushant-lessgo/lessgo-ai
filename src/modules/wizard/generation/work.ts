@@ -34,7 +34,8 @@ import type { CollectionsFacts } from '@/modules/brief/collections';
 import type { SitemapPage } from '@/types/product';
 import type { Brief } from '@/types/brief';
 import type { WorkStrategyOutput } from '@/modules/audience/work/strategy/parseStrategyWork';
-import { saveDraft } from './finalize';
+import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
+import { saveDraft, workLocaleConfigPatch } from './finalize';
 import type { GenerationCallbacks, GenerationResult } from './index';
 
 // work-copy-engine phase 5 — the guarded WORK LLM multi-page fan-out. Kept in a
@@ -97,6 +98,21 @@ const GRANTH_PALETTE = 'sinduri';
 const GRANTH_VARIANT = 'granth';
 
 /**
+ * language-settings phase 3 — the durable site-language declaration for WORK.
+ *
+ * Work adds NO second language control: it derives the declaration from the
+ * EXISTING Step-3 `languages` question (`facts.work.languages`, human LABELS
+ * like `'English'`/`'Dutch'`). ONE resolver, spread into EVERY work save site
+ * (this file ×3 + `work.llm.ts` ×1) so no save path can drop it. `{}` for
+ * English / no answer / an unmapped label ⇒ zero-diff (see
+ * `workLocaleConfigPatch`). Work's PROMPT language is unchanged — it keeps
+ * consuming the label directly server-side; this is persistence only.
+ */
+function workLocalePatch(input: WorkGenerationInput) {
+  return workLocaleConfigPatch(getWorkFacts(input.brief?.facts)?.languages);
+}
+
+/**
  * Fetch the persisted Project templateId (load-detection path). Returns null on
  * any failure so the caller can decide (we treat "couldn't read" as a hard fail
  * — the guard below is a defense, not a best-effort).
@@ -134,6 +150,8 @@ export async function runWorkGeneration(
   cb.onStage?.('saving');
   const writerName = input.writerName.trim() || undefined;
   const title = (input.writerName.trim() || input.oneLiner || 'Writer').slice(0, 50);
+  // Resolved ONCE per run (one warn at most for an unmapped label).
+  const localePatch = workLocalePatch(input);
 
   try {
     const finalContent = buildGranthHomeFinalContent({
@@ -153,6 +171,7 @@ export async function runWorkGeneration(
       paletteId: GRANTH_PALETTE,
       templateId: 'granth',
       variantId: GRANTH_VARIANT,
+      ...localePatch,
       finalContent,
     });
 
@@ -173,6 +192,7 @@ export async function runWorkGeneration(
           paletteId: GRANTH_PALETTE,
           templateId: 'granth',
           variantId: GRANTH_VARIANT,
+          ...localePatch,
           finalContent: fc,
         });
       },
@@ -210,6 +230,7 @@ export async function runWorkSkeleton(
   const { tokenId } = input;
   const pages = input.pages ?? [];
   const title = (input.writerName.trim() || input.oneLiner || 'Your site').slice(0, 50);
+  const localePatch = workLocalePatch(input);
 
   cb.onStage?.('saving');
   try {
@@ -269,6 +290,7 @@ export async function runWorkSkeleton(
       title: (fc.meta?.title as string) || title,
       ...(input.templateId ? { templateId: input.templateId } : {}),
       ...(themeValues ? { themeValues } : {}),
+      ...localePatch,
       finalContent: fc,
     });
   } catch (e: any) {

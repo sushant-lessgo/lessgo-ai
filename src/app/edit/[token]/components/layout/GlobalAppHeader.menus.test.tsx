@@ -163,6 +163,23 @@ describe('GlobalAppHeader menus', () => {
     await settle();
 
     expect(showSeoModal).toHaveBeenCalledTimes(1);
+    // language-settings phase 2b: SEO must stay a no-arg call — the window
+    // defaults to the SEO pane, so this row's behavior is unchanged.
+    expect(showSeoModal.mock.calls[0]).toEqual([]);
+    expect(menuOpen('Site settings')).toBe(false);
+  });
+
+  // language-settings phase 2b (founder request at the phase-2 gate).
+  it('Settings → Languages opens the settings window ON the Languages pane', async () => {
+    act(() => trigger('Site settings').click());
+    act(() => row('Languages').click());
+    await settle();
+
+    expect(showSeoModal).toHaveBeenCalledTimes(1);
+    // The whole point of the row: WITHOUT the section argument it would land on
+    // SEO, which is the SEO row's job. Drop the arg and this goes red.
+    expect(showSeoModal).toHaveBeenCalledWith({ section: 'languages' });
+    expect(showSocialModal).not.toHaveBeenCalled();
     expect(menuOpen('Site settings')).toBe(false);
   });
 

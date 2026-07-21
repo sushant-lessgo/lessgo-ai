@@ -32,6 +32,15 @@ export interface ProductStrategyPromptInput {
   /** Page-archetype MENU (capability data, not template identity — resolved
    *  route-side). When present, the prompt gains Step 5: sitemap proposal. */
   pageArchetypes?: PageArchetypeDef[];
+  /**
+   * language-settings phase 4 — output language as an English exonym
+   * (`'English'`, `'Dutch'`, …). Absent ⇒ `'English'`. The strategy output is
+   * mostly internal reasoning, BUT positioning/persona/benefit phrasing is
+   * pasted verbatim into the copy prompt — without this hedge, source-language
+   * angle text leaks into the page. Mirrors work/strategy/promptsWork.ts:95.
+   * Always route-validated (`resolvePromptLanguage`), never raw client input.
+   */
+  language?: string;
 }
 
 function buildSitemapStep(menu: PageArchetypeDef[]): string {
@@ -74,6 +83,8 @@ export function buildProductStrategyPrompt(input: ProductStrategyPromptInput): s
   } = input;
 
   const isTrade = (input.voiceId ?? 'modern-tech') === 'tailored-trade';
+  // ALWAYS emitted, English included (plan ruling 2).
+  const language = input.language || 'English';
 
   const sitemapStep = pageArchetypes?.length ? buildSitemapStep(pageArchetypes) : '';
 
@@ -151,6 +162,8 @@ ${sitemapStep}
 ---
 
 ${framing}
+
+Write every string in ${language}. The product information above MAY be in another language — render its MEANING in ${language}; never copy or echo its source-language wording (proper nouns stay as-is).
 
 Output valid JSON only. No explanations or markdown.`;
 }

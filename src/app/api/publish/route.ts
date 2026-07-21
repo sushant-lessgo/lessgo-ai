@@ -195,12 +195,31 @@ async function publishHandler(req: NextRequest) {
     // at `finalContent.localeContent`) — exactly where saveDraft persists them,
     // and preview force-saves before publishing so this read is fresh. The
     // publish REQUEST `content` (built from the store's page export) carries
-    // neither key, so we source both from the DB here. Absent ⇒ legacy
-    // single-locale ⇒ renderPublishedExport runs its single default-locale pass
-    // exactly as before (byte-identical, no locale docs, no extra routes).
+    // neither key, so we source both from the DB here — and persist them on
+    // PublishedPage.content so the `/p/{slug}` SSR fallback and the verify-dns
+    // go-live regen both see them (neither has access to Project.content).
+    // Absent ⇒ legacy single-locale ⇒ renderPublishedExport runs its single
+    // default-locale pass exactly as before (byte-identical, no locale docs, no
+    // extra routes) and the persisted row gains NO new keys.
     const projectContent = (project?.content ?? null) as any;
     const localeConfig: LocaleConfig | null = projectContent?.localeConfig ?? null;
     const projectLocaleContent = projectContent?.finalContent?.localeContent;
+
+    // ONE enriched content object feeds BOTH the PublishedPage row writes AND the
+    // static export, so what the row says can never drift from what the blob was
+    // baked from. PRESENCE-GATED: with no localeConfig this is the untouched
+    // `content` reference ⇒ monolingual publishes are byte-identical (zero-diff).
+    // (publish-sanitize phase 2: the translated overlay is a verbatim-import path,
+    // so it goes through sanitizeLocaleOverlay before it is stored or rendered.)
+    const publishedContent: any = localeConfig
+      ? {
+          ...(content as any),
+          localeConfig,
+          ...(projectLocaleContent
+            ? { localeContent: sanitizeLocaleOverlay(projectLocaleContent) }
+            : {}),
+        }
+      : content;
 
     // i18n-phase-1 (Phase 6): reserved-path collision guard. A multi-page subpage
     // slug that equals a declared NON-DEFAULT locale code would collide with that
@@ -288,7 +307,7 @@ async function publishHandler(req: NextRequest) {
         data: {
           htmlContent: '',  // Phase 2: Empty for dynamic rendering
           title: cleanTitle,
-          content: content as any,
+          content: publishedContent as any,
           themeValues: publishedThemeValues as any,
           projectId: project?.id || null,
           audienceType,
@@ -324,7 +343,7 @@ async function publishHandler(req: NextRequest) {
           slug,
           htmlContent: '',  // Phase 2: Empty for dynamic rendering
           title: cleanTitle,
-          content: content as any,
+          content: publishedContent as any,
           themeValues: publishedThemeValues as any,
           projectId: project?.id || null,
           audienceType,
@@ -421,18 +440,10 @@ async function publishHandler(req: NextRequest) {
       const { renderPublishedExport } = await import('@/lib/staticExport/renderPublishedExport');
       const { cleanupOldVersions } = await import('@/lib/staticExport/versionCleanup');
 
-      // i18n (Phase 6): the non-default-locale text overlay lives in the DB
-      // (Project.content.finalContent.localeContent), NOT in the publish request
-      // `content`. renderPublishedExport reads it off `content.localeContent`
-      // (project-global, keyed by unique sectionId) when resolving each locale
-      // doc, so seed it here. Only set when present ⇒ single-locale publishes
-      // stay byte-identical (no key added).
-      if (projectLocaleContent && content && typeof content === 'object') {
-        // publish-sanitize (phase 2): clean the render-only translated overlay too
-        // (verbatim-import path — highest-severity XSS class). Only-when-present
-        // semantics preserved: single-locale publishes add no key, stay byte-identical.
-        (content as any).localeContent = sanitizeLocaleOverlay(projectLocaleContent);
-      }
+      // i18n (Phase 6): the non-default-locale text overlay is NOT seeded here
+      // any more. It (and `localeConfig`) ride on `publishedContent`, built once
+      // above and used for BOTH the row write and the export below — the row and
+      // the blob therefore describe the same locale data by construction.
 
       // pricing-v2 (phase 2): suppress the "Made with Lessgo" badge only when the
       // page OWNER's plan has removeBranding (Pro/LTD). userId here is the owner.
@@ -453,7 +464,8 @@ async function publishHandler(req: NextRequest) {
         pageId,
         userId,
         slug,
-        content,
+        // Same object the PublishedPage row was written with (see publishedContent).
+        content: publishedContent,
         title: cleanTitle,
         previewImage,
         analyticsEnabled: analyticsEnabled || false,

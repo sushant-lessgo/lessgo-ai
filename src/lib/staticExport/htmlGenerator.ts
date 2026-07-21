@@ -317,13 +317,25 @@ function buildHTMLDocument(params: {
           )
           .join('')
       : '';
-  // Inline locale config (drives switcher.v1.js) + the shared switcher asset.
+  // language-settings phase 5 — widget style. Read off the localeConfig the
+  // generator ALREADY receives (no parallel param). Absent ⇒ 'dropdown' ⇒
+  // exactly today's behavior. 'none' ⇒ the ENTIRE switcher block (config +
+  // script) is omitted, which kills the pill AND the geo auto-redirect —
+  // "None" means no automatic locale behavior at all. hreflang/canonical are
+  // unaffected (SEO does not depend on widget style).
+  const switcherStyle = params.localeConfig?.switcherStyle ?? 'dropdown';
+  const emitSwitcher = multiLocale && switcherStyle !== 'none';
+  // Inline locale config (drives switcher.v2.js) + the shared switcher asset.
   // `<` escaped to < so a stray locale code can't break out of the script.
-  const localeJson = multiLocale
+  // `slug` lets the runtime derive its basePath ('' at host root, '/p/{slug}'
+  // on the lessgo preview path) so one stamped config serves every surface.
+  const localeJson = emitSwitcher
     ? JSON.stringify({
         locales: params.localeConfig!.locales,
         defaultLocale: params.localeConfig!.defaultLocale,
         current: lang,
+        slug: metadata.slug,
+        style: switcherStyle,
       }).replace(/</g, '\\u003c')
     : '';
 
@@ -370,9 +382,11 @@ function buildHTMLDocument(params: {
     canonicalPath: metadata.canonicalPath,
   });
 
-  // Switcher tag block (needs assetBase, resolved above). Empty for single-locale.
-  const switcherTags = multiLocale
-    ? `\n\n  <!-- i18n locale switcher (multi-locale) -->\n  <script>window.__lessgoLocales=${localeJson}</script>\n  <script src="${assetBase}/assets/switcher.v1.js" defer></script>`
+  // Switcher tag block (needs assetBase, resolved above). Empty for single-locale
+  // AND for switcherStyle 'none'. v2 filename per the immutable-asset contract —
+  // already-published blobs keep loading the frozen switcher.v1.js.
+  const switcherTags = emitSwitcher
+    ? `\n\n  <!-- i18n locale switcher (multi-locale) -->\n  <script>window.__lessgoLocales=${localeJson}</script>\n  <script src="${assetBase}/assets/switcher.v2.js" defer></script>`
     : '';
 
   return `<!DOCTYPE html>

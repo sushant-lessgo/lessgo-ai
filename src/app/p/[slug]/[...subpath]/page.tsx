@@ -1,13 +1,21 @@
 import { prisma } from '@/lib/prisma';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { usesTemplateModule, type TemplateId } from '@/types/service';
 import { resolveCanonicalURL } from '@/lib/staticExport/canonicalUrl';
-import { resolveOgImage } from '@/lib/staticExport/buildPageMetadata';
+import { buildPageMetadata, flattenContent, resolveOgImage } from '@/lib/staticExport/buildPageMetadata';
 import { getPublishedGoal } from '@/lib/staticExport/getPublishedGoal';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import { isServingPublishState } from '@/lib/publishState';
+import { resolveLocaleElements } from '@/lib/i18n/localeContent';
+import {
+  buildLocaleAlternateMap,
+  resolvePublishedLocale,
+  switcherTagsForSsr,
+} from '@/lib/i18n/publishedLocale';
+import { renderPublishedRoot } from '../renderPublishedRoot';
 
 // Multi-page subpage route. Serves content.subpages[pathSlug] from a published
 // project. The blob fast path (KV route:{host}:{path} → blob-proxy) handles most
@@ -46,7 +54,65 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!page || !isServingPublishState(page.publishState)) return {};
 
   const content = page.content as any;
-  const subPath = subPathFromParams(params.subpath);
+  // i18n (phase 6): `/{loc}` and `/{loc}/{sub}` are locale routes, not subpages.
+  // Absent/single-locale config ⇒ null ⇒ the exact pre-change path below.
+  const localeConfig = content?.localeConfig;
+  const localeHit = resolvePublishedLocale(localeConfig, params.subpath);
+  const barePath = subPathFromParams(localeHit ? localeHit.remainder : params.subpath);
+  const servedPath = localeHit ? `/${localeHit.locale}${barePath === '/' ? '' : barePath}` : barePath;
+  const languages = buildLocaleAlternateMap({
+    config: localeConfig,
+    slug: params.slug,
+    canonicalDomain:
+      page.customDomainStatus === 'live' && page.customDomain ? page.customDomain : undefined,
+    barePath,
+  });
+  const withLanguages = (alternates: { canonical: string }) =>
+    Object.keys(languages).length ? { ...alternates, languages } : alternates;
+
+  // Locale ROOT (`/{loc}`): the root document in another language. Metadata comes
+  // from the same builder the root route uses, at this locale's canonical path.
+  if (localeHit && localeHit.remainder.length === 0) {
+    const canonicalDomain =
+      page.customDomainStatus === 'live' && page.customDomain ? page.customDomain : undefined;
+    const localized = resolveLocaleElements(
+      (content.content || {}) as Record<string, any>,
+      content.localeContent,
+      localeHit.locale,
+    );
+    const meta = buildPageMetadata({
+      slug: params.slug,
+      pageTitle: page.title || '',
+      content: flattenContent({ ...content, content: localized }),
+      previewImage: page.previewImage,
+      canonicalDomain,
+      canonicalPath: servedPath,
+      baseUrl: 'https://lessgo.ai',
+    });
+    return {
+      title: meta.title,
+      description: meta.description,
+      alternates: withLanguages({ canonical: meta.canonicalURL }),
+      ...(meta.noIndex ? { robots: { index: false, follow: false } } : {}),
+      ...(meta.faviconUrl ? { icons: { icon: meta.faviconUrl } } : {}),
+      openGraph: {
+        title: meta.title,
+        description: meta.description,
+        url: meta.canonicalURL,
+        siteName: meta.siteName,
+        images: [{ url: meta.ogImage, width: 1200, height: 630, alt: meta.title }],
+        type: meta.ogType,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: meta.title,
+        description: meta.description,
+        images: [meta.ogImage],
+      },
+    };
+  }
+
+  const subPath = barePath;
   const sub = getSubpage(content, subPath);
   if (!sub) return {};
 
@@ -57,11 +123,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // (shared with the static generator so the SSR fallback can't drift).
   const canonicalDomain =
     page.customDomainStatus === 'live' && page.customDomain ? page.customDomain : undefined;
-  const canonicalURL = resolveCanonicalURL({ slug: params.slug, canonicalDomain, canonicalPath: subPath });
+  // `servedPath` === `subPath` for a non-locale request (byte-identical), and
+  // `/{loc}{subPath}` for a localized subpage (its own canonical, matching the blob).
+  const canonicalURL = resolveCanonicalURL({ slug: params.slug, canonicalDomain, canonicalPath: servedPath });
+
+  // Localized subpage metadata reads the OVERLAID elements (same shared primitive
+  // the export uses); no locale ⇒ the base section map, untouched.
+  const subSectionData: Record<string, any> = localeHit
+    ? resolveLocaleElements((sub?.content || {}) as Record<string, any>, content.localeContent, localeHit.locale)
+    : (sub?.content || {});
 
   // Product-detail pages have no hero — derive SEO from the Product entry record.
   const pdId = sections.find((id: string) => /^productdetail/i.test(id));
-  const pdEl = pdId ? sub?.content?.[pdId]?.elements || {} : null;
+  const pdEl = pdId ? subSectionData?.[pdId]?.elements || {} : null;
 
   // Per-page seo overrides (sanitized at publish; subpage seo lives on the sub entry).
   const seo = sub?.seo || undefined;
@@ -73,7 +147,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     previewImage: page.previewImage,
     canonicalDomain,
     baseUrl: 'https://lessgo.ai',
-    canonicalPath: subPath,
+    canonicalPath: servedPath,
   });
 
   if (pdEl) {
@@ -87,7 +161,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const firstImg = Array.isArray(pdEl.images) ? pdEl.images.find((im: any) => im?.src)?.src : undefined;
     if (firstImg) ogImageUrl = firstImg;
   } else {
-    const heroElements = heroId ? sub?.content?.[heroId]?.elements || {} : {};
+    const heroElements = heroId ? subSectionData?.[heroId]?.elements || {} : {};
     // Strip HTML from headline (user/AI string) before it feeds pageTitle + the fallback.
     headline = stripHTMLTags(heroElements.headline?.content || '') || sub?.title || page.title || 'Page';
     // Strip HTML from subheadline BEFORE the 157-char cap (avoids truncated-tag remnants).
@@ -113,7 +187,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: pageTitle,
     description,
-    alternates: { canonical: canonicalURL },
+    alternates: withLanguages({ canonical: canonicalURL }),
     ...(seo?.noIndex ? { robots: { index: false, follow: false } } : {}),
     ...(faviconUrl ? { icons: { icon: faviconUrl } } : {}),
     openGraph: {
@@ -143,6 +217,9 @@ export default async function PublishedSubpage({ params }: PageProps) {
       paletteId: true,
       themeValues: true,
       publishState: true,
+      title: true,
+      customDomain: true,
+      customDomainStatus: true,
     },
   });
 
@@ -150,7 +227,42 @@ export default async function PublishedSubpage({ params }: PageProps) {
   if (!page || !page.content || !isServingPublishState(page.publishState)) return notFound();
 
   const content = page.content as any;
-  const pathSlug = subPathFromParams(params.subpath);
+  // i18n (phase 6): a leading declared NON-default locale segment makes this a
+  // locale route rather than a subpage. Absent/single-locale config, or a first
+  // segment that is not a declared locale ⇒ null ⇒ the EXACT pre-change path.
+  const localeConfig = content?.localeConfig;
+  const localeHit = resolvePublishedLocale(localeConfig, params.subpath);
+  const pathSlug = subPathFromParams(localeHit ? localeHit.remainder : params.subpath);
+
+  // The switcher block (identical suppression + `slug` to the blob path; see the
+  // root route). `current` is the locale THIS document renders.
+  const switcher = switcherTagsForSsr({
+    config: localeConfig,
+    current: localeHit ? localeHit.locale : localeConfig?.defaultLocale || 'en',
+    slug: params.slug,
+    host: () => headers().get('host'),
+  });
+  const switcherTags = switcher ? (
+    <>
+      <script dangerouslySetInnerHTML={{ __html: switcher.configScript }} />
+      <script src={switcher.scriptSrc} defer />
+    </>
+  ) : null;
+
+  // `/{loc}` with nothing after it = the ROOT document in that locale. Before
+  // phase 6 this 404'd. Rendered through the SHARED root helper (no copy of the
+  // root render block).
+  if (localeHit && localeHit.remainder.length === 0) {
+    sanitizeContentForPublish(content);
+    return renderPublishedRoot({
+      page,
+      slug: params.slug,
+      content,
+      locale: localeHit.locale,
+      extras: switcherTags,
+    });
+  }
+
   const sub = getSubpage(content, pathSlug);
   if (!sub) return notFound();
 
@@ -173,9 +285,17 @@ export default async function PublishedSubpage({ params }: PageProps) {
     await preloadTemplate(templateId as any);
   }
 
-  // Subpage section data + shared forms/legalPages from the root.
+  // Subpage section data + shared forms/legalPages from the root. i18n (phase 6):
+  // overlays are PROJECT-GLOBAL (keyed by globally-unique sectionId) and live on the
+  // ROOT content, so the root map is the overlay source for subpages too — exactly
+  // what renderPublishedExport does. No locale ⇒ same reference back ⇒ no-op.
+  const localizedSub = resolveLocaleElements(
+    (sub.content || {}) as Record<string, any>,
+    content.localeContent,
+    localeHit?.locale,
+  );
   const mergedContent = {
-    ...(sub.content || {}),
+    ...localizedSub,
     forms: content.forms || {},
     legalPages: content.legalPages || undefined,
   };
@@ -202,6 +322,7 @@ export default async function PublishedSubpage({ params }: PageProps) {
         mood={(page.themeValues as any)?.mood ?? null}
         goal={goal}
       />
+      {switcherTags}
     </>
   );
 }

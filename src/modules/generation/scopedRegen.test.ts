@@ -620,3 +620,88 @@ describe('generateScopedCopy — engine, retry loop, scopes', () => {
     expect(generateRawJson).not.toHaveBeenCalled();
   });
 });
+
+// ── language-settings phase 4: REGEN's language source ──────────────────────
+//
+// First generation takes the language off the REQUEST (the audience routes hold
+// no token — plan ruling 11); REGEN is the other half of the seam and reads the
+// DURABLE declaration off the Project row it already has. These cases drive the
+// real primitive and read the prompt string handed to the (mocked) AI client, so
+// they fail if the thread is cut anywhere between `content.localeConfig` and the
+// builder.
+describe('generateScopedCopy — output language comes from content.localeConfig', () => {
+  const layoutState = { sections: Object.keys(PRODUCT_LAYOUTS), sectionLayouts: PRODUCT_LAYOUTS };
+  const promptSent = () => String(generateRawJson.mock.calls[0][1]);
+
+  const withLocale = (project: ScopedProject, defaultLocale: string): ScopedProject => ({
+    ...project,
+    content: { ...(project.content as object), localeConfig: { locales: [defaultLocale], defaultLocale } },
+  });
+
+  it('PRODUCT regen: a declared nl project regenerates with the Dutch directive', async () => {
+    generateRawJson.mockResolvedValueOnce({ hero: fullSection('hero') });
+    await generateScopedCopy({
+      project: withLocale(productProject(), 'nl'),
+      layoutState,
+      scope: { kind: 'section', sectionId: 'hero' },
+    });
+    expect(promptSent()).toContain('## OUTPUT LANGUAGE — Dutch (READ FIRST)');
+    expect(promptSent()).not.toContain('Nederlands');
+  });
+
+  it('PRODUCT regen: no declaration ⇒ the English directive (always emitted)', async () => {
+    generateRawJson.mockResolvedValueOnce({ hero: fullSection('hero') });
+    await generateScopedCopy({
+      project: productProject(),
+      layoutState,
+      scope: { kind: 'section', sectionId: 'hero' },
+    });
+    expect(promptSent()).toContain('## OUTPUT LANGUAGE — English (READ FIRST)');
+  });
+
+  it('SERVICE regen: a declared de project regenerates with the German directive', async () => {
+    generateRawJson.mockResolvedValueOnce({ hero: fullSection('hero') });
+    await generateScopedCopy({
+      project: withLocale(serviceProject(), 'de'),
+      layoutState,
+      scope: { kind: 'section', sectionId: 'hero' },
+    });
+    expect(promptSent()).toContain('## OUTPUT LANGUAGE — German (READ FIRST)');
+  });
+
+  it('WORK regen: localeConfig BEATS facts.languages[0] (plan ruling 4)', async () => {
+    generateRawJson.mockResolvedValueOnce({ about: { elements: WORK_ABOUT_RESPONSE } });
+    // facts say English; the site DECLARES Dutch — the declaration wins.
+    await generateScopedCopy({
+      project: withLocale(atelierProject(), 'nl'),
+      layoutState: ATELIER_LAYOUT_STATE,
+      scope: { kind: 'section', sectionId: 'about' },
+    });
+    expect(promptSent()).toContain('## OUTPUT LANGUAGE — Dutch (READ FIRST)');
+    expect(promptSent()).not.toContain('## OUTPUT LANGUAGE — English');
+  });
+
+  it('WORK regen: NO localeConfig ⇒ facts.languages[0] is still the fallback (legacy work projects)', async () => {
+    generateRawJson.mockResolvedValueOnce({ about: { elements: WORK_ABOUT_RESPONSE } });
+    const legacy = atelierProject();
+    (legacy.brief as any).facts.work.languages = ['Dutch'];
+    await generateScopedCopy({
+      project: legacy,
+      layoutState: ATELIER_LAYOUT_STATE,
+      scope: { kind: 'section', sectionId: 'about' },
+    });
+    expect(promptSent()).toContain('## OUTPUT LANGUAGE — Dutch (READ FIRST)');
+  });
+
+  it('WORK regen: an UNMAPPED work label (Hindi — no localeConfig is ever written for it) still reaches the prompt', async () => {
+    generateRawJson.mockResolvedValueOnce({ about: { elements: WORK_ABOUT_RESPONSE } });
+    const legacy = atelierProject();
+    (legacy.brief as any).facts.work.languages = ['Hindi'];
+    await generateScopedCopy({
+      project: legacy,
+      layoutState: ATELIER_LAYOUT_STATE,
+      scope: { kind: 'section', sectionId: 'about' },
+    });
+    expect(promptSent()).toContain('## OUTPUT LANGUAGE — Hindi (READ FIRST)');
+  });
+});

@@ -140,13 +140,15 @@ describe('Phase 5 — multi-locale static export', () => {
     expect(nlSet).toEqual(expected); // reciprocity: nl doc uses the SAME URLs as en
 
     // Switcher asset + inline config injected on both docs, current locale correct.
-    expect(enHtml).toContain('/assets/switcher.v1.js');
-    expect(nlHtml).toContain('/assets/switcher.v1.js');
+    // language-settings phase 5: v2 filename (v1 is frozen for old blobs) and the
+    // config now carries `slug` (runtime basePath) + `style`.
+    expect(enHtml).toContain('/assets/switcher.v2.js');
+    expect(nlHtml).toContain('/assets/switcher.v2.js');
     expect(enHtml).toContain(
-      'window.__lessgoLocales={"locales":["en","nl"],"defaultLocale":"en","current":"en"}'
+      `window.__lessgoLocales={"locales":["en","nl"],"defaultLocale":"en","current":"en","slug":"${SLUG}","style":"dropdown"}`
     );
     expect(nlHtml).toContain(
-      'window.__lessgoLocales={"locales":["en","nl"],"defaultLocale":"en","current":"nl"}'
+      `window.__lessgoLocales={"locales":["en","nl"],"defaultLocale":"en","current":"nl","slug":"${SLUG}","style":"dropdown"}`
     );
   });
 
@@ -221,7 +223,9 @@ describe('Phase 5 — single-locale back-compat (byte-identical)', () => {
     // And none of the multi-locale surface leaked in.
     expect(baseline.html).toContain('<html lang="en">');
     expect(baseline.html).not.toContain('hreflang');
-    expect(baseline.html).not.toContain('switcher.v1.js');
+    // phase 5: pin the LIVE filename — `switcher.v1.js` is no longer emitted by
+    // anything, so asserting its absence here could never fail (inert).
+    expect(baseline.html).not.toContain('switcher.v2.js');
     expect(baseline.html).not.toContain('__lessgoLocales');
   });
 });

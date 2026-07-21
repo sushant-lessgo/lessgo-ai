@@ -29,6 +29,14 @@ export interface ServiceCopyPromptInput {
   offer: string;
   goal: ServiceGoal;
   understanding: ServiceUnderstandingInput;
+  /**
+   * language-settings phase 4 — the site's OUTPUT language as an English exonym
+   * (`'English'`, `'Dutch'`, …), never an ISO code and never a native endonym.
+   * Absent ⇒ `'English'`. ALWAYS produced by `resolvePromptLanguage()` (route)
+   * or `toPromptLanguage()` (regen), never taken raw from a request body —
+   * see `@/lib/i18n/projectLocale` and plan ruling 11.
+   */
+  language?: string;
 }
 
 // proof-truth phase 2: proof-shaped elements (testimonial quote/author fields,
@@ -139,6 +147,22 @@ export function buildServiceCopyPrompt(input: ServiceCopyPromptInput): string {
   // Voice is chosen by business ARCHETYPE (serviceType + growth signals), never by
   // templateId — firewall-safe. Drives IDENTITY, the voice block, and the rules.
   const voice = selectServiceVoice(understanding);
+
+  // ALWAYS emitted, English included (plan ruling 2) — see product/copyPrompt.ts.
+  const language = input.language || 'English';
+  // Mirrors work/copyPrompt.ts:213-219; placed BEFORE all grounding material.
+  const languageDirective = `## OUTPUT LANGUAGE — ${language} (READ FIRST)
+Your entire output MUST be written in ${language}. The grounding material below —
+the provider facts, the strategy blocks, and the stated services — MAY be written
+in another language. When it is, render its MEANING in ${language}: translate the
+idea, never copy or echo the source-language wording. No source-language
+fragments, names of things, or phrases may survive into your output (unless
+${language} IS that language). Proper nouns (the business name, place names,
+people's names) stay as-is.`;
+  // UNNUMBERED + bold: the RULES block hardcodes 1.–9. (plus a conditional 10.
+  // and the computed binding rules), so a numbered insert would collide.
+  const languageRule = `**Write EVERY string in ${language}.** The entire page — headings, ledes, card labels, CTAs, footer text, everything — must be in ${language}. No other language, no mixed-language cards, no English fragments (unless ${language} IS English).`;
+
   const hasCaseStudies = strategy.sections.includes('casestudies');
   const hasServicesSection = strategy.sections.includes('services');
 
@@ -182,6 +206,8 @@ ${understanding.services.map((s) => `- ${s}`).join('\n')}
 
   return `## IDENTITY
 ${voice.identity}
+
+${languageDirective}
 
 ## PROVIDER
 One-liner: ${oneLiner}
@@ -233,6 +259,7 @@ ${sectionSpecs}
 ${getElementSchemas()}
 
 ## RULES (MUST FOLLOW)
+${languageRule}
 1. **Emphasis convention — applies to EVERY section, not just hero.** Every "headline" field AND every "lede" field across ALL sections (hero, services, packages, testimonials, cta — every one) must wrap 1-2 emphasized words in <em>...</em>. The renderer styles emphasized words (the template decides how). Without <em>, the page reads flat. Do not skip it on services/packages/cta headlines or on any lede.
    - ⚠️ **LEDES ARE THE #1 MISSED FIELD.** A lede is a full descriptive sentence, so it is easy to forget the accent — but it needs exactly one <em>...</em> just like a headline. Pick the single most meaningful word in each lede and wrap it. Re-read every lede before you output.
 2. Respect character limits and array min/max strictly.

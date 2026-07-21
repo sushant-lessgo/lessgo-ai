@@ -330,3 +330,114 @@ describe('/api/publish — CMS detail-path collision surfaces as an actionable 4
     expect(renderPublishedExport).not.toHaveBeenCalled();
   });
 });
+
+// language-settings phase 6 — publish PERSISTENCE of the locale declaration.
+//
+// Before this phase `PublishedPage.content` carried neither `localeConfig` nor
+// `localeContent`: the row was written from the request `content`, and the locale
+// data was only ever handed to the static export. The `/p/{slug}` SSR renderer and
+// the verify-dns go-live regen read PublishedPage.content — so they had no data
+// source at all. These cases pin (a) the bilingual round-trip, (b) that ONE object
+// feeds both the row write and the export (no persisted-vs-rendered drift), and
+// (c) the monolingual zero-diff contract: NO new keys on the row, ever.
+describe('/api/publish — locale persistence onto PublishedPage.content (phase 6)', () => {
+  const LOCALE_CONFIG = { locales: ['en', 'nl'], defaultLocale: 'en', switcherStyle: 'dropdown' };
+  const OVERLAY = { nl: { 'hero-1': { headline: 'Hallo<script>alert(1)</script>' } } };
+
+  const projectRow = (projectContent: any) => ({
+    id: 'proj_1',
+    audienceType: 'product',
+    templateId: 'meridian',
+    variantId: null,
+    paletteId: null,
+    themeValues: {},
+    content: projectContent,
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    db.project.upsert.mockResolvedValue({});
+    db.token.upsert.mockResolvedValue({});
+    db.publishedPage.findUnique.mockResolvedValue(PAGE_ROW);
+    db.publishedPage.update.mockResolvedValue(PAGE_ROW);
+    db.publishedPage.create.mockResolvedValue(PAGE_ROW);
+    db.publishedPage.count.mockResolvedValue(0);
+    renderPublishedExport.mockResolvedValue({ version: 3, blobKey: BLOB_KEY, blobUrl: 'https://blob/x', sizeBytes: 1024, extraRoutes: {} });
+    atomicPublishWithRetry.mockResolvedValue({ attempts: 1, verified: true } as any);
+    materializeCmsForPublish.mockResolvedValue(0 as any);
+  });
+
+  /** The `content` the row was written with (update path — `existing` is found). */
+  function writtenContent(): any {
+    const call = db.publishedPage.update.mock.calls.find((c: any[]) => c[0]?.data?.content !== undefined);
+    return call?.[0]?.data?.content;
+  }
+
+  it('bilingual project ⇒ the persisted row carries localeConfig + the SANITIZED overlay', async () => {
+    db.project.findUnique.mockResolvedValue(
+      projectRow({ localeConfig: LOCALE_CONFIG, finalContent: { localeContent: OVERLAY } }),
+    );
+
+    const res: any = await POST(makeReq(BODY));
+    expect(res.__status).toBe(200);
+
+    const stored = writtenContent();
+    expect(stored.localeConfig).toEqual(LOCALE_CONFIG);
+    // The overlay is a verbatim-import path: it must go through sanitizeLocaleOverlay
+    // BEFORE it is stored (the SSR renderer reads this map straight out of the row).
+    expect(stored.localeContent).toBeDefined();
+    const storedHeadline = stored.localeContent.nl['hero-1'].headline;
+    expect(storedHeadline).toContain('Hallo');
+    expect(storedHeadline).not.toContain('<script>');
+  });
+
+  it('the row write and the static export get the SAME object (no persisted-vs-rendered drift)', async () => {
+    db.project.findUnique.mockResolvedValue(
+      projectRow({ localeConfig: LOCALE_CONFIG, finalContent: { localeContent: OVERLAY } }),
+    );
+
+    await POST(makeReq(BODY));
+
+    const exported = renderPublishedExport.mock.calls[0][0] as any;
+    expect(exported.content).toBe(writtenContent());
+    expect(exported.localeConfig).toEqual(LOCALE_CONFIG);
+  });
+
+  it('creating a NEW page persists the locale keys too (create path, not just update)', async () => {
+    db.publishedPage.findUnique
+      .mockResolvedValueOnce(null)          // `existing` lookup → create branch
+      .mockResolvedValue(PAGE_ROW);         // subsequent lookups (pageId, guards)
+    db.project.findUnique.mockResolvedValue(
+      projectRow({ localeConfig: LOCALE_CONFIG, finalContent: { localeContent: OVERLAY } }),
+    );
+
+    await POST(makeReq(BODY));
+
+    const created = db.publishedPage.create.mock.calls[0][0].data.content;
+    expect(created.localeConfig).toEqual(LOCALE_CONFIG);
+    expect(created.localeContent).toBeDefined();
+  });
+
+  it('MONOLINGUAL project ⇒ the persisted content gains NO new keys (zero-diff pin)', async () => {
+    db.project.findUnique.mockResolvedValue(projectRow({}));
+
+    await POST(makeReq(BODY));
+
+    const stored = writtenContent();
+    expect('localeConfig' in stored).toBe(false);
+    expect('localeContent' in stored).toBe(false);
+    // Presence-gated: it is the request content object itself, untouched.
+    expect(stored).toBe((renderPublishedExport.mock.calls[0][0] as any).content);
+    expect((renderPublishedExport.mock.calls[0][0] as any).localeConfig).toBeNull();
+  });
+
+  it('declared config but NO overlay yet ⇒ localeConfig persists, localeContent key is absent', async () => {
+    db.project.findUnique.mockResolvedValue(projectRow({ localeConfig: LOCALE_CONFIG }));
+
+    await POST(makeReq(BODY));
+
+    const stored = writtenContent();
+    expect(stored.localeConfig).toEqual(LOCALE_CONFIG);
+    expect('localeContent' in stored).toBe(false);
+  });
+});

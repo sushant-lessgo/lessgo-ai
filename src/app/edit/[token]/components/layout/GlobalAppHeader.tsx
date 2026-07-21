@@ -196,6 +196,19 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
           >
             Social &amp; sharing
           </AppPopoverItem>
+          {/* language-settings phase 2b — opens the SAME settings window as SEO,
+              landing on its Languages pane (the rail still switches freely).
+              Glyph `language` is free: phase 2 moved the modal's Domain row to
+              `public` precisely so this row could own it. */}
+          <AppPopoverItem
+            icon={<AppIcon name="language" size={18} />}
+            onClick={() => {
+              setShowSettingsMenu(false);
+              showSeoModal({ section: 'languages' });
+            }}
+          >
+            Languages
+          </AppPopoverItem>
         </AppPopoverMenu>
       </Popover>
 

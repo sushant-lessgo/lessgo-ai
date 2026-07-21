@@ -29,6 +29,7 @@ import {
   buildServiceCopyPrompt,
   buildServiceCopyRetryPrompt,
 } from '@/modules/audience/service/copyPrompt';
+import { resolvePromptLanguage } from '@/lib/i18n/projectLocale';
 import {
   processServiceCopy,
   validateServiceCopyCompleteness,
@@ -112,6 +113,12 @@ const GenerateServiceCopyRequestSchema = z.object({
       })
     )
     .optional(),
+  // language-settings phase 4 (ruling 11) — the onboarding-declared site
+  // language, a bare ISO code. Typed `z.unknown()` DELIBERATELY: validation is
+  // SEMANTIC (`resolvePromptLanguage` → 'en' fallback), so no value of any shape
+  // can 400 a paid generation run over language. The raw value never reaches the
+  // prompt — only the validated English exonym does.
+  language: z.unknown().optional(),
 });
 
 async function serviceCopyHandler(req: NextRequest): Promise<Response> {
@@ -128,7 +135,7 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
         400
       );
     }
-    const { strategy, uiblocks, oneLiner, businessName, offer, goal, understanding, realTestimonials } = validation.data;
+    const { strategy, uiblocks, oneLiner, businessName, offer, goal, understanding, realTestimonials, language } = validation.data;
 
     // 2. Auth
     const authCheck = await requireAuth(req);
@@ -205,6 +212,8 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
       offer,
       goal: goal as any,
       understanding: understanding as any,
+      // Validated + mapped to an English exonym here (ruling 11).
+      language: resolvePromptLanguage(language),
     });
     logger.dev('[service-generate-copy] PROMPT:', prompt);
 

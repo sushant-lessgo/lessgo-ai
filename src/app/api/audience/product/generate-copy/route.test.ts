@@ -154,3 +154,54 @@ describe('/api/audience/product/generate-copy — charging model', () => {
     expect(checkCreditsMock).toHaveBeenCalledWith('user_test', 3);
   });
 });
+
+// ── language-settings phase 4: the BOUND path (ruling 11) ───────────────────
+// NOT "a mocked object yields Dutch": the request BODY goes in one end and the
+// assertion reads the prompt string that actually reached the (mocked) AI
+// client. That is the only shape of test that can fail if the route stops
+// threading the field, or starts trusting it raw.
+//
+// `generateRawJson(endpoint, prompt, schema)` — arg 1 is the assembled prompt.
+const promptSentToAI = () => String(aiMock.mock.calls[0][1]);
+
+describe('/api/audience/product/generate-copy — output language', () => {
+  it('body language:"nl" ⇒ the prompt handed to the AI carries the DUTCH directive', async () => {
+    const res = await POST(makeRequest({ ...BASE_BODY, language: 'nl' }) as never);
+
+    expect(res.status).toBe(200);
+    const prompt = promptSentToAI();
+    expect(prompt).toContain('## OUTPUT LANGUAGE — Dutch (READ FIRST)');
+    expect(prompt).toContain('**Write EVERY string in Dutch.**');
+    // The exonym, never the native endonym, and never the bare code as a name.
+    expect(prompt).not.toContain('Nederlands');
+    expect(prompt).not.toContain('OUTPUT LANGUAGE — nl');
+  });
+
+  it('NO language field ⇒ the English directive is still emitted (ruling 2)', async () => {
+    await POST(makeRequest(BASE_BODY) as never);
+    expect(promptSentToAI()).toContain('## OUTPUT LANGUAGE — English (READ FIRST)');
+  });
+
+  it('garbage language ⇒ English fallback, and the raw string reaches NO prompt', async () => {
+    for (const bad of ['xx', '; DROP TABLE projects; --', 'nl-NL', 'Nederlands']) {
+      aiMock.mockClear();
+      const res = await POST(makeRequest({ ...BASE_BODY, language: bad }) as never);
+      // Never a 400 — language is a prompt input, not an authz input.
+      expect(res.status, `${bad} must not 400`).toBe(200);
+      const prompt = promptSentToAI();
+      expect(prompt).toContain('## OUTPUT LANGUAGE — English (READ FIRST)');
+      expect(prompt, `raw "${bad}" leaked into the prompt`).not.toContain(bad);
+    }
+  });
+
+  it('a non-string language is tolerated (never a 400) and falls back to English', async () => {
+    for (const bad of [42, null, { defaultLocale: 'nl' }, ['nl']]) {
+      aiMock.mockClear();
+      const res = await POST(makeRequest({ ...BASE_BODY, language: bad as never }) as never);
+      // The schema types this field `z.unknown()` on purpose: language is a
+      // prompt input, so no shape of value may fail a paid generation run.
+      expect(res.status, `${JSON.stringify(bad)} must not 400`).toBe(200);
+      expect(promptSentToAI()).toContain('## OUTPUT LANGUAGE — English (READ FIRST)');
+    }
+  });
+});

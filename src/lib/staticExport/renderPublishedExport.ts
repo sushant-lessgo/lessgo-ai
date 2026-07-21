@@ -110,6 +110,16 @@ export async function renderPublishedExport(
   const multiLocale = isMultiLocale(localeConfig);
   const locales = multiLocale ? localeConfig!.locales : [];
   const defaultLocale = multiLocale ? localeConfig!.defaultLocale : 'en';
+  // language-settings phase 5 — the DECLARED site language, independent of the
+  // multi-locale gate: a single-locale config `{locales:['nl'],defaultLocale:'nl'}`
+  // is legal and means "this site is Dutch" (ruling 10). It drives `<html lang>`
+  // on the default-locale docs (root AND subpages — both, or a declared-nl site
+  // would ship lang="nl" on / and lang="en" on /about). No config ⇒ undefined ⇒
+  // 'en' ⇒ byte-identical; a declared-'en' config is also byte-identical.
+  const declaredLocale =
+    localeConfig && typeof localeConfig.defaultLocale === 'string'
+      ? localeConfig.defaultLocale
+      : undefined;
 
   // Reciprocal hreflang set for a logical page (identified by its DEFAULT-locale
   // "bare" path, '/' or '/about'). Built from the SAME resolveCanonicalURL source
@@ -225,8 +235,10 @@ export async function renderPublishedExport(
     canonicalDomain,
     canonicalPath: '/',
     // i18n: default-locale root still lives at '/'. When multi-locale it also
-    // carries hreflang + switcher; single-locale ⇒ all undefined ⇒ byte-identical.
-    locale: multiLocale ? defaultLocale : undefined,
+    // carries hreflang + switcher; single-locale ⇒ those stay undefined ⇒
+    // byte-identical. `locale` follows the DECLARED language (may be a
+    // single-locale config — phase 5).
+    locale: declaredLocale,
     localeConfig: multiLocale ? localeConfig! : undefined,
     localeAlternates: multiLocale ? buildAlternates('/') : undefined,
   });
@@ -325,7 +337,8 @@ export async function renderPublishedExport(
         canonicalPath: path,
         // i18n: default-locale subpage keeps its '/{subpage}' path; hreflang +
         // switcher only when multi-locale. Single-locale ⇒ byte-identical.
-        locale: multiLocale ? defaultLocale : undefined,
+        // `locale` follows the DECLARED language, same as the root doc above.
+        locale: declaredLocale,
         localeConfig: multiLocale ? localeConfig! : undefined,
         localeAlternates: multiLocale ? buildAlternates(path) : undefined,
       });

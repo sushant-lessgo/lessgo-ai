@@ -132,6 +132,33 @@ Code: entry screens in `src/app/onboarding/[token]/components/decider/`; resolve
 `applyEnginePick` in `src/modules/brief/classify.ts`; the rail engine field in
 `src/components/onboarding/journey/UnderstoodRail.tsx`.
 
+## Output language (all three live engines)
+
+Every copy prompt carries an explicit **`## OUTPUT LANGUAGE — {Language}` directive** —
+`thing`/`trust` since language-settings (2026-07-21), `work` since its build. It is emitted
+**unconditionally, English included**: the "picked English, got Dutch" bug was the model
+inferring the language from a non-English one-liner, so gating the directive on non-English
+would leave the bug in place.
+
+The value is always an **English exonym** (`Dutch`, not `Nederlands`) from
+`LOCALE_ENGLISH_NAMES` — the directive interpolates it into English instructions.
+
+Two sources, because the two paths hold different data:
+
+- **First generation** — the audience routes carry no tokenId, so the wizard sends the
+  resolved ISO code on the strategy/copy request body and each route runs
+  `resolvePromptLanguage()` (validate against `SUPPORTED_LOCALES` → `'en'` fallback →
+  exonym). Raw client input can never reach a prompt; no prisma enters those routes.
+- **Regeneration** — `scopedRegen` holds the Project row and server-reads
+  `content.localeConfig.defaultLocale`.
+
+Both derive from the same wizard pick, so they agree. **Work reconcile rule:** a present
+`localeConfig.defaultLocale` wins; the raw `facts.languages[0]` label is the fallback for
+legacy work projects (a bare code there, e.g. `'nl'`, is rejected by `labelToLocaleCode`
+and falls back to English).
+
+Details + known limits: `src/lib/i18n/README.md`.
+
 ## Direction: engines are replacing audienceType as the spine
 
 Onboarding is being reorganized **by engine, not by audienceType** (memory
