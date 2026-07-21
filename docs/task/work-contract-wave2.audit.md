@@ -239,3 +239,88 @@ So `/dev/blocks/atelier2` hits `notFound()`, no parity band ever renders, and bo
 deterministically, independent of this diff (reproduced on re-run). Both `parity.spec.ts`
 and `registry.ts` are outside this phase's Files-touched, so left untouched. The live
 `atelier` per-section parity (which covers the packages band) is green.
+
+---
+
+## Phase 3 — About: portrait (4:5) / signature / badge
+
+### Files changed
+
+- `src/modules/engines/workSections.ts` — added 3 About fields to the `fromDonor`-built about schema EXPLICITLY.
+- `src/modules/audience/work/copyPrompt.ts` — `badge` char cap (36) + a `hasAbout` binding rule (badge DISTINCT from eyebrow).
+- `src/modules/wizard/generation/work.llm.ts` — NEW pure exported helper `stampAboutSignature` + its first-gen call site in `runFanOut`.
+- `src/hooks/editStore/aiActions.ts` — story-regen merge skip predicate: `if (key === 'signature') return;` (belt).
+- `src/hooks/editStore/aiActions.test.ts` — NEW store test: story-regen merge-survival regression.
+- `src/modules/wizard/generation/work.llm.test.ts` — added a `stampAboutSignature` unit-test describe block (Deviation 1: file NOT on Files-touched).
+- `src/modules/skeletons/work/blocks/About/WorkAbout.core.tsx` — portrait art (`E.Img`) + overlaid badge + serif signature; `WorkAboutContent` gains `portrait_image?`/`badge?`/`signature?`.
+- `src/modules/skeletons/work/blocks/About/styles.ts` — `.wk-about__art`/`__portrait`(+`:empty`)/`__portrait-img`/`__badge`/`__sign`.
+- `src/modules/templates/blockMocks/atelier.ts` — about fixture: portrait/badge/signature on the filled fixture; `editBasics.text += badge, signature`.
+- `src/modules/audience/work/parseCopy.ts` — VERIFY-ONLY, NO edit (below).
+
+### Contract shape (donor-add mechanism)
+
+`about` is `fromDonor(writerElementSchema.GranthParichay, 'about')`. `fromDonor` copies only the donor's OWN keys (eyebrow/heading/bio + facts[]), blanking string defaults — it does NOT know Wave-2 fields. So the 3 new fields are assigned onto the returned `aboutContract.elements` EXPLICITLY:
+
+```
+portrait_image: { type:'string', requirement:'optional', fillMode:'system', default:'' }  // manual media lane
+signature:      { type:'string', requirement:'optional', fillMode:'system', default:'' }  // manual lane; name default at first-gen
+badge:          str('optional')  // fillMode:'manual_preferred', default '' — AI-drafted, editable
+```
+
+All optional (regenerate-story collision safety). `portrait_image`/`signature` = `fillMode:'system'` → excluded from the AI spec by the existing `isSystemField` skip and auto-stripped by the Phase-2 `stripSystemKeys`. `badge` = `manual_preferred` → AI-emitted + regenerable normally.
+
+### parseCopy.ts — verify-only (NO edit), exactly as the plan predicted
+
+`stripSystemKeys` (Phase 2) iterates `schema.elements` and deletes any `fillMode:'system'` scalar. Once `signature`/`portrait_image` are declared `fillMode:'system'` on the about contract, they are dropped from any AI/regen output at parse automatically. No signature logic added here — this is precisely WHY signature is not injected in parse: `parseWorkCopy` is called by the story-regen route, so a parse-time inject would re-emit `signature=name` every regen and clobber a user-customized signature.
+
+### Signature stamp — where + how (work.llm.ts), and why not parseCopy
+
+New pure exported helper `stampAboutSignature(fc, name)`: walks `fc.content` (flat home) + every `fc.pages[*].content`, matches sections by `id.startsWith('about-')`, sets `elements.signature = name.trim()` ONLY when empty (`if (!el.signature)`) — never clobbers a user value, idempotent on resume, no-op on empty name.
+
+Call site: in `runFanOut`, immediately AFTER the `runWorksFanOut` try-block (before `finalizeMultiPageGeneration`), as `stampAboutSignature(fc, getWorkFacts(input.brief?.facts)?.identity?.name)`. First-gen ONLY (work.llm.ts is unreachable by scoped/story regen), facts in scope, same stamp call-site family the plan names — NOT `parseCopy.ts` (story-regen clobber), NOT `multiPageAssembly.ts` (no facts in scope).
+
+**Deviation from the plan's literal L202 placement (Deviation 2).** The plan said "beside `stampWorkGalleryBinding(fc, entries)` (L202)", which is INSIDE `runWorksFanOut`. But `runWorksFanOut` early-returns (`entries.length === 0`) when facts yield no derivable works entries — and a signature=name default has nothing to do with photos. Placing it at L202 would silently skip the signature on any such run. So it lives in `runFanOut` at the works-binding region (always runs on fresh gen) — strictly dominant on correctness while honoring every other constraint. Phase 4's photo-derived `stampHeroSlides` can still sit at L202.
+
+### aiActions.ts belt — exact line
+
+Story-regen apply block ONLY (~L382, the block WITHOUT the "Merge new content — skip image elements" comment). Added as the FIRST line inside `Object.entries(data.content).forEach(...)`:
+
+```
+if (key === 'signature') return;
+```
+
+directly above the existing `if (isImageValue(existingElements[key]) || isImageKey(key)) return;`. The `regenerateSection` twin (~L182, WITH the comment) was NOT touched — it is covered by the Phase-2 parse-time `stripSystemKeys`. One guard line + comment, no merge refactor.
+
+### Graceful-empty per field (empty → today's about markup exactly)
+
+- **portrait_image** — `E.Img`, NO placeholder. Published-empty → bare `<div class="wk-about__portrait"></div>` → `.wk-about__portrait:empty{ display:none; margin:0 }` → zero space; `.wk-about__art` carries no margin/padding → 0-height, invisible → head column = today's eyebrow+heading. Edit-empty keeps the picker affordance (editor-only; Phase-1/2 image precedent).
+- **badge** — `E.Txt`, NO placeholder → published-empty returns `null` (no node, no leak).
+- **signature** — `E.Txt`, NO placeholder → published-empty returns `null`; `.wk-about__sign` margin applies only when the node exists → no reflow.
+
+The portrait is the first child of the existing `.wk-about__head` column (above eyebrow) — the 2-col `head | body` grid is unchanged, so no column is added/reflowed when empty. Filled: left column = portrait+badge over eyebrow+heading; signature = serif sign-off after the bio.
+
+### Story-regen survival test (aiActions.test.ts)
+
+Store test on the `createAIActions(set, get)` harness (cloned from `aiActions.credits.test.ts`; mocks `posthog-js` + `@/utils/autoSaveDraft`). Seeds an about section with customized `signature`/`badge`/`portrait_image`, drives `regenerateStoryFromInterview`: (1) response `{heading,bio}` → heading/bio update, the 3 preserved (absent from response); (2) hostile response echoing `signature`/`portrait_image` → heading updates, signature preserved (belt), portrait_image preserved (isImageKey). Both green.
+
+`stampAboutSignature` unit tests (work.llm.test.ts): stamps empty signature; never clobbers a user value; stamps in-page about sections; no-op on empty/undefined name; touches only `about-*`. All green.
+
+### Full gate
+
+- `npx tsc --noEmit` — CLEAN (no `founder.jpg` phantom).
+- `npm run test:run` — **289 passed | 1 skipped; 4654 passed | 15 skipped** (+7 tests, +1 file vs Phase 2b). Green: `renderParity.work`, `coreParity` (count stays 19), `skinPurity`, `conformance`, `kundiusPages`, `oldContentFallback`, `workContract`, `injectPackages`, new `aiActions` (2/2), `stampAboutSignature` (5/5).
+- `npm run lint` — clean (pre-existing `<img>`/hook warnings only; zero errors; none in touched files).
+- `npm run build` — SUCCEEDED.
+- `npx playwright test e2e/parity.spec.ts --project=public` — **atelier ALL bands pass; atelier/about [#18] = 0.258%** (< 3%); the `atelier` per-section parity test passed. The 2 failures are the PRE-EXISTING `atelier2` timeouts (stale `atelier2` in the spec's TEMPLATES, not in the registry → 404 → time out), reproduced identically and documented in the progress log; `parity.spec.ts` is outside Files-touched.
+
+### Deviations
+
+1. **`work.llm.test.ts` edited though NOT on Files-touched.** Phase 3 step 5 mandates a signature-stamp unit test and names "wherever `work.llm.ts` behavior is already tested" as the home; Files-touched omitted the test file. `work.llm.test.ts` is the direct test twin of the (listed) `work.llm.ts` and already imports the same module — adding a `stampAboutSignature` describe block there is within phase intent, not scope creep. Flagged for the reviewer.
+2. **Signature stamp placed in `runFanOut` (always-runs), not literally inside `runWorksFanOut` at L202** — conservative correctness (avoids the no-entries early-return skipping the name-only default). In scope (only `work.llm.ts` touched).
+3. **Badge fixture default "Kristina · Amsterdam"** (a name·place stamp) — matches designer `.atl-badge` and the binding rule (distinct from eyebrow "About"). Fixture-only.
+
+### Open risks
+
+- Edit-mode empty portrait shows a picker affordance box in the EDITOR (editor-only; published collapses via `:empty`) — same accepted behavior as Phase-2 packages image. The live Kundius PUBLISHED page stays byte-identical; the editor gains an "add portrait" affordance. No migration.
+- Badge is `manual_preferred` → AI drafts it fresh; if the model echoes the eyebrow despite the binding rule it is an editable copy nit, not a structural regression.
+- Pre-existing `atelier2` parity timeouts remain (orthogonal; flag at merge gate).

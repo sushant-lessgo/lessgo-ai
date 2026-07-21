@@ -79,6 +79,7 @@ const WORK_CHAR_CAPS: Record<string, number> = {
   description: 140,
   price_line: 40,
   category: 24, // per-tier category label — 1-3 words (e.g. "Portrait", "Wedding")
+  badge: 36, // about portrait badge — a short accent chip, DISTINCT from eyebrow
   bullets: 200, // whole newline-list; each line stays short (see the packages rule)
   label: 40,
   value: 24,
@@ -163,6 +164,7 @@ export function buildWorkCopyPrompt(input: WorkCopyPromptInput): string {
   const groupNames = (facts.groups ?? []).map((g) => g.name);
   const hasWork = page.sections.includes('work');
   const hasPackages = page.sections.includes('packages');
+  const hasAbout = page.sections.includes('about');
   const hasContact = page.sections.includes('contact');
   const agencyMetrics = hasAgencyMetrics(voice, page);
 
@@ -191,6 +193,15 @@ export function buildWorkCopyPrompt(input: WorkCopyPromptInput): string {
     );
     bindingRuleLines.push(
       `${nextRule++}. **Package \`category\` — a short per-tier label, distinct from the name.** Give each package tier a 1-3 word \`category\` (e.g. "Portrait", "Wedding", "Commercial") that classifies the tier at a glance — NOT a restatement of its \`name\`. Draw it from the kind of work the tier covers. Leave it empty rather than force a label that adds nothing.`
+    );
+  }
+
+  if (hasAbout) {
+    // The about `badge` is a short accent chip beside the portrait. It is
+    // manual_preferred (AI-drafted, seller-editable) and MUST read differently
+    // from the section `eyebrow` — otherwise the chip just echoes the label.
+    bindingRuleLines.push(
+      `${nextRule++}. **About \`badge\` — a short accent chip, DISTINCT from the eyebrow.** In the \`about\` section, \`badge\` is a tiny caption that sits over the portrait (e.g. a name·place stamp, discipline, or years like "Photographer · Amsterdam"). Keep it a few words and make it DIFFERENT text from the \`eyebrow\` — never restate the eyebrow or heading. Draw it only from stated facts; leave it empty rather than invent a credential.`
     );
   }
 

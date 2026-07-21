@@ -19,6 +19,13 @@ export interface WorkAboutContent {
   eyebrow?: string;
   heading?: string;
   bio?: string;
+  // Wave 2 About lane — all optional, graceful-empty (empty → today's markup).
+  //   portrait_image — 4:5 maker portrait (manual media lane, picker-wired).
+  //   badge          — short accent chip over the portrait, DISTINCT from eyebrow.
+  //   signature      — the maker's name, serif sign-off under the bio.
+  badge?: string;
+  signature?: string;
+  portrait_image?: string;
   facts?: WorkAboutFact[];
 }
 
@@ -32,6 +39,18 @@ export function WorkAboutCore({
       <section className="wk-about" data-sid={sectionId} data-section-id={sectionId} data-wk-about="">
         <div className="wk-about__in">
           <div className="wk-about__head">
+            {/* Portrait (4:5) + overlaid accent badge (Wave 2, designer .atl-split-art).
+                GRACEFUL-EMPTY: no placeholder on the portrait → published-empty is a
+                bare :empty div (display:none, no space); badge is E.Txt → null when
+                empty. So with all three empty the head column collapses to EXACTLY
+                today's eyebrow + heading (Kundius byte-identical, no reflow). The edit
+                render keeps the picker/edit affordance so a portrait can be added. */}
+            <div className="wk-about__art">
+              <E.Img elementKey="portrait_image" src={content.portrait_image} alt={content.heading}
+                className="wk-about__portrait" imgClassName="wk-about__portrait-img" />
+              <E.Txt elementKey="badge" value={content.badge} as="span"
+                className="wk-about__badge" />
+            </div>
             <E.Txt elementKey="eyebrow" value={content.eyebrow} as="span"
               className="wk-about__eyebrow" placeholder="About" />
             <E.Txt elementKey="heading" value={content.heading} as="h2"
@@ -42,6 +61,12 @@ export function WorkAboutCore({
             <E.Txt elementKey="bio" value={content.bio} as="p"
               className="wk-about__bio" multiline
               placeholder="A few honest paragraphs about who you are, how you work, and why it matters." />
+
+            {/* Serif sign-off = the maker's name (Wave 2, designer .atl-sign). No
+                placeholder → published-empty → null (no leak, no reflow). Defaults to
+                the seller's name at first-gen (stampAboutSignature). */}
+            <E.Txt elementKey="signature" value={content.signature} as="div"
+              className="wk-about__sign" />
 
             {(facts.length > 0) && (
               <E.List collectionKey="facts" items={facts} className="wk-about__facts"

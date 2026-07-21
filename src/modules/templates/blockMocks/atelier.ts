@@ -327,6 +327,11 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
     content: {
       eyebrow: 'About',
       heading: 'The person behind the lens',
+      // Wave 2 About lane exercised: 4:5 portrait (manual media lane), a serif
+      // signature sign-off, and an accent badge DISTINCT from the eyebrow.
+      badge: 'Kristina · Amsterdam',
+      signature: 'Kristina Kundius',
+      portrait_image: 'https://cdn.example.com/about-portrait.jpg',
       bio: 'I photograph brands the way I wish more of them were seen — honestly, warmly, and with an eye for the small details that make a company feel human. Over the last decade I have worked with enterprise teams across the Netherlands to build image libraries they actually reach for.',
       facts: [
         { id: 'af1', value: '10+ yrs', label: 'Behind the camera' },
@@ -335,7 +340,7 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
       ],
     },
     editBasics: {
-      text: ['eyebrow', 'heading', 'bio'],
+      text: ['eyebrow', 'heading', 'bio', 'badge', 'signature'],
       button: [],
       collections: [
         { key: 'facts', countPrefix: 'facts.', itemPrefixes: ['facts.'], items: 3 },

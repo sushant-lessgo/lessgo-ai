@@ -14,7 +14,7 @@ Close the Wave-2 gaps in the frozen work-engine content contract so Atelier reac
 - phase 1 editor media + primitive foundation + header logo lane: done (review loops 1)
 - phase 2 packages quad end-to-end (pilot): done (review loops 1; +3 orchestrator-authorized mid-phase files). HUMAN GATE PASSED 2026-07-21: contract FROZEN; founder chose category = PER-CARD (not section-level) → follow-up 2b converts `category_label` section-scalar → per-item `category`. Proceed to phase 3 after 2b.
 - phase 2b per-card category (founder gate decision): done — category_label section-scalar → per-item `category` (manual_preferred); gate green (parity <3%, e2e pass); orchestrator diff-sanity (pattern = reviewed per-item fields). NOTE: pre-existing `atelier2` staleness in e2e/parity.spec.ts TEMPLATES (not in registry → those 2 tests time out) — out of scope, flag at merge gate.
-- phase 3 about — portrait / signature / badge: pending
+- phase 3 about — portrait / signature / badge: done (review loops 1). Signature stamp in work.llm.ts runFanOut (not runWorksFanOut — early-return catch); aiActions.ts:389 story-regen `signature` skip belt (surgical); +work.llm.test.ts (accepted deviation: test home). Parity atelier/about 0.258%.
 - phase 4 hero — slides[] + 2nd CTA: pending
 - phase 5 footer — derived columns + contact: pending
 - phase 6 hardening, e2e consolidation, docs: pending

@@ -245,8 +245,24 @@ const packagesContract: UIBlockSchemaV2 = {
   },
 };
 
-// your story. Donor: GranthParichay.
+// your story. Donor: GranthParichay (eyebrow · heading · bio + facts[]).
+// `fromDonor` copies only the donor's OWN keys (blanking string defaults), so
+// Wave-2 About fields must be added to the returned schema EXPLICITLY.
+//   • portrait_image / signature — MANUAL lane (`fillMode:'system'`): never
+//     AI-emitted (isSystemField prompt skip + the parse-time system-key strip),
+//     set only via the editor. signature defaults to the seller's name at
+//     first-gen (stampAboutSignature in work.llm.ts) — NOT here / not at parse.
+//   • badge — AI-drafted + editable (`manual_preferred`); DISTINCT from eyebrow
+//     (binding rule in copyPrompt). ALL optional → graceful-empty (empty →
+//     today's about markup exactly; Kundius byte-identical).
 const aboutContract = fromDonor(writerElementSchema.GranthParichay, 'about');
+aboutContract.elements.portrait_image = {
+  type: 'string', requirement: 'optional', fillMode: 'system', default: '',
+};
+aboutContract.elements.signature = {
+  type: 'string', requirement: 'optional', fillMode: 'system', default: '',
+};
+aboutContract.elements.badge = str('optional');
 
 // how to reach — REFERENCES a lead mechanism (forms internals are scope-OUT).
 // `contact_method` picks the mechanism; `form_ref` names a form the forms system owns.

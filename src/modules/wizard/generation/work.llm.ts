@@ -204,6 +204,45 @@ export async function runWorksFanOut(
 }
 
 /**
+ * FIRST-GEN-ONLY signature default (Wave 2 About lane). Stamp the seller's own
+ * name into each `about` section's `signature` when it is empty. PURE (mutates fc
+ * in place). Walks the flat home content + every page's content, matching a
+ * section by its `about-…` id, and writes ONLY when signature is empty — a
+ * customized signature (set later in the editor) is NEVER clobbered, so re-running
+ * on RESUME is idempotent.
+ *
+ * Why HERE and not in `parseWorkCopy`: the story-regen route (regenerate-story)
+ * ALSO calls `parseWorkCopy`, so a parse-time inject would re-emit `signature=name`
+ * on every story regen and the client merge would then overwrite a user-edited
+ * signature. This first-gen site is unreachable by scoped/story regen → no clobber
+ * by construction. The AI can never emit `signature` itself (it is
+ * `fillMode:'system'` → the parse-time system-key strip drops it), so the field is
+ * empty until this stamp fills it.
+ *
+ * Placed in the works-binding region of `runFanOut` (NOT inside `runWorksFanOut`)
+ * so it fires on EVERY fresh generation — `runWorksFanOut` early-returns when there
+ * are no derivable works entries, which would skip a name-only default that has
+ * nothing to do with photos.
+ */
+export function stampAboutSignature(fc: any, name: string | undefined | null): void {
+  const sig = (name ?? '').trim();
+  if (!fc || !sig) return;
+  const stampTree = (content: Record<string, any> | undefined): void => {
+    if (!content || typeof content !== 'object') return;
+    for (const sec of Object.values(content)) {
+      const id = (sec as any)?.id;
+      if (typeof id !== 'string' || !id.startsWith('about-')) continue;
+      const el = (sec as any).elements;
+      if (!el || typeof el !== 'object') continue;
+      if (!el.signature) el.signature = sig; // only-when-empty — never clobber
+    }
+  };
+  stampTree(fc.content);
+  const pages = fc.pages && typeof fc.pages === 'object' ? fc.pages : {};
+  for (const page of Object.values(pages)) stampTree((page as any)?.content);
+}
+
+/**
  * The WORK LLM multi-page fan-out. Guarded (workCopyEngineEnabled / atelier
  * allow-list) at the GeneratingSlot fork — called DIRECTLY, mirroring
  * runWorkSkeleton (NOT via runGeneration).
@@ -322,6 +361,12 @@ export async function runWorkLLMGeneration(
     } catch (e: any) {
       return { status: 'error', error: e?.message || 'Works binding failed.' };
     }
+
+    // ─── About signature default (Wave 2) — first-gen only; the SAME call-site
+    // family as the works stamps. Fills `about.signature` with the seller's name
+    // when empty. Runs unconditionally (unlike runWorksFanOut's photo-gated early
+    // return) so a name-only default is never skipped. Idempotent on resume.
+    stampAboutSignature(fc, getWorkFacts(input.brief?.facts)?.identity?.name);
 
     cb.onStage?.('saving');
     try {
