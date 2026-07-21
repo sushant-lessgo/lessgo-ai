@@ -246,13 +246,22 @@ export function buildQuestionPlan(input: QuestionPlanInput): QuestionPlanItem[] 
 
   if (candidates.length <= MAX_QUESTIONS) return candidates;
 
-  // D-F ceiling: keep the top 5 by priority rank, then restore display order.
-  const kept = new Set(
-    [...candidates]
+  // D-F ceiling (engagement-aware): an item the visitor has already engaged with
+  // — answered upstream OR tapped THIS session — must NEVER be evicted (else it
+  // appears-then-vanishes, e.g. rank-6 dreamClient; B1). Pin every engaged slot,
+  // then cap only the UNENGAGED new asks by priority rank. With nothing engaged
+  // this collapses to the original rank-5 result. Display order is restored last.
+  const engaged = (c: QuestionPlanItem): boolean => c.answered || session(c.slot);
+  const pinned = candidates.filter(engaged);
+  const remaining = Math.max(0, MAX_QUESTIONS - pinned.length);
+  const keptCompeting = new Set(
+    candidates
+      .filter((c) => !engaged(c))
       .sort((a, b) => PRIORITY_RANK[a.slot] - PRIORITY_RANK[b.slot])
-      .slice(0, MAX_QUESTIONS)
+      .slice(0, remaining)
       .map((c) => c.slot)
   );
+  const kept = new Set<WorkSlotId>([...pinned.map((c) => c.slot), ...keptCompeting]);
   return candidates.filter((c) => kept.has(c.slot));
 }
 

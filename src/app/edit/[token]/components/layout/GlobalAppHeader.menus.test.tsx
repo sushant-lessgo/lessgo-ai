@@ -174,4 +174,12 @@ describe('GlobalAppHeader menus', () => {
     expect(showSocialModal).toHaveBeenCalledTimes(1);
     expect(menuOpen('Site settings')).toBe(false);
   });
+
+  // B3: the dead "coming soon" device SegmentedControl stub used to render here
+  // (aria-label "Preview device") alongside the real DeviceToggle in
+  // EditHeaderRightPanel → two toggles, one inert. EditHeaderRightPanel is mocked
+  // to null in this suite, so the stub is the ONLY possible "Preview device" node.
+  it('does NOT render the dead device-preview stub (B3)', () => {
+    expect(container.querySelector('[aria-label="Preview device"]')).toBeNull();
+  });
 });

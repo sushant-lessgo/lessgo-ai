@@ -566,10 +566,10 @@ const handleAddSection = (afterSectionId?: string) => {
                   {/* Section Container with Element Detection */}
                   <ElementDetector sectionId={sectionId}>
                     <div
-                      className={`
-                        relative transition-all duration-200 cursor-pointer
-                        hover:ring-1 hover:ring-gray-300
-                      `}
+                      className={cn(
+                        "relative transition-all duration-200",
+                        mode !== 'preview' && "cursor-pointer hover:ring-1 hover:ring-gray-300"
+                      )}
                       draggable={mode !== 'preview'}
                       // DISABLED: Using unified click handler from useEditor instead
                       // onClick={(e) => handleSectionClick(sectionId, e)}

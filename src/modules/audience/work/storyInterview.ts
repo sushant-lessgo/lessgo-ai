@@ -155,7 +155,10 @@ Write ONLY the \`about\` section. Do NOT write any other section.
 
 ## RULES (MUST FOLLOW)
 1. **Write EVERY string in ${language}.** No other language, no mixed-language
-   fragments, no English fragments (unless ${language} IS English).
+   fragments, no English fragments (unless ${language} IS English). The interview
+   answers, praise, and facts above MAY be in another language — render their
+   MEANING in ${language}; never copy or echo their source-language wording (proper
+   nouns stay as-is).
 2. **HOOK on the moment.** Open the bio on the SPECIFIC client moment above — a
    concrete scene, not a summary. Earn the reader's attention in the first line.
 3. **BELIEF is the spine.** Let the story build to the craft belief above; make

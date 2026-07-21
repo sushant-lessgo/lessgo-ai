@@ -252,6 +252,20 @@ describe('buildQuestionPlan — packages bullets ride the groups slot (no new sl
   });
 });
 
+describe('buildQuestionPlan — ceiling never evicts an engaged slot (B1)', () => {
+  it('a session-answered dreamClient survives the cap even with 6+ candidates', () => {
+    // Only dreamClient is seeded, so every other slot needs asking → 7 candidates
+    // (>5), tripping the ceiling. Pre-fix the rank-6 dreamClient was the first
+    // real ask sorted out and dropped (appear-then-vanish); post-fix it is pinned
+    // because it is session-answered.
+    const work = { dreamClient: 'discerning couples' } as WorkFacts;
+    const plan = buildQuestionPlan({ work, entry: null, sessionAnswered: ['dreamClient'] });
+    const dc = plan.find((p) => p.slot === 'dreamClient');
+    expect(dc).toBeDefined();
+    expect(dc!.answered).toBe(true);
+  });
+});
+
 describe('resolveQuestionProfession', () => {
   it('re-exports the voice resolver (known keys map, unknown ⇒ photographer default)', () => {
     expect(resolveQuestionProfession('photographer')).toBe('photographer');

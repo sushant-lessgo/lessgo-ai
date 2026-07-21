@@ -326,12 +326,14 @@ export function serializeSkinTokens(t: WorkSkinTokens): string {
   // Header overlay (Wave 2B): overlay = dark bar + on-dark text + accent-dot
   // wordmark + on-dark hairline (sits over the dark hero); off = current paper bar.
   const hdrOverlay = t.headerOverlay;
-  // Transparent (not a dark FILL): the header is designed to sit over the dark hero
-  // cover, and a transparent bg lets the hero show through. It also keeps the short
-  // header band free of a fill-vs-crop-edge subpixel artifact that a hard dark fill
-  // trips in the isolated parity harness. The REAL-PAGE geometric overlay (absolute
-  // over the hero) is a page/section-stack concern (reported cross-track).
-  const hdrBg   = hdrOverlay ? 'transparent' : 'var(--u-bg, var(--wk-paper))';
+  // Dark editorial band (interim): the overlay header is designed to sit over the dark
+  // hero cover, but the geometric overlay (absolute over the hero) was never built. A
+  // transparent bg therefore revealed the white paper band beneath, painting the
+  // on-dark (near-white) logo/nav invisible. A self-contained dark fill makes the
+  // on-dark header legible on its own — white text + accent dot — regardless of the
+  // unbuilt geometric overlay, and keeps logo/nav visible & their toolbars clickable.
+  // The true transparent-over-hero geometric overlay remains deferred (cross-track).
+  const hdrBg   = hdrOverlay ? 'var(--wk-dark)' : 'var(--u-bg, var(--wk-paper))';
   const hdrFg   = hdrOverlay ? 'var(--wk-on-dark)' : 'var(--u-fg, var(--wk-ink))';
   const hdrLine = hdrOverlay ? 'var(--wk-line-dark)' : 'var(--wk-line)';
   const hdrDot  = hdrOverlay ? 'inline-block' : 'none';
