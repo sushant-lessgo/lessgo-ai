@@ -25,6 +25,7 @@ export interface WorkPackage {
   description?: string;
   cta_label?: string;
   // Wave 2 packages quad — all optional, graceful-empty.
+  category?: string;  // per-tier category label (Wave 2b); AI-drafted + editable
   bullets?: string;   // newline-delimited "what's included"; split at render
   image?: string;     // manual lane (picker); url string
   featured?: string;  // manual lane (toggle); 'true' when the "most booked" chip shows
@@ -34,7 +35,6 @@ export interface WorkPackagesContent {
   eyebrow?: string;
   heading?: string;
   lead?: string;
-  category_label?: string;
   packages?: WorkPackage[];
 }
 
@@ -58,10 +58,6 @@ export function WorkPackagesCore({
           <div className="wk-packages__head">
             <E.Txt elementKey="eyebrow" value={content.eyebrow} as="span"
               className="wk-packages__eyebrow" placeholder="Packages" />
-            {/* Section-level category label (Wave 2). No placeholder — an empty
-                value must render NOTHING in both renderers (graceful-empty). */}
-            <E.Txt elementKey="category_label" value={content.category_label} as="span"
-              className="wk-packages__cat" />
             <E.Txt elementKey="heading" value={content.heading} as="h2"
               className="wk-packages__heading" placeholder="Ways to work together" />
             <E.Txt elementKey="lead" value={content.lead} as="p"
@@ -71,7 +67,7 @@ export function WorkPackagesCore({
 
           <E.List collectionKey="packages" items={packages} className="wk-packages__grid"
             itemClassName="wk-packages__card"
-            makeItem={() => ({ name: '', price_mode: 'on-request', price_line: 'On request', description: '', cta_label: '', bullets: '', image: '', featured: '' })}
+            makeItem={() => ({ name: '', price_mode: 'on-request', price_line: 'On request', description: '', cta_label: '', category: '', bullets: '', image: '', featured: '' })}
             min={1} max={6} addLabel="+ Package"
             render={(item: WorkPackage) => {
               const lines = bulletLines(item.bullets);
@@ -90,6 +86,12 @@ export function WorkPackagesCore({
                     renderer, so an image-less tier is byte-identical to today. */}
                 <E.Img elementKey={`packages.${item.id}.image`} src={item.image} alt={item.name}
                   className="wk-packages__img" imgClassName="wk-packages__img-el" />
+                {/* Per-tier category label (Wave 2b, per `.atl-pack`). No
+                    placeholder — an empty value must render NOTHING in both
+                    renderers (graceful-empty: an uncategorised tier is
+                    byte-identical to today's card). */}
+                <E.Txt elementKey={`packages.${item.id}.category`} value={item.category} as="span"
+                  className="wk-packages__cat" />
                 <E.Txt elementKey={`packages.${item.id}.name`} value={item.name} as="span"
                   className="wk-packages__name" placeholder="Package name" />
                 <span className="wk-packages__price" data-price-mode={item.price_mode || 'on-request'}>

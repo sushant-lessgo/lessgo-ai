@@ -208,9 +208,6 @@ const packagesContract: UIBlockSchemaV2 = {
     eyebrow: str('optional'),
     heading: str('required'),
     lead: str('optional'),
-    // Section-level category label (Wave 2 packages quad). AI-visible + editable
-    // (manual_preferred); optional → no default injection, absent until written.
-    category_label: str('optional'),
   },
   collections: {
     packages: {
@@ -220,6 +217,13 @@ const packagesContract: UIBlockSchemaV2 = {
       fields: {
         id: { type: 'string', fillMode: 'system' },
         name: { type: 'string', fillMode: FILL, default: '' },
+        // Per-tier category label (Wave 2b — per-card, matching the designer
+        // `.atl-pack` where each tier card shows its own category). AI-drafted +
+        // editable (manual_preferred): WorkFacts carries no category, so it has
+        // no facts source — the model drafts a short label, the seller can edit.
+        // Optional (default '') → graceful-empty: a tier with no category renders
+        // EXACTLY today's card (no node).
+        category: { type: 'string', fillMode: FILL, default: '' },
         // price display slots: mode drives whether an amount is shown.
         price_mode: { type: 'string', fillMode: FILL, default: 'on-request' }, // exact | from | on-request
         price_line: { type: 'string', fillMode: FILL, default: 'On request' },

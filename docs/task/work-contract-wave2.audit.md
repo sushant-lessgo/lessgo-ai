@@ -150,3 +150,92 @@ Closes prior Deviations #1 and #5 (the two dormant lanes). Orchestrator authoriz
 - `npx playwright test e2e/workWave2.spec.ts` — **1 passed**.
 
 **Open risk (updated).** First-gen facts-verbatim bullets are now LIVE (GAP 1 done). Regen (section/element) of a packages section still leaves bullets AI-drafted because `scopedRegen.ts` does not pass `groups` — a scope-gated divergence from the injectPraise precedent, pending the orchestrator-authorized one-liner above.
+
+---
+
+## Phase 2b — per-card category (founder gate decision)
+
+Founder gate ruled `category` = PER-CARD (per-tier), matching the designer `.atl-pack`
+(each tier card shows its own category), NOT the Phase-2 section-level scalar. This
+phase converts the section scalar `category_label` → a per-item collection field
+`category`. Forward-modifies committed Phase 2 (`b507a5f6`).
+
+### Files changed
+
+- `src/modules/engines/workSections.ts` — packages contract: REMOVED the section-level
+  scalar `category_label`; ADDED per-item `category` to the `packages` collection `fields`.
+- `src/modules/audience/work/copyPrompt.ts` — replaced the `category_label:32` cap with a
+  per-item `category:24` cap; added a `hasPackages` drafting rule (each tier gets a short
+  1-3 word category, distinct from its name).
+- `src/modules/audience/work/injectPackages.ts` — updated the LAW comment (`category_label`
+  → per-tier `category`); NO logic change (category has no facts source, never injected).
+- `src/modules/skeletons/work/blocks/Packages/WorkPackages.core.tsx` — removed the
+  section-level category `E.Txt`; added a per-card category `E.Txt` (key
+  `packages.<id>.category`) as a kicker above the tier name; added `category?` to
+  `WorkPackage`, removed `category_label?` from `WorkPackagesContent`, seeded `category:''`
+  in `makeItem`.
+- `src/modules/skeletons/work/blocks/Packages/styles.ts` — repointed the `.wk-packages__cat`
+  comment to per-tier; margin `12px 0 0` → `0 0 -8px` (kicker tight above name).
+- `src/modules/templates/blockMocks/atelier.ts` — moved category off the section into the
+  two filled tiers (`pk1:'Commercial'`, `pk2:'Editorial'`); empty tier (`pk3`) left blank.
+- `e2e/workWave2.spec.ts` — swapped the section-scalar category assertion for per-card:
+  filled tiers' text visible in BOTH bands; count/empty-tier-absence checked PUBLISHED-only
+  (see graceful-empty note); added empty-tier no-category assertion (published band).
+
+### New contract shape
+
+```
+packages (collection) fields:
+  category: { type: 'string', fillMode: 'manual_preferred', default: '' }   // optional, per-tier
+```
+Lane = `manual_preferred` (AI-drafted + editable) — NOT `fillMode:'system'` — because
+WorkFacts has no category source; the AI drafts it, the seller edits it. Optional
+(default `''`) so absent = graceful-empty. The section-level `category_label` scalar is
+GONE from `packages.elements`.
+
+### Graceful-empty confirmation
+
+- **Published** (Kundius byte-identical): `publishedPrimitives.Txt` returns `null` when value
+  is empty with no placeholder → a tier with no category renders NO node. The card's flex
+  gap only spans present children, so an uncategorised tier is byte-identical to today.
+  e2e asserts this on the empty tier (published band).
+- **Edit**: an empty optional `E.Txt` still mounts an empty editable node (`InlineTextEditorV2`),
+  which is the normal editor affordance for any optional field (click-to-fill). This is
+  edit-only and does not reach published output — so the strict category count / empty-tier
+  absence checks are PUBLISHED-band-only in the e2e (deviation noted below). `category` is
+  visible text → no `NON_VISIBLE_KEY` change.
+
+### Deviations
+
+- **e2e count assertions are published-band-only.** In the edit renderer an empty optional
+  category mounts an empty editable node, so `.wk-packages__cat` count = 3 (all tiers) in
+  edit vs 2 in published. Conservative choice: assert filled-tier category TEXT in both
+  bands (robust to empty nodes), and strict count / empty-tier-absence in published only
+  (the graceful-empty guarantee is a published-output contract). No scope change.
+- **styles.ts margin** `0 0 -8px` chosen so the kicker sits tight above the name within the
+  card's `gap:14px` flex column; edit↔published render the same markup so parity is
+  unaffected regardless.
+
+### Full gate
+
+- `npx tsc --noEmit` — clean. (One transient self-inflicted error: a backtick in a CSS
+  comment inside the `WORK_PACKAGES_STYLES` template literal — removed.)
+- `npm run test:run` (full vitest) — **288 passed | 1 skipped** (4647 passed / 15 skipped).
+  Includes renderParity.work, coreParity, skinPurity, conformance, kundiusPages,
+  oldContentFallback, injectPackages — all green.
+- `npm run lint` (touched files) — clean.
+- `npm run build` — SUCCEEDED.
+- `npx playwright test e2e/workWave2.spec.ts` — **1 passed** (per-card category in both
+  bands; empty tier stays legacy).
+- `npx playwright test e2e/parity.spec.ts` — **atelier per-section parity PASSED** (packages
+  band under threshold, <3%). Two `atelier2` tests FAILED — see surprise below.
+
+### Surprise (pre-existing, NOT this change)
+
+`parity.spec.ts` TEMPLATES still lists a stale `atelier2`, but `atelier2` is NOT in
+`templateRegistry` (the old atelier2 skeleton barrel was folded into `templates/atelier/`).
+So `/dev/blocks/atelier2` hits `notFound()`, no parity band ever renders, and both
+`atelier2` tests time out on `waitForSelector('[data-parity-band="published"]')` —
+deterministically, independent of this diff (reproduced on re-run). Both `parity.spec.ts`
+and `registry.ts` are outside this phase's Files-touched, so left untouched. The live
+`atelier` per-section parity (which covers the packages band) is green.

@@ -20,8 +20,8 @@
 //     draft them as a fallback (copyPrompt.ts). Unlike praise (fake client quotes,
 //     high risk), package inclusions are the seller's own scope, low-risk to draft.
 //   • No-op when the page has no `packages` section (defensive).
-//   • category_label is NOT injected here — WorkFacts carries no category string
-//     (groups have `name`/`kind` only), so it stays AI-drafted / manual.
+//   • per-tier `category` is NOT injected here — WorkFacts carries no category
+//     string (groups have `name`/`kind` only), so it stays AI-drafted / manual.
 //
 // ── FIREWALL ────────────────────────────────────────────────────────────────
 //   Pure code. `import type` from the facts schema only. No react / stores /

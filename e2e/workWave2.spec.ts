@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 // the /dev/blocks/atelier parity stage (edit + published bands, same fixtures the
 // pixel-diff parity.spec.ts uses). This spec asserts CONTENT, not pixels:
 //   • the filled packages tiers render the Wave-2 quad (per-tier image, dash
-//     bullets, "most booked" flag, section category label) in BOTH renderers;
+//     bullets, "most booked" flag, per-tier category label) in BOTH renderers;
 //   • an unfilled tier renders EXACTLY today's legacy card (no image / bullets /
 //     flag) — the graceful-empty guarantee that keeps existing drafts byte-stable.
 // (Phase 4/6 grow this file: hero multi-slide hooks + the full graceful-empty sweep.)
@@ -24,8 +24,15 @@ test.describe('work-wave2 packages quad', () => {
     for (const kind of ['published', 'edit'] as const) {
       const root = page.locator(band(kind)).first();
 
-      // Section category label (Wave 2 section scalar).
-      await expect(root.locator('.wk-packages__cat'), `${kind}: category label`).toHaveText('Commissions');
+      // Per-tier category labels (Wave 2b): the two filled tiers carry one. Text
+      // holds in BOTH renderers. (In the PUBLISHED band an empty category renders
+      // NOTHING — asserted below; in EDIT an empty optional field still mounts an
+      // empty editable node, so a strict count is a published-only check.)
+      await expect(root.getByText('Commercial', { exact: true }), `${kind}: pk1 category`).toBeVisible();
+      await expect(root.getByText('Editorial', { exact: true }), `${kind}: pk2 category`).toBeVisible();
+      if (kind === 'published') {
+        await expect(root.locator('.wk-packages__cat'), `${kind}: exactly 2 per-tier categories`).toHaveCount(2);
+      }
 
       // Three tiers total; two carry an image, one is empty (legacy card).
       await expect(root.locator('.wk-packages__card'), `${kind}: 3 tiers`).toHaveCount(3);
@@ -47,6 +54,10 @@ test.describe('work-wave2 packages quad', () => {
       await expect(emptyCard.locator('.wk-packages__img-el'), `${kind}: empty tier has no image`).toHaveCount(0);
       await expect(emptyCard.locator('.wk-packages__bullet'), `${kind}: empty tier has no bullets`).toHaveCount(0);
       await expect(emptyCard.locator('.wk-packages__flag'), `${kind}: empty tier has no flag`).toHaveCount(0);
+      if (kind === 'published') {
+        // Published graceful-empty: the uncategorised tier renders no category node.
+        await expect(emptyCard.locator('.wk-packages__cat'), `${kind}: empty tier has no category`).toHaveCount(0);
+      }
     }
   });
 });

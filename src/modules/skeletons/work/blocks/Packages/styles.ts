@@ -28,8 +28,10 @@ export const WORK_PACKAGES_STYLES = `
 /* "Most booked" chip (Wave 2). Absolute over the card top-left; anchors to the
    position:relative card. Rendered only when featured (graceful-empty). */
 .wk-packages__flag{ position:absolute; top:0; left:0; z-index:2; background:var(--wk-accent); color:var(--wk-accent-ink,#fff); font-family:var(--wk-ff-body); font-weight:600; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; padding:9px 14px; }
-/* Section category label (Wave 2). Empty → the E.Txt renders nothing (no leak). */
-.wk-packages__cat{ display:block; font-family:var(--wk-ff-body); font-weight:600; font-size:10px; letter-spacing:0.24em; text-transform:uppercase; color:var(--wk-accent); margin:12px 0 0; }
+/* Per-tier category label (Wave 2b, per the designer .atl-pack — a kicker above
+   the tier name). Empty -> the E.Txt renders nothing (no leak); the card's flex
+   gap only spans present children, so an uncategorised tier is byte-identical. */
+.wk-packages__cat{ display:block; font-family:var(--wk-ff-body); font-weight:600; font-size:10px; letter-spacing:0.24em; text-transform:uppercase; color:var(--wk-accent); margin:0 0 -8px; }
 /* Dash-bullet "what's included" list (Wave 2). */
 .wk-packages__bullets{ list-style:none; margin:2px 0 0; padding:16px 0 0; border-top:1px solid var(--wk-line); display:grid; gap:10px; }
 .wk-packages__bullet{ display:grid; grid-template-columns:auto 1fr; gap:10px; font-family:var(--wk-ff-body); font-size:14px; line-height:1.5; color:var(--wk-ink-soft); }
