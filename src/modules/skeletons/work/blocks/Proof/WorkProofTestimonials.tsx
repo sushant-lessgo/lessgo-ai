@@ -14,7 +14,7 @@ export default function WorkProofTestimonials({ sectionId }: { sectionId: string
   const ctx = useWorkEditCtx(sectionId, blockContent, handleContentUpdate, handleCollectionUpdate);
   return (
     <WorkEditProvider ctx={ctx}>
-      <WorkProofTestimonialsCore content={blockContent} E={editPrimitives} sectionId={sectionId} />
+      <WorkProofTestimonialsCore content={blockContent} E={editPrimitives} sectionId={sectionId} editable />
     </WorkEditProvider>
   );
 }

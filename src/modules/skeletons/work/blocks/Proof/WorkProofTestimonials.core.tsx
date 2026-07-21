@@ -26,9 +26,14 @@ export interface WorkProofContent {
 }
 
 export function WorkProofTestimonialsCore({
-  content, E, sectionId,
-}: { content: WorkProofContent; E: WorkPrimitives; sectionId: string }) {
+  content, E, sectionId, editable = false,
+}: { content: WorkProofContent; E: WorkPrimitives; sectionId: string; editable?: boolean }) {
   const quotes = content.quotes || [];
+  const empty = quotes.length === 0;
+  // Greyed-placeholder policy (never silently omit): with NO quotes, PUBLISHED
+  // omits the whole band (no heading over an empty grid), while the EDITOR shows a
+  // visible greyed placeholder card so the owner sees a slot to fill.
+  if (empty && !editable) return null;
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: WORK_PROOF_STYLES }} />
@@ -42,6 +47,12 @@ export function WorkProofTestimonialsCore({
             <E.Txt elementKey="awards_line" value={content.awards_line} as="p"
               className="wk-proof__awards" placeholder="Awards & recognition" />
           </div>
+
+          {empty && editable && (
+            <div className="wk-proof__empty" data-wk-proof-empty="" aria-hidden="true">
+              Add a client testimonial — clients&rsquo; words build trust
+            </div>
+          )}
 
           <E.List collectionKey="quotes" items={quotes} className="wk-proof__grid"
             itemClassName="wk-proof__card"

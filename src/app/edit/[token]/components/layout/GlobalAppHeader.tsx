@@ -38,7 +38,6 @@ import Logo from '@/components/shared/Logo';
 import { CreditBadge } from '@/components/billing/CreditBadge';
 import { AppIcon } from '@/components/ui/icon';
 import { Coming } from '@/components/ui/coming';
-import { SegmentedControl } from '@/components/ui/segmented-control';
 import {
   Popover,
   PopoverTrigger,
@@ -274,58 +273,6 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
       >
         <AppIcon name="menu" size={18} />
       </button>
-
-      {/* ── Center: device segmented (t1) ────────────────────────────────── */}
-      {/* GREYED slot (decision 12): ui/DeviceToggle.tsx is mounted nowhere, so
-          wiring this would be new behavior. Inertness comes from <Coming>'s
-          onClickCapture + the no-op onValueChange — NOT from `disabled`, which
-          would swallow the tooltip's pointer events (phase-3 precedent). */}
-      {/* ICON SUBSTITUTE — PENDING A FONT REGENERATION (same carry as the Help
-          menu's three above; see that note for the full why). The handoff draws
-          `smartphone`; the committed subset woff2 has no working ligature for it,
-          so it rendered the literal TEXT "smartphone" (measured 144px wide at 24px
-          vs 24px for a real glyph — a visibly broken top bar). `phone` is the only
-          phone-ish glyph actually PRESENT in the subset (verified against the
-          woff2's GSUB ligature table, NOT icons.txt — that manifest is unreliable
-          in both directions: `smartphone` is listed there yet was silently DROPPED
-          by the subset build, and `phone` is absent there yet present in the font).
-          AFTER someone regenerates per public/fonts/material-symbols-rounded/NOTICE:
-          swap `phone` → `smartphone` here. Do NOT restore `smartphone` before that
-          — you'd ship text. */}
-      <div className="ml-auto flex-none">
-        <SegmentedControl
-          aria-label="Preview device"
-          value="desktop"
-          onValueChange={() => {}}
-          options={[
-            {
-              value: 'desktop',
-              label: (
-                <Coming what="device previews">
-                  <AppIcon name="desktop_windows" size={19} />
-                </Coming>
-              ),
-            },
-            {
-              value: 'tablet',
-              label: (
-                <Coming what="device previews">
-                  <AppIcon name="tablet_mac" size={19} />
-                </Coming>
-              ),
-            },
-            {
-              value: 'phone',
-              label: (
-                <Coming what="device previews">
-                  {/* substitute pending font regeneration → `smartphone` */}
-                  <AppIcon name="phone" size={19} />
-                </Coming>
-              ),
-            },
-          ]}
-        />
-      </div>
 
       {/* ── Right cluster ────────────────────────────────────────────────── */}
       <div className="ml-auto flex flex-none items-center gap-2">

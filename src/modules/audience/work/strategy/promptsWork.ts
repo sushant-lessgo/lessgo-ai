@@ -92,7 +92,7 @@ Return JSON with EXACTLY these three fields — nothing else:
 - **storyAngle**: one line framing the About / story section. ${establishmentGuidance(establishment)}
 - **voiceNotes**: 2-4 short, concrete voice reminders for the copywriter (e.g. cadence, what to avoid), consistent with the VOICE block.
 
-Write every string in ${primaryLanguage}. Use ONLY facts stated above — invent nothing.
+Write every string in ${primaryLanguage}. The facts and praise above MAY be in another language — render their MEANING in ${primaryLanguage}; never copy or echo their source-language wording (proper nouns stay as-is). Use ONLY facts stated above — invent nothing.
 
 Output valid JSON only. No explanations or markdown.`;
 

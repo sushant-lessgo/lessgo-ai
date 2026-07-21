@@ -12,8 +12,9 @@ body {
   @apply font-body text-brand-text bg-white antialiased;
 }
 
-/* Default: All elements show pointer cursor for selection - UNLESS in text editing mode */
-[data-element-key]:not([contenteditable="true"][data-editing="true"]) {
+/* Default: All elements show pointer cursor for selection - UNLESS in text editing mode.
+   Gated on .edit-mode so preview does not leak the pointer/no-select affordance (B4). */
+.edit-mode [data-element-key]:not([contenteditable="true"][data-editing="true"]) {
   cursor: pointer;
   user-select: none;
   /* Only background transitions — no outline transition (flicker fix, phase 2) */
@@ -84,8 +85,8 @@ body {
   color: inherit;
 }
 
-/* Prevent text selection on non-editable elements */
-[data-element-key]:not([contenteditable="true"][data-editing="true"]) {
+/* Prevent text selection on non-editable elements (edit-mode-only — B4) */
+.edit-mode [data-element-key]:not([contenteditable="true"][data-editing="true"]) {
   user-select: none;
   -webkit-user-select: none;
 }
