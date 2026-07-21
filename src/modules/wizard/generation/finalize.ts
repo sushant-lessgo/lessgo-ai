@@ -13,6 +13,9 @@
 
 import type { SectionCopy } from '@/types/generation';
 import type { Brief } from '@/types/brief';
+import type { LocaleConfig } from '@/types/core/content';
+import { SUPPORTED_LOCALES } from '@/lib/i18n/localeContent';
+import { labelToLocaleCode } from '@/lib/i18n/localeNames';
 import { seedGoalForm } from '@/modules/goals/seedGoalForm';
 import { stampGoalRefCtas, resolveGoalFormId } from '@/modules/goals/stampGoalRefCtas';
 import { injectGoalSections } from '@/modules/goals/injectGoalSections';
@@ -172,6 +175,59 @@ export function buildFinalContent(params: BuildFinalContentParams): { finalConte
  * palette/variant, themeValues, brief patch, finalContent). Throws on failure so
  * the adapter surfaces a retryable error, matching the old GeneratingStep saves.
  */
+// ---------------------------------------------------------------------------
+// language-settings phase 3 — the durable site-language declaration.
+// ---------------------------------------------------------------------------
+
+/**
+ * The `localeConfig` fragment to SPREAD into a saveDraft body so the project
+ * carries a durable, user-declared site language (the data source regen reads —
+ * `content.localeConfig.defaultLocale`).
+ *
+ * Contract (zero-diff, ruling 7):
+ *  - `en` / absent / unsupported ⇒ `{}` — the save body gains NO key, so a
+ *    monolingual English project's stored `content` is byte-identical to before;
+ *  - a SUPPORTED non-`en` code ⇒ `{ localeConfig: { locales:[code],
+ *    defaultLocale: code } }` — a legitimate SINGLE-locale config (ruling 10:
+ *    non-null ≠ multi-locale; every multi-locale surface is `isMultiLocale`-gated).
+ *
+ * Unsupported codes are dropped rather than persisted: `SUPPORTED_LOCALES` is the
+ * closed vocabulary every reader (store, publish, prompts) validates against, so
+ * writing outside it would create an unreadable declaration.
+ */
+export function localeConfigPatch(
+  siteLanguage?: string | null
+): Record<string, never> | { localeConfig: LocaleConfig } {
+  if (!siteLanguage || siteLanguage === 'en') return {};
+  if (!(SUPPORTED_LOCALES as readonly string[]).includes(siteLanguage)) return {};
+  return { localeConfig: { locales: [siteLanguage], defaultLocale: siteLanguage } };
+}
+
+/**
+ * WORK variant (ruling 5): the work engine's existing `languages` question stores
+ * human LABELS (`'English'`, `'Dutch'`), never ISO codes — map the FIRST label to
+ * a code, then reuse `localeConfigPatch`.
+ *
+ * An unmapped custom label (e.g. `'Hindi'` — `hi` is outside `SUPPORTED_LOCALES`)
+ * ⇒ `{}` + a warn: work copy is STILL generated in that language (the work prompt
+ * path consumes the label directly), but the site language cannot be DECLARED.
+ * Shared by `work.ts` + `work.llm.ts` so the two adapters cannot drift.
+ */
+export function workLocaleConfigPatch(
+  languages?: string[] | null
+): Record<string, never> | { localeConfig: LocaleConfig } {
+  const label = languages?.[0];
+  if (!label) return {};
+  const code = labelToLocaleCode(label);
+  if (!code) {
+    console.warn(
+      `[work] language label "${label}" has no supported ISO code — skipping the localeConfig declaration (copy is still written in that language).`
+    );
+    return {};
+  }
+  return localeConfigPatch(code);
+}
+
 export async function saveDraft(body: Record<string, unknown>): Promise<void> {
   const res = await fetch('/api/saveDraft', {
     method: 'POST',

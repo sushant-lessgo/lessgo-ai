@@ -499,3 +499,227 @@ suite +1, panel suite +3. No file count change.)
 - Zero-diff holds: opening either pane still writes nothing to the store (pinned by
   the phase-2 zero-diff case, unchanged).
 - No visual/CSS change to the modal or the popover beyond the one added row.
+
+---
+
+# Phase 3 — onboarding site-language capture (+ language on the generation payloads)
+
+Branch verified before any edit: `git branch --show-current` → `feature/language-settings`
+(worktree `C:\Users\susha\lessgo-ai\.claude\worktrees\language-settings`). No git
+state-changing command run.
+
+## Files changed
+
+- `src/hooks/useWizardStore.ts`
+- `src/components/onboarding/wizard/IdentitySlot.tsx`
+- `src/components/onboarding/wizard/identityLanguage.test.tsx` (new)
+- `src/modules/wizard/generation/finalize.ts`
+- `src/modules/wizard/generation/thing.ts`
+- `src/modules/wizard/generation/trust.ts`
+- `src/modules/wizard/generation/payloadLanguage.test.ts` (new)
+- `src/modules/wizard/generation/work.ts`
+- `src/modules/wizard/generation/work.llm.ts`
+- `src/modules/wizard/generation/workLocale.test.ts` (new)
+- `docs/task/language-settings.audit.md` (this file)
+
+`src/components/onboarding/wizard/GeneratingSlot.tsx` was on the Files-touched list but
+needed NO edit — see "Plan pointers checked against the tree". Nothing outside the list was
+edited; in particular **zero diffs** under `journey/engines/`, `inputContracts.ts`,
+`modules/wizard/work/rail.ts`, and no new `wizardSlots` member (ruling 8 /
+uniform-journey collision avoidance). Pre-existing dirty files NOT touched by me:
+`docs/task/language-settings.plan.md` (orchestrator's 2b sha fill) and
+`src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap`.
+
+## A1 acceptance — the enumerated call-site coverage
+
+**Every audience-route request body built in `thing.ts`/`trust.ts` now carries `language`.
+Zero exceptions.** Line numbers below are post-change; A1's pre-change numbers were verified
+against the tree first and had NOT shifted.
+
+| # | Engine | Route | Body built at | How `language` lands | Test that fails if dropped |
+|---|---|---|---|---|---|
+| 1 | thing | product/strategy | `buildStrategyPayload` (thing.ts:245), fetched :415 | `payloadLanguage(input)` | `#1 strategy body carries the picked ISO code` |
+| 2 | thing | product/generate-copy (single page) | `buildCopyPayload` (thing.ts:285), fetched :739 | `payloadLanguage(input)` | `#2 single-page copy body …` |
+| 3 | thing | product/generate-copy (**multi-page fan-out**) | **INLINE** thing.ts:545 (fetch :522) | `payloadLanguage(input)` | `#3 MULTI-PAGE FAN-OUT …` |
+| 4 | thing | product/generate-copy (**collection item**) | **INLINE** thing.ts:633 (fetch :618) | `payloadLanguage(input)` | `#4 COLLECTION-ITEM FAN-OUT …` |
+| 5 | trust | service/strategy | `buildStrategyPayload` (trust.ts:261), fetched :347 | `payloadLanguage(input)` | `#5 strategy body …` |
+| 6 | trust | service/generate-copy | `buildCopyPayload` (trust.ts:295), fetched :419 | `payloadLanguage(input)` | `#6 copy body …` |
+| 7 | trust | service/generate-copy (**collection item**) | **INLINE** trust.ts:499 (fetch :485) | `payloadLanguage(input)` | `#7 COLLECTION-ITEM FAN-OUT …` |
+
+Per A1's preference each file has ONE exported local resolver — `payloadLanguage(input)` in
+`thing.ts` and in `trust.ts` — called from every site, so a future fan-out path that copies
+a neighbouring body inherits it.
+
+Two belt-and-braces sweeps also exist ("every product/service request body of a full run
+carries language"): they iterate every captured `/api/audience/{product,service}/` call, so
+a NEW call site added later without the field fails them too.
+
+**The work routes (`/api/audience/work/{strategy,generate-copy}`) deliberately carry NO
+`language` field** — the work prompt path consumes the `languages` LABEL server-side from
+`brief.facts.work` (unchanged; ruling 5 / plan step 4: work is persistence-only here).
+
+**Save-site coverage (no save path can drop the declaration):**
+
+| Engine | Save site | File:line |
+|---|---|---|
+| thing | `saveFC` (skeleton + per-page + multipage final) | thing.ts:482 |
+| thing | techpremium deterministic path | thing.ts:714 |
+| thing | single-page final save | thing.ts:810 |
+| trust | final save | trust.ts:467 |
+| trust | collections `persist` | trust.ts:481 |
+| work | granth generator save | work.ts:174 |
+| work | granth collections `persist` | work.ts:195 |
+| work | multipage SKELETON save | work.ts:293 |
+| work | `saveFC` (every LLM fan-out save) | work.llm.ts:271 |
+
+## Per file
+
+**`src/hooks/useWizardStore.ts`** — adds `siteLanguage: string` (default `'en'`) and
+`siteLanguagePersisted: boolean` to `WizardState`; `setSiteLanguage` + `persistSiteLanguage`
+to `WizardActions`; both fields to `initialState` and to the explicit `reset()` assign list.
+`buildThingInput` / `buildTrustInput` forward `siteLanguage: s.siteLanguage`.
+`persistSiteLanguage` posts to the existing `/api/saveDraft` channel:
+`nl` ⇒ `{tokenId, stepIndex, localeConfig:{locales:['nl'],defaultLocale:'nl'}}`;
+revert to `en` after a prior non-en save ⇒ `localeConfig: null` (explicit clear);
+untouched English ⇒ **no call at all**. Best-effort like `save()`; on a non-2xx it leaves
+`siteLanguagePersisted` false so the next pick retries.
+
+**`IdentitySlot.tsx`** — a `div.space-y-5` wrapping the UNCHANGED
+`<SlotBody slot="identity" …/>` plus a local `SiteLanguageField`: a labelled `<select>` over
+`SUPPORTED_LOCALES` rendered with `localeLabel`, defaulted to `en`, helper text "Your page
+copy will be written in this language.", `onChange` ⇒ `setSiteLanguage` +
+`void persistSiteLanguage()`. No contract / slot-vocabulary change.
+
+**`finalize.ts`** — two new pure exports beside `saveDraft`:
+`localeConfigPatch(siteLanguage?)` (`{}` for en / absent / **unsupported**; the single-locale
+config otherwise) and `workLocaleConfigPatch(languages?)` (label → `labelToLocaleCode` →
+`localeConfigPatch`; `{}` + ONE `console.warn` for an unmapped label such as `'Hindi'`).
+
+**`thing.ts` / `trust.ts`** — optional `siteLanguage?: string` on the input interfaces, the
+exported `payloadLanguage()` resolver, `language` on all 7 bodies (table above), and
+`...localeConfigPatch(input.siteLanguage)` on all 5 save bodies.
+
+**`work.ts`** — imports `getWorkFacts` + `workLocaleConfigPatch`; one file-local
+`workLocalePatch(input)` resolved ONCE per run in each entry point (so an unmapped label
+warns at most once), spread into all 3 save bodies.
+
+**`work.llm.ts`** — the same derivation, spread into `saveFC` (the single funnel for every
+save in that adapter). See Deviations #1 for why it is inlined rather than imported.
+
+## Deviations from the plan
+
+1. **`work.llm.ts` does NOT import `workLocaleConfigPatch` from `./finalize`** — it inlines
+   the same 4-line derivation (label → `labelToLocaleCode` → config) using
+   `@/lib/i18n/localeNames`. Reason: the pre-existing `work.llm.test.ts` FACTORY-mocks
+   `'./finalize'` with `saveDraft` only, so ANY new export consumed by `work.llm.ts` throws
+   `No "workLocaleConfigPatch" export is defined on the "./finalize" mock` — and that test
+   file is **outside this phase's Files-touched list**, so I did not edit it (10 failures
+   observed on the first full run; this was the fix). Importing from `./work` instead would
+   have created a real runtime import cycle (`work.ts` re-exports `work.llm.ts`). Drift risk
+   is mitigated by `workLocale.test.ts`, which asserts the canonical helper AND both
+   adapters' save bodies with identical expectations (sites 1-3 exercise `finalize`'s copy,
+   site 4 the inlined one). A future consolidation should switch `work.llm.test.ts`'s mock
+   to `importOriginal` and re-point the import.
+2. **`persistSiteLanguage` sends `stepIndex`** (the current slot index, exactly like the
+   store's own `save()`) rather than a bare `{tokenId, localeConfig}` body — see the
+   stepIndex finding below. The exact-body assertion in `identityLanguage.test.tsx` pins the
+   shape, and a dedicated case proves the value is the CURRENT slot, not a hardcoded 0.
+3. **`localeConfigPatch` drops UNSUPPORTED codes** (persists nothing for `'hi'`/`'xx'`) while
+   the request payload still carries whatever was picked. Conservative: the picker cannot
+   produce an unsupported code, `SUPPORTED_LOCALES` is the closed vocabulary every reader
+   validates against, and phase 4 validates the payload value server-side with an `en`
+   fallback. Pinned by a case in both `payloadLanguage` and `workLocale`.
+4. **A new state field `siteLanguagePersisted`** (not named in the plan) exists solely to make
+   the zero-diff rule expressible ("English never saved ⇒ no call" vs "revert ⇒ explicit
+   null"). Session state; reset by `reset()`; never sent to the server.
+5. **`GeneratingSlot.tsx` untouched** — see the next section.
+
+## Plan pointers checked against the tree
+
+- OK — A1's three inline bodies + four builder sites were exactly where A1 said
+  (`thing.ts:493`, `thing.ts:584`, `trust.ts:464` pre-change).
+- OK — work save sites `work.ts:150/:170/:267` + `work.llm.ts:234` confirmed; all four now
+  spread the patch (`work.llm.ts:234` is `saveFC`, the funnel for every save there).
+- WRONG — **`GeneratingSlot.tsx buildInput() (:72)` is not where `siteLanguage` belongs.**
+  That function only dispatches to `buildThingInput`/`buildTrustInput`/`buildWorkInput`,
+  which live in `useWizardStore.ts` (scale-07 phase 5 consolidated them so the pre-gate
+  strategy fetch and generation share ONE projection). Threading the field in the slot would
+  have MISSED the store's own `fetchStrategy` path — the pre-gate, CHARGED strategy call.
+  The field is set in the two store projections instead; the slot needed no edit.
+- CLARIFIED — the plan's "**five** final-save bodies (`thing.ts :445/:667/:761`,
+  `trust.ts :436/:457`)" is right in count/location, but `:445` sits inside `saveFC`, which
+  covers the `:557/:628/:803` callers. Recorded so a reviewer's grep expects 5, not 8.
+- RESPECTED — phase 1's carry note that `labelToLocaleCode` takes LABELS only and returns
+  `null` for a bare code: work only ever feeds it `facts.work.languages[0]` (a label), and
+  the null branch is test-pinned (`'Hindi'` ⇒ no write + warn).
+
+## The `stepIndex` finding (plan step 1 / round-2 note 7)
+
+`api/saveDraft/route.ts:80` defaults `stepIndex = 0` and `:159-165` REWRITES
+`content.onboarding.stepIndex` on **every** call. Repo-wide readers of the persisted value:
+`api/loadDraft/route.ts:143` → `components/dashboard/continueRouting.ts:56-60` (the dashboard
+"Continue" router) — and nothing else. **Nothing resumes off it mid-wizard** (the wizard
+rehydrates from `brief`/`briefFacts`; the journey shell resumes off `journeyStep`). So a bare
+body would not break resume, but it WOULD silently rewind the progress the store's own
+`save()` maintains, which the dashboard reads. Conservative choice: `persistSiteLanguage`
+sends `Math.max(0, slots.indexOf(currentSlot))` — byte-identical to `save()`'s body shape.
+
+## Anti-inert-test check (mutation-verified, not assumed)
+
+The A1 defect is exactly "a test that passes while the fan-out paths ship dead", so the new
+assertions were mutated:
+
+- deleted `language: payloadLanguage(input)` from BOTH inline collection-item bodies
+  (`thing.ts`, `trust.ts`) ⇒ **4 failures** (`#3`, `#4`, `#7`, plus the trust every-body
+  sweep). Reverted; suite green again.
+- deleted `...localePatch` from `work.ts`'s collections-persist + skeleton saves and from
+  `work.llm.ts`'s `saveFC` ⇒ **3 failures** (work save sites 1+2, 3, 4). Reverted; green.
+
+Zero-diff cases assert **key absence** (`not.toHaveProperty('localeConfig')`) and **call
+absence** (`saveCalls()).toHaveLength(0)`), never mere falsiness.
+
+## Test results (verbatim)
+
+`npx tsc --noEmit` — exit 0, no diagnostics:
+
+```
+TSC_CLEAN
+```
+
+`npm run test:run`:
+
+```
+ Test Files  294 passed | 1 skipped (295)
+      Tests  4730 passed | 15 skipped (4745)
+   Start at  16:37:20
+   Duration  75.79s (transform 42.75s, setup 0ms, import 326.02s, tests 74.34s, environment 554.63s)
+```
+
+Phase-2b baseline was 291 files / 4688 tests. +3 files, +42 tests = exactly the three new
+suites (`payloadLanguage` 19, `identityLanguage` 9, `workLocale` 14). No pre-existing test
+was modified.
+
+## Open risks / what phase 4 must know
+
+- **The seam is live on the client and UNVALIDATED server-side.** All 7 thing/trust
+  audience-route bodies now carry `language` as a bare ISO code (`'nl'`), ALWAYS present,
+  defaulting to `'en'`. Phase 4 owns: the optional `language` string on the four route
+  request schemas, `resolvePromptLanguage` (validate against `SUPPORTED_LOCALES`, lenient
+  `'en'` fallback, `toPromptLanguage` → English exonym), and threading it into the builders.
+  **Until phase 4 lands the field is inert** — the routes' zod schemas strip unknown keys,
+  so nothing breaks and nothing changes today.
+- Phase 4 must tolerate an **unsupported/garbage** `language` (the client is deliberately
+  lenient and forwards whatever was picked): never a 400, always the `en` fallback, and the
+  raw string must never reach a prompt.
+- `payloadLanguage()` is exported from both `thing.ts` and `trust.ts` — any new
+  product/service route call added later must call it.
+- Regen's source is unchanged (`content.localeConfig.defaultLocale`); this phase is what
+  makes that value EXIST for new projects. First-gen and regen derive from the same wizard
+  pick, so they agree by construction (ruling 11).
+- Work regen (ruling 4) now has a `localeConfig` to prefer over `facts.languages[0]` for
+  Dutch work projects; for an unmapped label (`'Hindi'`) there is still no config, so the
+  `facts.languages[0]` fallback stays load-bearing — do not delete it in phase 4.
+- Manual QA still owed (not provable in jsdom): a real thing run with `nl` picked → the
+  editor loads with `localeConfig.defaultLocale === 'nl'` and NO pills/switcher (single-locale
+  is correct); an English run leaves `content` with no `localeConfig` key; the network tab
+  shows `language: 'nl'` on the strategy + copy request bodies.

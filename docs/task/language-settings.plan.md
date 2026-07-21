@@ -141,7 +141,7 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     becomes a genuine fake control.
   - manual-QA only (not provable in jsdom): nested `confirmDialog` portal stacking above the
     settings `Dialog` (z-index / focus trap)
-- phase 2b header Site-settings popover → Languages entry: done (commit pending-sha, review
+- phase 2b header Site-settings popover → Languages entry: done (commit dc05b1b4, review
   loops 1, VERDICT ship) — **founder addition made AT the phase-2 gate** ("in the settings (in
   header) dropdown there should be a Languages option as well"). FOUNDER SIGNED OFF phase 2 +
   2b; pipeline resumed at phase 3.
@@ -150,7 +150,21 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     that union — do NOT invert the dependency (no-cycle rule, `SeoSettingsModal.tsx:239`).
   - the section seed only takes effect on a **closed→open transition** (`useState` initializer +
     conditional unmount). Unreachable today; matters if a future in-window deep-link is added.
-- phase 3 onboarding site-language capture: pending
+- phase 3 onboarding site-language capture: done (commit pending-sha, review loops 1, VERDICT ship)
+  - **A1 SATISFIED**: all 7 audience call sites carry `language`, verified independently by the
+    reviewer (`thing.ts:245/285/545/633`, `trust.ts:261/295/499` — line numbers had SHIFTED from
+    A1's estimates). Single exported `payloadLanguage(input)` per file. Save sites: thing ×3,
+    trust ×2, work ×4.
+  - **owed → phase 4 (now in its Files touched)**: the resume/rehydration gap — `siteLanguage` is
+    in-memory only, so a reload between picking the language and generating silently reverts to
+    `'en'` while `localeConfig` says `nl`. Inert today, REAL the moment phase 4 makes the
+    directive live.
+  - owed → a later phase owning `work.llm.test.ts`: consolidate the duplicated label→code
+    derivation in `work.llm.ts` (inlined to avoid an out-of-scope factory mock; two copies drift)
+  - phase-7 known-limits doc: work multi-select declares only `languages[0]`; unmapped labels
+    (e.g. `'Hindi'`) generate fine but declare no `defaultLocale`
+  - founder/UX nit (not code): the picker renders below the whole `SlotBody`, so on a long
+    identity slot it sits under the fields rather than beside them
 - phase 4 generation output-language directive: pending
 - phase 5 switcher.v2 asset + publish emission: pending
 - phase 6 publish persistence + /p SSR locale awareness + e2e: pending
@@ -637,6 +651,30 @@ reconciles per ruling 4.
 - `src/app/api/audience/service/generate-copy/route.ts`
 - `src/modules/generation/scopedRegen.ts`
 - `src/modules/generation/scopedRegen.test.ts`
+- `src/hooks/useWizardStore.ts` — **owed from phase 3** (see step below)
+- `src/modules/wizard/generation/thing.ts` — resume branch, same fix
+- `src/modules/wizard/generation/payloadLanguage.test.ts` — pin the resume paths
+
+**Owed from phase 3 (added by orchestrator after phase-3 review) — fix BEFORE the directive goes live**
+
+**Resume/rehydration gap.** `siteLanguage` currently lives ONLY in the in-memory wizard store —
+`useWizardStore` has no `persist` middleware and `hydrate()` (`useWizardStore.ts:1015`) seeds only
+from the brief. Identity is slot 1 of 8, so a reload or dashboard-"Continue" between picking the
+language and generating resets `siteLanguage` to `'en'` while `content.localeConfig` still says
+`nl`. **Today that is inert; the moment phase 4 makes the directive live it becomes a real bug** —
+copy generates in English on a project that *declares* Dutch, and regen (which reads
+`defaultLocale` from the DB) then disagrees with first-gen.
+
+Second door, same failure: `thing.ts:684 runFanOut(loaded)` takes the language from live `input`
+while every sibling field comes from the persisted `ob` — so an interrupted Dutch multipage run,
+resumed after a reload, half-translates. That is **exactly the A1 failure mode** arriving through
+a different route, which is why it must not be deferred past this phase.
+
+Required:
+1. Seed `siteLanguage` from `content.localeConfig.defaultLocale` at `hydrate()`.
+2. In the resume branch, take the language from the loaded content's `localeConfig`, not live `input`.
+3. Pin both with tests that simulate a reload (fresh store + persisted content) and assert the
+   non-English language survives into every request body.
 
 **Verification**
 - `npx tsc --noEmit` · `npm run test:run` (promptBranch + contract + route tests green)

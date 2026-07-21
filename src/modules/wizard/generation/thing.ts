@@ -58,7 +58,7 @@ import {
   VESTRIA_LEAD_SUBMIT_TEXT,
   VESTRIA_LEAD_SUCCESS_MESSAGE,
 } from '@/modules/templates/vestria/blocks/Contact/contactFields';
-import { buildFinalContent, saveDraft, type BriefGoal } from './finalize';
+import { buildFinalContent, saveDraft, localeConfigPatch, type BriefGoal } from './finalize';
 import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './index';
 import { trackFailure, failureEventName } from '@/utils/trackTelemetry';
 
@@ -146,11 +146,35 @@ export interface ThingGenerationInput {
    * cardCountHints / collections seams).
    */
   styleAutoAssign?: boolean;
+
+  /**
+   * language-settings phase 3 — the ONBOARDING-declared site language (bare ISO
+   * code, e.g. `'nl'`). Absent ⇒ `'en'`. Rides EVERY product route request body
+   * as `language` (ruling 11: the audience routes have no token to bind a DB read
+   * to, so first-gen's language travels on the request and is validated
+   * server-side against `SUPPORTED_LOCALES` in phase 4).
+   */
+  siteLanguage?: string;
 }
 
 // ---------------------------------------------------------------------------
 // Payload builders — the fidelity surface asserted by thing.test.ts.
 // ---------------------------------------------------------------------------
+
+/**
+ * The `language` value carried by EVERY product-route request body of this run
+ * (strategy, single-page copy, per-page fan-out copy, collection-item copy).
+ *
+ * ONE resolver, called from ALL FOUR call sites deliberately: a fan-out path that
+ * built its body inline and silently omitted `language` would generate the root
+ * page in Dutch and every sub-page/collection item in English (a half-translated
+ * site). Always emitted (ruling 2 — the directive is unconditional, `'en'` is a
+ * real instruction, not a no-op); ISO CODE, never an exonym (the code→English-name
+ * mapping is server-side, phase 4).
+ */
+export function payloadLanguage(input: Pick<ThingGenerationInput, 'siteLanguage'>): string {
+  return input.siteLanguage || 'en';
+}
 
 /** Legacy LandingGoal enum the routes require (derived from the captured intent). */
 export function landingGoalFor(input: ThingGenerationInput): LandingGoal {
@@ -217,6 +241,8 @@ export function buildStrategyPayload(input: ThingGenerationInput): Record<string
     categories: isMfr ? input.productCategories ?? input.categories ?? [] : input.categories ?? [],
     ...(isMfr && input.whatYouMake ? { whatYouMake: input.whatYouMake } : {}),
     templateId: input.templateId ?? undefined,
+    // language-settings phase 3 — always sent (ruling 11 / call-site #1 of 4).
+    language: payloadLanguage(input),
     // Proof hard rule (phase 4) — fed to assembleProductStrategy so an unpromised
     // testimonials section is never generated. Absent ⇒ old behavior.
     ...(input.proof ? { proof: input.proof } : {}),
@@ -255,6 +281,8 @@ export function buildCopyPayload(
     templateId: input.templateId ?? undefined,
     // scale-08 phase 1: the copy route derives voice from businessType.
     businessType: input.businessTypeKey,
+    // language-settings phase 3 — always sent (ruling 11 / call-site #2 of 4).
+    language: payloadLanguage(input),
   };
 }
 
@@ -448,6 +476,10 @@ export async function runThingGeneration(
       ...(templateInfo ?? {}),
       ...styleInfo,
       ...briefPatch,
+      // language-settings phase 3 — belt-and-suspenders durable declaration
+      // (`{}` for en/absent ⇒ zero-diff). Spread into EVERY save site so no save
+      // path can drop it even if the slot-1 persist failed.
+      ...localeConfigPatch(input.siteLanguage),
       finalContent: fc,
     });
   };
@@ -506,6 +538,11 @@ export async function runThingGeneration(
             // manufacturer today); the fallback covers in-flight resumable
             // drafts persisted before this key existed. Transitional.
             businessType: ob.businessTypeKey ?? 'manufacturer',
+            // language-settings phase 3 — call-site #3 of 4 (MULTI-PAGE FAN-OUT).
+            // This body is built INLINE (not via buildCopyPayload), so it needs
+            // the field explicitly: without it every sub-page would be written in
+            // English on a Dutch site.
+            language: payloadLanguage(input),
             page: {
               archetypeKey: page.archetypeKey,
               title: page.title,
@@ -591,6 +628,9 @@ export async function runThingGeneration(
               features: fanFeatures,
               templateId: resolvedTemplateId,
               businessType: ob.businessTypeKey ?? 'manufacturer',
+              // language-settings phase 3 — call-site #4 of 4 (COLLECTION-ITEM
+              // fan-out). Inline body ⇒ explicit field, same reason as #3.
+              language: payloadLanguage(input),
               // Record in the payload — AI writes connective copy only; record
               // fields are kept verbatim by the clamp on merge.
               collectionItem: plan.entry,
@@ -671,6 +711,7 @@ export async function runThingGeneration(
         templateId: 'techpremium',
         variantId: defaultTechPremiumVariant,
         ...briefPatch,
+        ...localeConfigPatch(input.siteLanguage),
         finalContent,
       });
     } catch (e: any) {
@@ -766,6 +807,7 @@ export async function runThingGeneration(
         variantId,
         ...(multipageTemplate && input.styleMoodPicked && input.mood ? { themeValues: { mood: input.mood } } : {}),
         ...briefPatch,
+        ...localeConfigPatch(input.siteLanguage),
         finalContent,
       });
     } catch (e: any) {

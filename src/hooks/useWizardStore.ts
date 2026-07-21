@@ -299,6 +299,31 @@ interface WizardState {
   // author_name, author_role} shape the route expects (authors blank).
   importedTestimonials: Array<{ quote: string; author_name: string; author_role: string }>;
 
+  /**
+   * language-settings phase 3 — the site language the user picked in the IDENTITY
+   * slot (bare ISO code from `SUPPORTED_LOCALES`; default `'en'`).
+   *
+   * TWO durable consumers, deliberately independent so neither is a single point
+   * of failure (ruling 11):
+   *  a) it rides EVERY strategy/copy request body as `language` (via the
+   *     `buildThingInput`/`buildTrustInput` projections → the adapters), which is
+   *     what makes FIRST generation write in this language;
+   *  b) `persistSiteLanguage()` writes `content.localeConfig` through saveDraft,
+   *     which is what REGEN + Site Settings later read.
+   *
+   * WORK does NOT use this field — it derives its declaration from the existing
+   * `languages` question inside the work adapters (no second control).
+   */
+  siteLanguage: string;
+  /**
+   * True once a NON-English `localeConfig` has been persisted for this project in
+   * this session. It is what makes the English zero-diff contract precise: an
+   * untouched-English project must never CALL saveDraft from the picker (the
+   * route rebuilds `content.onboarding` on every call, so an "empty" call is not
+   * a no-op), while a revert nl→en MUST call it, with an explicit `null` clear.
+   */
+  siteLanguagePersisted: boolean;
+
   // generating slot.
   generationProgress: number;
   generationError: string | null;
@@ -430,6 +455,19 @@ interface WizardActions {
   // trust style.
   setVariantId: (v: string) => void;
   setPaletteId: (v: string) => void;
+
+  // language-settings phase 3 — site language (identity slot).
+  setSiteLanguage: (code: string) => void;
+  /**
+   * Persist the picked site language as `content.localeConfig` via the EXISTING
+   * saveDraft channel. Fired from the picker (identity = slot 1) so the durable
+   * declaration lands well ahead of generation.
+   *
+   * Zero-diff contract: English that was never persisted ⇒ NO CALL AT ALL.
+   * Best-effort like `save()` — the adapters also spread the declaration into
+   * every final-save body, so a failure here is recoverable.
+   */
+  persistSiteLanguage: () => Promise<void>;
 
   // generating.
   setGenerationProgress: (progress: number) => void;
@@ -756,6 +794,10 @@ export function buildThingInput(s: WizardState): ThingGenerationInput {
     styleVariantPicked: s.styleVariantPicked,
     stylePalettePicked: s.stylePalettePicked,
     styleMoodPicked: s.styleMoodPicked,
+    // language-settings phase 3 — first-gen's language source (ruling 11). Always
+    // forwarded; the adapter resolves absent ⇒ 'en' and emits `language` on every
+    // product route body.
+    siteLanguage: s.siteLanguage,
   };
 }
 
@@ -802,6 +844,8 @@ export function buildTrustInput(s: WizardState): TrustGenerationInput {
     importedTestimonials: s.importedTestimonials,
     paletteId: s.paletteId ?? undefined,
     variantId: s.variantId ?? undefined,
+    // language-settings phase 3 — mirror of buildThingInput (ruling 11).
+    siteLanguage: s.siteLanguage,
   };
 }
 
@@ -914,6 +958,8 @@ const initialState: WizardState = {
   variantId: null,
   paletteId: null,
   importedTestimonials: [],
+  siteLanguage: 'en',
+  siteLanguagePersisted: false,
   generationProgress: 0,
   generationError: null,
   // Journey (P2b). 2 = the first resumable step; the entry page owns STEP 01.
@@ -1423,6 +1469,47 @@ export const useWizardStore = create<WizardStore>()(
           state.paletteId = v;
         }),
 
+      // language-settings phase 3 — site language (identity slot picker).
+      setSiteLanguage: (code) =>
+        set((state) => {
+          state.siteLanguage = code;
+        }),
+
+      persistSiteLanguage: async () => {
+        const { tokenId, siteLanguage, siteLanguagePersisted, currentSlot, slots } = get();
+        if (!tokenId) return;
+        const isEn = !siteLanguage || siteLanguage === 'en';
+        // ZERO-DIFF: English that was never persisted ⇒ no saveDraft call at all
+        // (the route rebuilds `content.onboarding` on every call, so an "empty"
+        // call still mutates the row — call ABSENCE is the contract, not an
+        // empty body). A revert nl→en DOES call, with an explicit `null` clear.
+        if (isEn && !siteLanguagePersisted) return;
+        const localeConfig = isEn
+          ? null
+          : { locales: [siteLanguage], defaultLocale: siteLanguage };
+        try {
+          const res = await fetch('/api/saveDraft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tokenId,
+              // Mirror `save()`: the route defaults a missing stepIndex to 0 and
+              // REWRITES `content.onboarding.stepIndex`, so sending the current
+              // slot keeps the dashboard's `continueRouting` read honest instead
+              // of silently rewinding persisted progress.
+              stepIndex: Math.max(0, slots.indexOf(currentSlot)),
+              localeConfig,
+            }),
+          });
+          if (!res.ok) return;
+          set((state) => {
+            state.siteLanguagePersisted = !isEn;
+          });
+        } catch {
+          /* best-effort — the adapters' final saves also carry the declaration */
+        }
+      },
+
       setGenerationProgress: (progress) =>
         set((state) => {
           state.generationProgress = progress;
@@ -1607,6 +1694,8 @@ export const useWizardStore = create<WizardStore>()(
             structureDisabled: [],
             collections: {},
             briefFacts: null,
+            siteLanguage: 'en',
+            siteLanguagePersisted: false,
           });
         }),
     })),

@@ -44,6 +44,7 @@ import type {
   WorkStrategyOutput,
   WorkSitemapPage,
 } from '@/modules/audience/work/strategy/parseStrategyWork';
+import { labelToLocaleCode } from '@/lib/i18n/localeNames';
 import { saveDraft } from './finalize';
 import {
   estimateFullRunCost,
@@ -230,6 +231,32 @@ export async function runWorkLLMGeneration(
     /* skip knob seed */
   }
 
+  // language-settings phase 3 — durable site-language declaration derived ONCE
+  // from the EXISTING work `languages` question (labels → ISO code). `{}` for
+  // English / unanswered / unmapped ⇒ zero-diff. This is the FOURTH (and last)
+  // work save site; saveFC is the single funnel for every save in this adapter.
+  //
+  // ⚠️ Deliberately NOT importing `workLocaleConfigPatch` from './finalize' (the
+  // canonical twin used by work.ts): the pre-existing `work.llm.test.ts` FACTORY-
+  // mocks './finalize' with `saveDraft` only, so any new export from that module
+  // would break it — and that test file is outside this phase's scope. The two
+  // are behaviourally pinned together by `workLocale.test.ts` (site 3 vs site 4).
+  // `labelToLocaleCode` only ever returns a `SUPPORTED_LOCALES` code, so no extra
+  // vocabulary check is needed here.
+  const localePatch = (() => {
+    const label = getWorkFacts(input.brief?.facts)?.languages?.[0];
+    if (!label) return {};
+    const code = labelToLocaleCode(label);
+    if (!code) {
+      console.warn(
+        `[work] language label "${label}" has no supported ISO code — skipping the localeConfig declaration (copy is still written in that language).`
+      );
+      return {};
+    }
+    if (code === 'en') return {};
+    return { localeConfig: { locales: [code], defaultLocale: code } };
+  })();
+
   const saveFC = async (fc: any) => {
     await saveDraft({
       tokenId,
@@ -241,6 +268,7 @@ export async function runWorkLLMGeneration(
       // replaces `facts` wholesale, so send the whole brief — never a partial
       // `{facts:{work}}` patch. Idempotent re-send on each save is harmless.
       ...(input.brief ? { brief: input.brief } : {}),
+      ...localePatch,
       finalContent: fc,
     });
   };
