@@ -485,7 +485,21 @@ export async function runThingGeneration(
   };
 
   // ─── Multi-page fan-out (ported): per-page copy + persistence + resume ───
-  const runFanOut = async (fc: any): Promise<GenerationResult> => {
+  //
+  // language-settings phase 4 — `resumedLanguage` closes the SECOND door on the
+  // reload gap. A multipage run that is INTERRUPTED and resumed after a reload
+  // rebuilds every sibling field from the PERSISTED `ob`, but the language used
+  // to come from the live `input` — which a fresh (non-persisted) wizard store
+  // resets to `'en'`. A Dutch site would then finish half-translated: the pages
+  // written before the reload in Dutch, the rest in English. On the resume path
+  // the caller passes the language read off the loaded project's
+  // `localeConfig`, which is the durable record; a fresh run passes nothing and
+  // keeps using the live input.
+  const runFanOut = async (
+    fc: any,
+    resumedLanguage?: string
+  ): Promise<GenerationResult> => {
+    const fanLanguage = resumedLanguage || payloadLanguage(input);
     const ob = fc.onboardingData as MultiPageOnboardingData;
     const sitemap: SitemapPage[] = ob.sitemap;
     const fanStrategy = ob.strategy;
@@ -541,8 +555,9 @@ export async function runThingGeneration(
             // language-settings phase 3 — call-site #3 of 4 (MULTI-PAGE FAN-OUT).
             // This body is built INLINE (not via buildCopyPayload), so it needs
             // the field explicitly: without it every sub-page would be written in
-            // English on a Dutch site.
-            language: payloadLanguage(input),
+            // English on a Dutch site. Phase 4: `fanLanguage`, so a RESUMED run
+            // uses the persisted declaration rather than the reset store field.
+            language: fanLanguage,
             page: {
               archetypeKey: page.archetypeKey,
               title: page.title,
@@ -630,7 +645,8 @@ export async function runThingGeneration(
               businessType: ob.businessTypeKey ?? 'manufacturer',
               // language-settings phase 3 — call-site #4 of 4 (COLLECTION-ITEM
               // fan-out). Inline body ⇒ explicit field, same reason as #3.
-              language: payloadLanguage(input),
+              // Phase 4: `fanLanguage` — resume-aware, same as #3.
+              language: fanLanguage,
               // Record in the payload — AI writes connective copy only; record
               // fields are kept verbatim by the clamp on merge.
               collectionItem: plan.entry,
@@ -681,7 +697,17 @@ export async function runThingGeneration(
       const json = await res.json();
       const loaded = json?.finalContent || json?.content?.finalContent || json?.content;
       if (isResumableGeneration(loaded)) {
-        return runFanOut(loaded);
+        // language-settings phase 4 — take the language from the PERSISTED
+        // declaration, not from the live `input`. Every other field of a resumed
+        // run already comes from the persisted `ob`; the wizard store is not
+        // persisted, so after a reload `input.siteLanguage` is back to 'en' and
+        // the remaining pages would be written in English on a Dutch site.
+        // Absent (English / legacy) ⇒ undefined ⇒ the live input is used.
+        const declared = json?.localeConfig?.defaultLocale;
+        return runFanOut(
+          loaded,
+          typeof declared === 'string' && declared ? declared : undefined
+        );
       }
     }
   } catch {

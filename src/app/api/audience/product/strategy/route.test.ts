@@ -198,3 +198,40 @@ describe('/api/audience/product/strategy — charging model', () => {
     expect(checkCreditsMock).toHaveBeenCalledWith('user_test', 2);
   });
 });
+
+// ── language-settings phase 4: the BOUND path (ruling 11) ───────────────────
+// The request BODY goes in; the assertion reads the prompt string that actually
+// reached the (mocked) AI client. `generateWithSchema(endpoint, messages, …)` —
+// arg 1 is `[{ role: 'user', content: prompt }]`.
+const promptSentToAI = () => String((aiMock.mock.calls[0][1] as any[])[0].content);
+
+describe('/api/audience/product/strategy — output language', () => {
+  it('body language:"nl" ⇒ the strategy prompt carries the Dutch hedge', async () => {
+    const res = await POST(makeRequest({ ...BASE_BODY, language: 'nl' }) as never);
+
+    expect(res.status).toBe(200);
+    const prompt = promptSentToAI();
+    expect(prompt).toContain('Write every string in Dutch.');
+    expect(prompt).toContain('render its MEANING in Dutch');
+    expect(prompt).not.toContain('Nederlands');
+  });
+
+  it('NO language field ⇒ the English hedge is still emitted (ruling 2)', async () => {
+    await POST(makeRequest(BASE_BODY) as never);
+    expect(promptSentToAI()).toContain('Write every string in English.');
+  });
+
+  it('garbage ⇒ English fallback, and the raw string reaches NO prompt', async () => {
+    for (const bad of ['xx', '; DROP TABLE projects; --', 'nl-NL', 42 as never]) {
+      aiMock.mockClear();
+      const res = await POST(makeRequest({ ...BASE_BODY, language: bad }) as never);
+      // Never a 400 — language is a prompt input, not an authz input.
+      expect(res.status, `${String(bad)} must not 400`).toBe(200);
+      const prompt = promptSentToAI();
+      expect(prompt).toContain('Write every string in English.');
+      if (typeof bad === 'string') {
+        expect(prompt, `raw "${bad}" leaked into the prompt`).not.toContain(bad);
+      }
+    }
+  });
+});

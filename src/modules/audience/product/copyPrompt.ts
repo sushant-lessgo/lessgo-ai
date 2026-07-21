@@ -50,6 +50,17 @@ export interface ProductCopyPromptInput {
   /** Rendered SiteContext block (buildSiteContextPromptBlock) — facts + verbatim
    *  excerpts from the business's existing site. '' / absent for new businesses. */
   siteContextBlock?: string;
+  /**
+   * language-settings phase 4 — the site's OUTPUT language as an English exonym
+   * (`'English'`, `'Dutch'`, …), never an ISO code and never a native endonym
+   * (the directive interpolates it into English sentences — "unless
+   * ${language} IS English"). Absent ⇒ `'English'`.
+   *
+   * ALWAYS produced by `resolvePromptLanguage()` route-side, never taken raw
+   * from a request body: the caller validates against SUPPORTED_LOCALES first,
+   * so an unrecognized code can never reach this prompt (plan ruling 11).
+   */
+  language?: string;
 }
 
 /** Page-identity block for multi-page fan-out — prevents every page re-pitching
@@ -207,6 +218,10 @@ export function buildProductCopyPrompt(input: ProductCopyPromptInput): string {
   const { strategy, uiblocks, productName, oneLiner, offer, landingGoal, features } = input;
   const voiceId: ProductVoiceId = input.voiceId ?? 'modern-tech';
   const isTrade = voiceId === 'tailored-trade';
+  // ALWAYS emitted, English included (plan ruling 2): the reported bug is
+  // "picked English, got Dutch" — the model inferring the language from a
+  // non-English one-liner. Gating the directive on non-English would un-fix it.
+  const language = input.language || 'English';
 
   // Multi-page fan-out: the SECTION SET for this call comes from uiblocks (the
   // page's sections), not strategy.sections (which is home + chrome).
@@ -235,6 +250,23 @@ export function buildProductCopyPrompt(input: ProductCopyPromptInput): string {
 You are a conversion copywriter for a premium B2B manufacturer's lead-generation site. The page uses the tailored-trade design family: editorial paper surfaces, dark bands, serif display type. You write in that voice — assured, concrete, operator-to-operator — NOT generic agency marketing voice.`
     : `## IDENTITY
 You are a conversion copywriter for a software product landing page. The page uses the Meridian design family — "Modern Tech": confident, precise, builder-to-builder. You write in that voice, NOT generic breathless SaaS marketing voice.`;
+
+  // Mirrors work/copyPrompt.ts:213-219 verbatim in shape — one wording for every
+  // engine. Placed BEFORE all grounding material (product facts, strategy,
+  // SiteContext excerpts), which is the material the model would otherwise echo.
+  const languageDirective = `## OUTPUT LANGUAGE — ${language} (READ FIRST)
+Your entire output MUST be written in ${language}. The grounding material below —
+the product facts, the strategy blocks, and any SITE CONTEXT excerpts — MAY be
+written in another language. When it is, render its MEANING in ${language}:
+translate the idea, never copy or echo the source-language wording. No
+source-language fragments, names of things, or phrases may survive into your
+output (unless ${language} IS that language). Proper nouns (the product/business
+name, place names, people's names) stay as-is.`;
+
+  // UNNUMBERED + bold on purpose: the RULES block below hardcodes its numerals
+  // (`accentRule` opens with "1." and `pricingRule` is "5."), so a numbered
+  // insert would produce two "1." lines. See plan phase 4 step 2.
+  const languageRule = `**Write EVERY string in ${language}.** The entire page — headings, ledes, card labels, CTAs, footer text, everything — must be in ${language}. No other language, no mixed-language cards, no English fragments (unless ${language} IS English).`;
 
   const hasHero = sectionTypes.includes('hero');
   const accentRule = isTrade
@@ -362,6 +394,8 @@ Only the hero headline and cta headline carry <em>. Match this PATTERN with copy
 hero.cta_subtext is OPTIONAL — a short muted line under the primary CTA. OMIT it (null or absent) unless the offer explicitly supports it; do NOT invent terms.`;
 
   return `${identity}
+
+${languageDirective}
 ${pageContextBlock}
 ## PRODUCT
 Name: ${productName}
@@ -407,6 +441,7 @@ ${sectionSpecs}
 ${getThingCollectionSchemas(isTrade)}
 
 ## RULES (MUST FOLLOW)
+${languageRule}
 ${accentRule}
 2. Respect character limits and array min/max strictly.
 3. NO placeholder text — every field must be real, usable copy.

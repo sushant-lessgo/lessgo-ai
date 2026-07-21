@@ -58,6 +58,8 @@ import {
   buildWorkCopyRetryPrompt,
 } from '@/modules/audience/work/copyPrompt';
 import { productVoiceForBusinessType } from '@/modules/audience/product/voice';
+import { readDefaultLocale } from '@/lib/i18n/projectLocale';
+import { toPromptLanguage, labelToLocaleCode } from '@/lib/i18n/localeNames';
 import {
   selectWorkVoice,
   type Establishment,
@@ -265,6 +267,18 @@ export function readOnboardingView(project: ScopedProject | null): OnboardingVie
   const content = (project?.content ?? {}) as Record<string, unknown>;
   const onboarding = content['onboarding'];
   return onboarding && typeof onboarding === 'object' ? (onboarding as OnboardingView) : {};
+}
+
+/**
+ * language-settings phase 4 — REGEN's language source. Unlike first generation
+ * (whose routes carry no token and therefore take the language off the REQUEST —
+ * plan ruling 11), scopedRegen genuinely holds the Project row, so it reads the
+ * DURABLE declaration written at onboarding: `content.localeConfig.defaultLocale`.
+ * Absent/legacy ⇒ `'English'`. Both paths derive from the same wizard pick, so
+ * first-gen and regen agree by construction.
+ */
+export function readLocaleDefault(project: ScopedProject | null): string {
+  return toPromptLanguage(readDefaultLocale(project?.content) ?? 'en');
 }
 
 /** The exact assembled shape `getCompleteElementsMap` consumes (identical to
@@ -584,6 +598,7 @@ function buildProductPrompt(project: ScopedProject, map: ElementsMap): string {
     landingGoal: (validated.landingPageGoals ?? 'signup') as any,
     features: features.map((f) => f.feature),
     voiceId: productVoiceForBusinessType(brief.businessType),
+    language: readLocaleDefault(project),
   });
 }
 
@@ -633,6 +648,7 @@ function buildServicePrompt(project: ScopedProject, map: ElementsMap): string {
     offer: validated.offer ?? '',
     goal: (validated.landingPageGoals ?? 'book-call') as any,
     understanding,
+    language: readLocaleDefault(project),
   });
 }
 
@@ -645,8 +661,25 @@ function requireWorkFacts(project: ScopedProject): WorkFacts {
   return facts;
 }
 
+/**
+ * The work engine's own language answer (`facts.languages[0]`) as a prompt-facing
+ * name. The stored value is a human LABEL ('Dutch', 'Nederlands') — mapped to an
+ * English exonym when it is one of the 12 supported languages, otherwise passed
+ * through verbatim (an unmapped label like 'Hindi' is still a usable instruction
+ * for the model even though no localeConfig may be written for it).
+ */
+function workFactsLanguage(facts: WorkFacts): string | null {
+  const raw = facts.languages?.[0];
+  if (typeof raw !== 'string' || !raw.trim()) return null;
+  const code = labelToLocaleCode(raw);
+  return code ? toPromptLanguage(code) : raw.trim();
+}
+
 function buildWorkPrompt(project: ScopedProject, map: ElementsMap): string {
   const brief = briefOf(project);
+  // Present ⇒ the site DECLARED a language; null ⇒ fall back to the work facts.
+  const declared = readDefaultLocale(project?.content);
+  const declaredLanguage = declared ? toPromptLanguage(declared) : null;
   const facts = requireWorkFacts(project);
   const sectionTypes = Object.keys(uiblocksFromMap(map));
   const pricePosition = derivePricePosition(facts);
@@ -666,7 +699,15 @@ function buildWorkPrompt(project: ScopedProject, map: ElementsMap): string {
     uiblocks: uiblocksFromMap(map),
     sitemap: [],
     storyBranch: establishment,
-    primaryLanguage: facts.languages?.[0] ?? 'en',
+    // language-settings phase 4 (plan ruling 4) — RECONCILE the two sources.
+    // `content.localeConfig.defaultLocale` is the site's CURRENT declared
+    // language (user-set at onboarding, editable in Site Settings later), so it
+    // WINS. `facts.languages[0]` is onboarding-time raw input and stays the
+    // fallback for legacy work projects with no config — and for a work answer
+    // whose label is outside SUPPORTED_LOCALES (e.g. 'Hindi'), which never gets
+    // a localeConfig written at all. Do not delete it.
+    primaryLanguage:
+      declaredLanguage ?? workFactsLanguage(facts) ?? 'en',
   };
 
   return buildWorkCopyPrompt({

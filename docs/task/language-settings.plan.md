@@ -150,7 +150,7 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     that union — do NOT invert the dependency (no-cycle rule, `SeoSettingsModal.tsx:239`).
   - the section seed only takes effect on a **closed→open transition** (`useState` initializer +
     conditional unmount). Unreachable today; matters if a future in-window deep-link is added.
-- phase 3 onboarding site-language capture: done (commit pending-sha, review loops 1, VERDICT ship)
+- phase 3 onboarding site-language capture: done (commit 82605fa1, review loops 1, VERDICT ship)
   - **A1 SATISFIED**: all 7 audience call sites carry `language`, verified independently by the
     reviewer (`thing.ts:245/285/545/633`, `trust.ts:261/295/499` — line numbers had SHIFTED from
     A1's estimates). Single exported `payloadLanguage(input)` per file. Save sites: thing ×3,
@@ -165,7 +165,29 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     (e.g. `'Hindi'`) generate fine but declare no `defaultLocale`
   - founder/UX nit (not code): the picker renders below the whole `SlotBody`, so on a long
     identity slot it sits under the fields rather than beside them
-- phase 4 generation output-language directive: pending
+- phase 4 generation output-language directive: done (commit pending-sha, review loops 1, VERDICT ship)
+  - seam closed both ways: `projectLocale.ts` = `resolvePromptLanguage` (first-gen, validates
+    client code → `en` fallback → exonym, never throws/400s) + `readDefaultLocale` (regen).
+    No prisma in the audience routes. Directive always emitted, English included.
+  - **owed-from-phase-3 resume gap CLOSED**: `hydrate()` re-seeds `siteLanguage` from persisted
+    `localeConfig`; `thing.ts` resume takes the language from loaded content. Both pinned by
+    reload-simulating tests.
+  - **⛔ NEW OWED → phase 5 (a fake control — decide, don't just document).** The comment at
+    `IdentitySlot.tsx:10` ("Work never renders this shell") is FALSE: `isJourneyEligible`
+    (`src/lib/journeyEngines.ts:50-51`) routes only `isWorkCopyTemplate` templates to the
+    journey, so work-audience/granth projects DO render `WizardShell`, and
+    `workContract.slotSkips` keeps the identity slot — **those users see the language picker
+    while work first-gen ignores it** (work route bodies carry no `language`; it reads
+    `facts.languages`). Result: first-gen English, regen Dutch, on a project that visibly
+    declares Dutch. A control that appears functional but isn't is precisely what the
+    greyed-placeholder rule forbids. **Ruling: do NOT ship it as a doc note.** Either (a) make
+    work first-gen consume the declaration, or (b) hide/disable the picker for engines that
+    don't consume it. Prefer (a) if cheap; (b) is the honest floor. Fix the false comment either way.
+  - owed → a phase owning `page.tsx`/`WizardShell.tsx`/`JourneyShell.tsx`: pass the already-loaded
+    `localeConfig` into `hydrate()` to drop the extra `GET /api/loadDraft` per wizard mount
+    (doubles under StrictMode in dev; fire-and-forget, non-blocking, acceptable to ship as-is)
+  - phase-7 known-limits: work regen with a bare code in `facts.languages` renders
+    `## OUTPUT LANGUAGE — en` (pre-existing; `labelToLocaleCode` rejects bare codes)
 - phase 5 switcher.v2 asset + publish emission: pending
 - phase 6 publish persistence + /p SSR locale awareness + e2e: pending
 - phase 7 docs + acceptance sweep: pending

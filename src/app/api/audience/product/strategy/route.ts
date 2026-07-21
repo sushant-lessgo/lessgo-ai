@@ -29,6 +29,7 @@ import {
   ProductStrategyWithSitemapSchema,
 } from '@/lib/schemas/productStrategy.schema';
 import { buildProductStrategyPrompt } from '@/modules/audience/product/strategy/promptsProduct';
+import { resolvePromptLanguage } from '@/lib/i18n/projectLocale';
 import {
   productVoiceForBusinessType,
   type ProductVoiceId,
@@ -87,6 +88,12 @@ const ProductStrategyRequestSchema = z.object({
   // byte-identical).
   brief: BriefSchema.optional(),
   requiredCapabilities: z.array(z.enum(capabilityIds)).optional(),
+  // language-settings phase 4 (ruling 11) — the onboarding-declared site
+  // language, a bare ISO code. Typed `z.unknown()` DELIBERATELY: validation is
+  // SEMANTIC (`resolvePromptLanguage` → 'en' fallback), so no value of any shape
+  // can 400 a paid generation run over language. The raw value never reaches the
+  // prompt — only the validated English exonym does.
+  language: z.unknown().optional(),
 });
 
 async function productStrategyHandler(req: NextRequest): Promise<Response> {
@@ -193,6 +200,9 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
       voiceId,
       whatYouMake: data.whatYouMake,
       pageArchetypes,
+      // Validated + mapped to an English exonym here; `data.language` itself
+      // never reaches the builder (ruling 11).
+      language: resolvePromptLanguage(data.language),
     });
     logger.dev('[product-strategy] PROMPT:', prompt);
 

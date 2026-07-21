@@ -54,6 +54,9 @@ import {
   runTrustGeneration,
   type TrustGenerationInput,
 } from './trust';
+// phase 4 (reload gap): the store is driven for real — a fresh instance plus the
+// persisted content is the only honest way to simulate a reload.
+import { useWizardStore, buildThingInput, buildTrustInput } from '@/hooks/useWizardStore';
 
 // ─── Fixtures ──────────────────────────────────────────────────────────────
 
@@ -407,5 +410,204 @@ describe('localeConfig declaration on the save bodies', () => {
     // The route validates the payload value server-side (phase 4) and falls back
     // to English — the client stays lenient and never 400s over language.
     expect(copyCalls(calls, 'product')[0].body.language).toBe('xx');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// language-settings phase 4 — THE RELOAD GAP (owed from phase 3)
+//
+// `siteLanguage` lives ONLY in the in-memory wizard store: `useWizardStore` has
+// no `persist` middleware and `hydrate()` seeds from the Brief, which carries no
+// locale. Identity is slot 1 of 8, so a reload — or a dashboard "Continue" —
+// between picking Dutch and generating silently reset the field to `'en'` while
+// `content.localeConfig` still said `nl`. That was INERT until phase 4 made the
+// directive live; now it would generate an ENGLISH page on a project that
+// DECLARES Dutch, and regen (which reads `defaultLocale` from the DB) would
+// disagree with first-gen forever.
+//
+// TWO DOORS, both closed here, both driven through a SIMULATED RELOAD (a fresh
+// store / a fresh `input`, plus the persisted content) rather than through a
+// hand-set field:
+//   (a) the store: `hydrate()` re-seeds `siteLanguage` from the persisted
+//       `localeConfig` → every request body of the run carries it again;
+//   (b) the multipage RESUME branch in thing.ts, which rebuilt every sibling
+//       field from the persisted `ob` but took the language from the live
+//       `input` — so an interrupted Dutch run finished half-translated.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** finalContent shaped so `isResumableGeneration` returns true. */
+const RESUMABLE_FC = {
+  pages: {},
+  meta: { title: 'Acme Deploy', lastUpdated: 0 },
+  generationProgress: { completedPageKeys: ['home'] },
+  onboardingData: {
+    sitemap: [
+      { archetypeKey: 'home', title: 'Home', pathSlug: '/', sections: ['hero'] },
+      { archetypeKey: 'about', title: 'About', pathSlug: '/about', sections: ['hero'] },
+    ],
+    strategy: PRODUCT_STRATEGY,
+    productName: 'Acme Deploy',
+    oneLiner: 'Ship your app without babysitting the pipeline.',
+    offer: 'Start free',
+    landingGoal: 'signup',
+    businessTypeKey: 'manufacturer',
+    understanding: { features: ['Auto deploys'] },
+  },
+};
+
+/** As `makeFetchMock`, but loadDraft answers like a project that DECLARES nl. */
+function makeReloadFetchMock(calls: FetchCall[], loadDraftBody: Record<string, unknown>) {
+  const base = makeFetchMock(calls);
+  return vi.fn(async (url: string, init?: any) => {
+    if (url.includes('/api/loadDraft')) {
+      calls.push({ url, body: init?.body ? JSON.parse(init.body) : undefined });
+      return { ok: true, json: async () => loadDraftBody } as any;
+    }
+    return base(url, init);
+  });
+}
+
+const thingBrief = { copyEngine: 'thing', businessType: 'saas' } as any;
+
+describe('reload gap (a) — the wizard store re-seeds siteLanguage from the DB', () => {
+  let calls: FetchCall[];
+  beforeEach(() => {
+    calls = [];
+    useWizardStore.getState().reset();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    useWizardStore.getState().reset();
+  });
+
+  it('a FRESH store hydrated on a project that declares nl recovers siteLanguage', async () => {
+    vi.stubGlobal(
+      'fetch',
+      makeReloadFetchMock(calls, { localeConfig: { locales: ['nl'], defaultLocale: 'nl' } })
+    );
+    // Simulated reload: brand-new store, no picker interaction, only the DB.
+    expect(useWizardStore.getState().siteLanguage).toBe('en');
+    useWizardStore.getState().hydrate({ tokenId: 'tok123', brief: thingBrief });
+    await vi.waitFor(() => expect(useWizardStore.getState().siteLanguage).toBe('nl'));
+
+    // …and it reaches the projection the thing adapter builds its payloads from.
+    expect(buildThingInput(useWizardStore.getState()).siteLanguage).toBe('nl');
+    expect(buildTrustInput(useWizardStore.getState()).siteLanguage).toBe('nl');
+  });
+
+  it('the recovered language reaches EVERY request body of the run (end to end)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      makeReloadFetchMock(calls, { localeConfig: { locales: ['nl'], defaultLocale: 'nl' } })
+    );
+    useWizardStore.getState().hydrate({ tokenId: 'tok123', brief: thingBrief });
+    await vi.waitFor(() => expect(useWizardStore.getState().siteLanguage).toBe('nl'));
+
+    const input = {
+      ...thingInput({ strategy: PRODUCT_STRATEGY }),
+      siteLanguage: buildThingInput(useWizardStore.getState()).siteLanguage,
+    };
+    calls.length = 0;
+    await runThingGeneration(input);
+    const audienceCalls = calls.filter((c) => c.url.includes('/api/audience/product/'));
+    expect(audienceCalls.length).toBeGreaterThan(0);
+    for (const c of audienceCalls) expect(c.body.language).toBe('nl');
+  });
+
+  it('an ENGLISH / legacy project is untouched — no clobbering, no false declaration', async () => {
+    vi.stubGlobal('fetch', makeReloadFetchMock(calls, { localeConfig: null }));
+    useWizardStore.getState().hydrate({ tokenId: 'tok123', brief: thingBrief });
+    await vi.waitFor(() =>
+      expect(calls.some((c) => c.url.includes('/api/loadDraft'))).toBe(true)
+    );
+    await new Promise((r) => setTimeout(r, 0));
+    expect(useWizardStore.getState().siteLanguage).toBe('en');
+    expect(useWizardStore.getState().siteLanguagePersisted).toBe(false);
+  });
+
+  it('a WORK project issues NO read at all — it has no siteLanguage to rehydrate', async () => {
+    // Deliberate narrowing (not an oversight): the picker is thing/trust-only,
+    // `buildWorkInput` carries no `siteLanguage`, and the work adapters derive
+    // their language from the `languages` question. A work hydrate must stay
+    // request-free — `useWizardStore.test.ts` pins the chargeless work seed as
+    // literally zero fetches.
+    vi.stubGlobal(
+      'fetch',
+      makeReloadFetchMock(calls, { localeConfig: { locales: ['nl'], defaultLocale: 'nl' } })
+    );
+    useWizardStore.getState().hydrate({
+      tokenId: 'tok123',
+      brief: { copyEngine: 'work', businessType: 'photographer' } as any,
+      audienceType: 'service',
+      templateId: 'atelier',
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(calls).toHaveLength(0);
+    expect(useWizardStore.getState().siteLanguage).toBe('en');
+  });
+
+  it('a LIVE pick always beats the in-flight DB seed (no race clobber)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      makeReloadFetchMock(calls, { localeConfig: { locales: ['nl'], defaultLocale: 'nl' } })
+    );
+    useWizardStore.getState().hydrate({ tokenId: 'tok123', brief: thingBrief });
+    // The user picks German before the loadDraft response resolves.
+    useWizardStore.getState().setSiteLanguage('de');
+    await new Promise((r) => setTimeout(r, 0));
+    expect(useWizardStore.getState().siteLanguage).toBe('de');
+  });
+});
+
+describe('reload gap (b) — the multipage RESUME branch uses the persisted declaration', () => {
+  let calls: FetchCall[];
+  beforeEach(() => {
+    calls = [];
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('a resumed Dutch run does NOT half-translate: every remaining page body says nl', async () => {
+    vi.stubGlobal(
+      'fetch',
+      makeReloadFetchMock(calls, {
+        finalContent: RESUMABLE_FC,
+        localeConfig: { locales: ['nl'], defaultLocale: 'nl' },
+      })
+    );
+    // The reload reset the wizard store, so the LIVE input says English…
+    const res = await runThingGeneration(
+      thingInput({
+        templateId: 'vestria',
+        businessTypeKey: 'manufacturer',
+        strategy: PRODUCT_STRATEGY,
+        // no siteLanguage — exactly what a fresh post-reload store produces
+      })
+    );
+    expect(res.status).toBe('done');
+    const copies = copyCalls(calls, 'product');
+    expect(copies.length).toBeGreaterThan(0);
+    // …but the persisted declaration wins, so the run finishes in Dutch.
+    for (const c of copies) expect(c.body.language).toBe('nl');
+  });
+
+  it('a resumed run on a project with NO declaration keeps using the live input', async () => {
+    vi.stubGlobal(
+      'fetch',
+      makeReloadFetchMock(calls, { finalContent: RESUMABLE_FC, localeConfig: null })
+    );
+    const res = await runThingGeneration(
+      thingInput({
+        templateId: 'vestria',
+        businessTypeKey: 'manufacturer',
+        strategy: PRODUCT_STRATEGY,
+        siteLanguage: 'de',
+      })
+    );
+    expect(res.status).toBe('done');
+    const copies = copyCalls(calls, 'product');
+    expect(copies.length).toBeGreaterThan(0);
+    for (const c of copies) expect(c.body.language).toBe('de');
   });
 });

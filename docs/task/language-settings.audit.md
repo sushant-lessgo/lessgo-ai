@@ -723,3 +723,232 @@ was modified.
   editor loads with `localeConfig.defaultLocale === 'nl'` and NO pills/switcher (single-locale
   is correct); an English run leaves `content` with no `localeConfig` key; the network tab
   shows `language: 'nl'` on the strategy + copy request bodies.
+
+---
+
+# Phase 4 — generation output-language directive (first-gen + regen)
+
+Branch verified before any edit: `git branch --show-current` → `feature/language-settings`
+(worktree `C:\Users\susha\lessgo-ai\.claude\worktrees\language-settings`). No git
+state-changing command run.
+
+## Files changed
+
+- `src/lib/i18n/projectLocale.ts` (new)
+- `src/lib/i18n/projectLocale.test.ts` (new)
+- `src/modules/audience/product/copyPrompt.ts`
+- `src/modules/audience/product/copyPrompt.language.test.ts` (new)
+- `src/modules/audience/product/promptBranch.test.ts`
+- `src/modules/audience/product/strategy/promptsProduct.ts`
+- `src/modules/audience/service/copyPrompt.ts`
+- `src/modules/audience/service/copyPrompt.language.test.ts` (new)
+- `src/modules/audience/service/strategy/promptsService.ts`
+- `src/app/api/audience/product/strategy/route.ts`
+- `src/app/api/audience/product/strategy/route.test.ts`
+- `src/app/api/audience/product/generate-copy/route.ts`
+- `src/app/api/audience/product/generate-copy/route.test.ts`
+- `src/app/api/audience/service/strategy/route.ts`
+- `src/app/api/audience/service/generate-copy/route.ts`
+- `src/modules/generation/scopedRegen.ts`
+- `src/modules/generation/scopedRegen.test.ts`
+- `src/hooks/useWizardStore.ts` (owed from phase 3)
+- `src/modules/wizard/generation/thing.ts` (owed from phase 3 — resume branch)
+- `src/modules/wizard/generation/payloadLanguage.test.ts` (owed from phase 3 — resume pins)
+- `docs/task/language-settings.audit.md` (this file)
+
+Nothing outside the phase-4 Files-touched list was edited. Pre-existing dirty files NOT
+touched by me: `docs/task/language-settings.plan.md` (orchestrator's phase-3 sha fill) and
+`src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap`.
+
+## The seam, end to end (ruling 11)
+
+| Half | Source of language | Where it is validated | Where it lands |
+|---|---|---|---|
+| FIRST-GEN | request body `language` (bare ISO code, phase 3) | `resolvePromptLanguage()` in all FOUR audience routes | `buildProduct/ServiceCopyPrompt` + both strategy builders |
+| REGEN | `content.localeConfig.defaultLocale` (server-read) | `readDefaultLocale()` inside `readLocaleDefault(project)` | the SAME builders, via `scopedRegen` |
+
+`resolvePromptLanguage` is the single choke point: validate against `SUPPORTED_LOCALES` →
+`'en'` on absent/invalid/non-string → `toPromptLanguage` → an English exonym. It cannot
+throw and cannot 400, and its return value is ALWAYS one of the 12 `LOCALE_ENGLISH_NAMES`
+strings, so **raw client input can never appear in a prompt**. No prisma import, no DB read,
+no tokenId was added to any audience route.
+
+## Per file
+
+**`src/lib/i18n/projectLocale.ts`** (new) — `resolvePromptLanguage(unknown): string` +
+`readDefaultLocale(unknown): string | null`. Plain module; imports only `localeContent` +
+`localeNames` (both plain). `readDefaultLocale` also REJECTS an unsupported code (a
+declaration outside the closed vocabulary is not a legal declaration — `localeConfigPatch`
+never writes one), so a hand-edited `content` cannot inject prompt text either.
+
+**`product/copyPrompt.ts`** — optional `language?: string` on `ProductCopyPromptInput`;
+`const language = input.language || 'English'`; a `## OUTPUT LANGUAGE — ${language} (READ
+FIRST)` block inserted directly after `identity` (i.e. before the product facts, the strategy
+blocks and the SiteContext excerpts it governs); an **unnumbered bold** `**Write EVERY string
+in ${language}.**` line at the top of RULES. Wording mirrored from
+`work/copyPrompt.ts:213-219,:241-243` (translate the MEANING, never copy/echo the
+source-language wording, proper nouns stay). Retry prompt wraps the original ⇒ no change.
+
+**`service/copyPrompt.ts`** — identical shape; directive after `voice.identity`, unnumbered
+rule above the hardcoded `1.`.
+
+**`product/strategy/promptsProduct.ts` + `service/strategy/promptsService.ts`** — the one-line
+hedge (mirror of `work/strategy/promptsWork.ts:95`) immediately before the
+`Output valid JSON only.` footer, so positioning/persona/promise phrasing — which is pasted
+verbatim into the copy prompt — is written in the output language too.
+
+**The four routes** — `language` added to each request schema and threaded through
+`resolvePromptLanguage`. Mock/demo short-circuits untouched (language is prompt input, never
+a gate).
+
+**`scopedRegen.ts`** — `readLocaleDefault(project)` (exported sibling of `readOnboardingView`)
+threaded into `buildProductPrompt` + `buildServicePrompt`. Work reconcile in `buildWorkPrompt`:
+`declaredLanguage ?? workFactsLanguage(facts) ?? 'en'` — `content.localeConfig.defaultLocale`
+WINS (ruling 4), `facts.languages[0]` stays the fallback for legacy work projects and for
+unmapped labels like `'Hindi'`. No regen ROUTE file was touched (they already select `content`).
+
+## The owed phase-3 gap — how it was closed
+
+**Door (a), the store.** `useWizardStore` gains `siteLanguageTouched` (session-only) and a
+`seedSiteLanguage()` action that GETs `/api/loadDraft` and re-seeds `siteLanguage` from
+`localeConfig.defaultLocale`. It is fired fire-and-forget from `hydrate()` itself, so no mount
+path (WizardShell / JourneyShell / a future shell) can forget it — none of those files were
+touched. It only ever SEEDS: a null/absent config is left alone (writing `'en'` could only
+clobber), and `siteLanguageTouched` (latched by `setSiteLanguage`) makes a live pick beat an
+in-flight read. When it does seed it also sets `siteLanguagePersisted = true`, because the
+declaration demonstrably exists in the DB — so a later revert to English still sends the
+explicit `null` clear.
+
+**Door (b), the resume branch.** `runFanOut(fc, resumedLanguage?)` now resolves
+`fanLanguage = resumedLanguage || payloadLanguage(input)` ONCE and both inline fan-out bodies
+(per-page copy + collection item) use it. The resume call site reads
+`json.localeConfig.defaultLocale` off the loadDraft response it ALREADY fetches (no extra
+request) and passes it in. A fresh (non-resumed) run passes nothing and keeps using the live
+input, so nothing changes for it.
+
+Both doors are pinned by tests that simulate a real reload (`useWizardStore.getState().reset()`
++ a fresh store hydrated against persisted content; a fresh `input` with NO `siteLanguage`
+against a resumable `finalContent`), and assert the non-English language on EVERY request body
+that leaves the client — not on a hand-set field.
+
+## Deviations from the plan
+
+1. **`seedSiteLanguage` is ENGINE-GATED to thing/trust.** The first implementation fired the
+   read for every engine and broke **8 assertions in `src/hooks/useWizardStore.test.ts`** — a
+   file OUTSIDE this phase's Files-touched list — which pin that a chargeless WORK seed
+   (`fetchStrategy` + the proposal-driven sitemap seed) issues literally zero fetches. Rather
+   than edit an out-of-scope file, the seed now returns early unless
+   `engine === 'thing' || engine === 'trust'`. That is principled, not a dodge: `siteLanguage`
+   IS the thing/trust identity-slot field, `buildWorkInput` does not carry it, and the work
+   adapters derive their language from the `languages` question — a work run has nothing to
+   rehydrate. The narrowing is pinned by its own test ("a WORK project issues NO read at all").
+2. **`language` is typed `z.unknown().optional()` in all four route schemas, not
+   `z.string().optional()`.** With `z.string()` a non-string (`language: 42`) would 400 an
+   entire paid generation run — which contradicts "never 400 over language". `z.unknown()`
+   makes the field un-fail-able at the schema layer; `resolvePromptLanguage` does all the
+   validation. Pinned by a route case that feeds `42`, `null`, `{}` and `['nl']`.
+3. **`readDefaultLocale` rejects unsupported codes** (returns `null` for `'xx'`), slightly
+   stricter than "safe-parse `content.localeConfig.defaultLocale`". Conservative and
+   consistent with phase 3's `localeConfigPatch`, which never persists one.
+4. **Work regen's `facts.languages[0]` fallback now goes through `labelToLocaleCode` →
+   `toPromptLanguage`** when the stored value is a recognized LABEL (`'Dutch'`, `'Nederlands'`
+   ⇒ `'Dutch'`); anything else — including a bare code like `'nl'`, which `labelToLocaleCode`
+   deliberately rejects (phase-1 carry note) — passes through verbatim, exactly as before.
+   Existing work fixtures store `['en']`/`['nl']`, so their behavior is unchanged.
+5. **`promptBranch.test.ts` was RE-BASELINED, not weakened.** Both frozen SaaS baselines were
+   regenerated from the new builders and then LINE-DIFFED against the old ones: the ONLY
+   deltas are the `## OUTPUT LANGUAGE — English` block, the `**Write EVERY string in
+   English.**` rule and the strategy hedge. Nothing else moved. The header comment records
+   the re-baseline + the rationale (zero-diff covers storage and rendered output, not prompt
+   text).
+6. **The English directive contains "no English fragments (unless English IS English)"** — a
+   tautology on the English path. Kept verbatim for one-wording-per-engine parity with
+   `work/copyPrompt.ts`; harmless (self-satisfied) and it keeps a future wording change to one
+   diff shape across three engines.
+
+## Plan pointers checked against the tree
+
+- OK — `work/copyPrompt.ts:213-219` + rule 1 `:241-243`, `work/strategy/promptsWork.ts:95`,
+  `ProductCopyPromptInput` / `buildProductCopyPrompt`, `ServiceCopyPromptInput` /
+  `buildServiceCopyPrompt`, `scopedRegen`'s `buildProductPrompt`/`buildServicePrompt`/
+  `primaryLanguage` site, and the product RULES numbering collision (`accentRule` hardcodes
+  `1.`, `pricingRule` `5.`) were all exactly as described.
+- OK — the service routes have NO co-located tests (glob-confirmed). Service coverage =
+  `projectLocale.test.ts` + `service/copyPrompt.language.test.ts` + the reviewer-checkable fact
+  that all four routes run the same helper.
+- CORRECTION — the plan's assumption behind "seed `siteLanguage` at `hydrate()`" is that
+  hydrate can see the project content. It cannot: `WizardHydratePayload` carries only
+  `{tokenId, brief, audienceType, templateId, initialSlot}`, and `brief` has no locale. Adding
+  a payload field would have been INERT (the only callers — `WizardShell.tsx:143`,
+  `JourneyShell.tsx:147` — are out of scope and would never populate it). Hence the
+  self-binding fetch described above, plus deviation 1.
+- NOTE — the seed costs ONE extra `GET /api/loadDraft` per thing/trust wizard mount,
+  duplicating the read `page.tsx` already performed. During onboarding `finalContent` is
+  empty, so the payload is small. The zero-cost fix is to pass the already-loaded
+  `localeConfig` into `hydrate()` from `page.tsx`/the shells — three files outside this phase.
+  Recorded as a follow-up, not done.
+- NOTE — no firewall test was added (ruling 3: `assertNoTemplateLeak` key-checks
+  `templateId`/`variantId` only, so a `language` test could never fail = inert). No
+  `generationContract.test.ts` edit was needed — its prompt assertions are additive
+  `toContain` and stayed green.
+
+## Anti-inert-test check (mutation-verified, not assumed)
+
+Every new assertion family was mutated and observed to FAIL, then reverted:
+
+| Mutation | Failures |
+|---|---|
+| resume branch ignores `resumedLanguage` (`fanLanguage = payloadLanguage(input)`) | 1 (`a resumed Dutch run does NOT half-translate`) |
+| `hydrate()` stops calling `seedSiteLanguage()` | 3 (fresh-store recovery, end-to-end bodies, English no-clobber) |
+| both product routes pass the RAW body value instead of `resolvePromptLanguage(...)` | 5 (Dutch directive ×2, garbage-fallback ×2, non-string tolerance) |
+| work regen prefers `facts.languages[0]` over the declaration | 1 (`localeConfig BEATS facts.languages[0]`) |
+| product regen drops `language` | 1 (`a declared nl project regenerates with the Dutch directive`) |
+
+The route cases read the prompt string actually handed to the mocked AI client
+(`generateRawJson.mock.calls[0][1]` / `generateWithSchema.mock.calls[0][1][0].content`), so
+they exercise body → schema → helper → builder → prompt. They are not "a mocked object yields
+Dutch".
+
+## Test results (verbatim)
+
+`npx tsc --noEmit` — exit 0, no diagnostics:
+
+```
+TSC_CLEAN
+```
+
+`npm run test:run` (run as `npx vitest run`):
+
+```
+ Test Files  297 passed | 1 skipped (298)
+      Tests  4777 passed | 15 skipped (4792)
+   Start at  17:11:50
+   Duration  76.70s (transform 45.27s, setup 0ms, import 330.58s, tests 76.61s, environment 560.85s)
+```
+
+Phase-3 baseline was 295 files / 4730 tests. +3 files (`projectLocale.test.ts`,
+`product/copyPrompt.language.test.ts`, `service/copyPrompt.language.test.ts`) and +47 tests
+(the 3 new suites plus added cases in the two product route suites, `scopedRegen.test.ts` and
+`payloadLanguage.test.ts`). No pre-existing test was weakened; the only pre-existing
+assertions CHANGED are the two `promptBranch` baselines (re-frozen, diff-verified).
+
+## Open risks / what phases 5-7 must know
+
+- **The directive is now LIVE and unconditional.** Any future prompt edit that reorders the
+  product/service copy prompt must keep `## OUTPUT LANGUAGE` ABOVE the grounding material —
+  three tests pin the ordering, but a NEW grounding block inserted above it would not be
+  caught.
+- **`promptBranch.test.ts` baselines are frozen strings.** Any further product prompt change
+  re-breaks them by design; re-baseline deliberately and line-diff before freezing.
+- **The extra loadDraft GET per thing/trust wizard mount** (see NOTE above) is the one perf
+  cost this phase adds. A later phase that already touches `page.tsx`/`WizardShell.tsx`/
+  `JourneyShell.tsx` should pass the loaded `localeConfig` into `hydrate()` and delete the
+  fetch from `seedSiteLanguage`; the action + its tests would survive unchanged.
+- **Work first-gen still carries no `language` field** on its route bodies (deliberate, phase
+  3): the work prompt consumes the `languages` LABEL server-side. Only work REGEN was
+  reconciled here.
+- Real-LLM Dutch/English adherence remains **founder QA at the merge gate** (phase-7 item) —
+  this phase verifies the directive is present, never that the model obeys it.
+- Phase 7's known-limits doc should record: an unmapped work label (`'Hindi'`) still produces
+  Hindi copy through the work prompt but declares no `defaultLocale`, so Settings shows no
+  language for it.
