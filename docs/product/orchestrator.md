@@ -1,8 +1,22 @@
-# Orchestrator state — parallel work (updated 2026-07-17)
+# Orchestrator state — parallel work (updated 2026-07-21)
 
 Main session = orchestrator for all parallel feature sessions. New orchestrator session: read this + `memory/project_parallel_orchestration.md` + **`memory/feedback_everything_is_prebeta`** + **`memory/project_release_train_discipline`**.
 
-## ▶▶ FRESH CYCLE START HERE (2026-07-19 — cold-start; SUPERSEDES the 07-17/07-18 sections below)
+## ▶▶▶ CURRENT (2026-07-21) — Kundius critical path; SUPERSEDES 07-19 section below
+
+**Direction:** `docs/product/goals.md` (NEW — 2-path theory) now sits above productQueue/backlog. Path 1 Goal 1 = **Kundius handover** — full critical path + font/slideshow rulings in memory `project_kundius_release_path.md`. Key ruling: direction-2 fonts = Kontur's (Bricolage/Hanken) = ALREADY the shipped atelier skin; `delivery/Atelier/styles.css` Bodoni/Jost is SUPERSEDED — never "fix" fonts toward it. Hero = slideshow (wave-2 slides[]).
+
+**Merged since 07-19:** `cms-collections` (all 9 phases — generic CMS board + Content tab) · `work-contract-wave2` (phases 1-5: media picker + header logo, packages quad, about portrait/signature/badge, hero slides[] + 2nd CTA, derived footer) · qa-0719b bugfix round.
+
+**In-flight (own sessions):**
+- **`language-settings` (F1)** (`standard`) — started 2026-07-21. Kundius NL/EN minimum = F1 + NL copy (item-nav-i18n NOT blocking, accepted gap).
+- **`lead-emails`** (`standard`, `docs/task/lead-emails.spec.md`) — started 2026-07-21. Owner notification → page owner's Clerk email (retires fixed `LEAD_NOTIFICATION_EMAIL` recipient) + visitor auto-reply (ON by default, per-form editable via form toolbar→settings). Sender both: `"{Business}" <…@mail.lessgo.site>` (Resend already verified). Phase 1 (owner re-routing) alone unblocks handover. Human gate: live-send verify on prod before handover.
+
+**After these two:** rest of Kundius path = ops, no build: direction-2 slideshow QA on her draft → concierge assembly (real photos via library board, EN+NL copy) → publish + kundiusphotography.com domain + P0 parity/phone QA → sign-off → ownership transfer.
+
+---
+
+## ▶▶ (HISTORY 2026-07-19) FRESH CYCLE — superseded by the 07-21 section above
 
 **MODEL NOW = ONE LINE.** `next` was collapsed back into `main` (founder: "next not required now"). **Single integration line = `main`**; features AND bugfixes both land there; the `qa/beta-big-bang` pointer follows main. No more freeze/next split. **EVERYTHING is pre-beta and gets built — do NOT ask beta-scope, do NOT nudge** (`memory/feedback_everything_is_prebeta`, founder was explicit). Kundius/Atelier IS in the beta.
 

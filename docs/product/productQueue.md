@@ -1,6 +1,8 @@
 # Product Queue
 
-Updated: 2026-07-16
+Updated: 2026-07-21
+
+**Direction layer:** `docs/product/goals.md` (2-path theory, 2026-07-21) sits ABOVE this queue + backlog — it decides what enters here and in what order. Path 1 (beta private, strict order) Goal 1 = Kundius handover; its critical path lives in memory `project_kundius_release_path.md`.
 
 ## What lives here vs orchestrator vs backlog (boundary — clarified 2026-07-16)
 
@@ -23,6 +25,11 @@ Done this cycle (source: `docs/reports/code-quality-report.md`): `billing-correc
 ## Queue — specced, not yet started (build order)
 
 1. **`editor-route-consolidation`** (`docs/task/editor-route-consolidation.spec.md`, `full` tier) — specced 2026-07-18 via `/discuss`. Consolidate reveal + preview + **publish** onto `/edit/[token]`, piloted on the **work journey** (preview→in-editor mode incl. iframe mobile-view, reveal→editor first-load, publish relocated in-editor, XFO moved atomically). Route deletion (`/preview`+`/generate`) + onboarding post-gen lock are OUT (gated follow-ons). Warm scout brief: `docs/task/editor-route-consolidation.scout.md`. POST-beta (editor track). No branch yet.
+
+2. **`language-autotranslate` (Spec 2)** (`docs/task/language-autotranslate.spec.md`, `full` tier) — specced 2026-07-21. i18nPlan Phase 2: LLM per-field translate (reuse aiClient), HTML-preserving, source-hash cache/incremental, edited-field skip, `TRANSLATE` credit cost. Un-greys F1's Auto-translate toggle + monolingual change-language=translate. **Stacks on F1 (now in-flight → orchestrator).** Pilot naayom→Hindi. No branch yet.
+3. **`language-item-nav-i18n` (follow-up)** (`docs/task/language-item-nav-i18n.spec.md`, `full` tier) — specced 2026-07-21. Closes the two Phase-1 overlay gaps now live after cms-collections: per-collection-item text + nav-label localization (id-keyed, reorder-safe overlay addressing; both renderers). Spec 2 auto-translates them for free once the write path exists. **Stacks on F1**, benefits from Spec 2. No branch yet. NOT Kundius-blocking (accepted gap — owner names items/pages well in each language).
+
+**Moved to orchestrator 2026-07-21 (got branches/sessions):** `language-settings` (F1) — in-flight, own session · `lead-emails` — specced 2026-07-21 (owner-scoped lead notification via Clerk email + per-form visitor auto-reply, `standard`) and started same day, never sat in the queue. Both are Kundius-handover critical path.
 
 **Prior state — EMPTY as of 2026-07-18** (before the above). Every other specced item got a branch — all live on the **orchestrator board**
 now (merged, or building). The 8 specs from the 2026-07-18 speccing session
