@@ -162,6 +162,30 @@ describe('IdentitySlot — site language picker', () => {
   });
 });
 
+// language-settings phase 5 — the engine gate. Work-engine projects (granth /
+// writer) DO render WizardShell (only isWorkCopyTemplate templates take the
+// journey), but work first-gen never reads `siteLanguage` — so showing the picker
+// there would be a control that looks functional and isn't.
+describe('IdentitySlot — the picker is engine-gated (no fake control on work)', () => {
+  it('work engine ⇒ the picker is NOT rendered', () => {
+    act(() => {
+      useWizardStore.setState({ engine: 'work' as any });
+    });
+    mount();
+    expect(container.querySelector('#site-language')).toBeNull();
+  });
+
+  it('thing / trust / an unresolved engine ⇒ the picker IS rendered', () => {
+    for (const engine of ['thing', 'trust', null]) {
+      act(() => {
+        useWizardStore.setState({ engine: engine as any });
+      });
+      mount();
+      expect(container.querySelector('#site-language')).not.toBeNull();
+    }
+  });
+});
+
 describe('site language reaches the generation projections', () => {
   beforeEach(() => {
     useWizardStore.getState().reset();

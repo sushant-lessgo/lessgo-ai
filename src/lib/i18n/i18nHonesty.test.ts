@@ -100,7 +100,7 @@ describe('i18n honesty — `bilingual` capability is backed by real machinery (D
       expect(base[SECTION].elements.headline).toBe('EN');
     });
 
-    it('switcherBehaviors.js source exists and is registered as switcher.v1.js in buildAssets', () => {
+    it('switcher sources exist and BOTH the frozen v1 and the live v2 are registered in buildAssets', () => {
       const root = path.join(__dirname, '..', '..', '..'); // src/lib/i18n → repo root
       const src = path.join(
         root,
@@ -111,12 +111,22 @@ describe('i18n honesty — `bilingual` capability is backed by real machinery (D
       );
       expect(existsSync(src), 'switcherBehaviors.js source must exist').toBe(true);
 
+      // language-settings phase 5 — the frozen v1 source must exist so old blobs
+      // (which hardcode /assets/switcher.v1.js) keep their ORIGINAL bytes.
+      const frozen = path.join(root, 'scripts', 'legacy', 'switcher.v1.src.js');
+      expect(existsSync(frozen), 'scripts/legacy/switcher.v1.src.js must exist').toBe(true);
+
       const buildAssets = readFileSync(
         path.join(root, 'scripts', 'buildAssets.js'),
         'utf8'
       );
-      expect(buildAssets).toMatch(/switcherBehaviors\.js/);
-      expect(buildAssets).toMatch(/switcher\.v1\.js/);
+      // v1 is built from the FROZEN legacy source, v2 from the live source.
+      expect(buildAssets).toMatch(
+        /\{\s*src:\s*'switcher\.v1\.src\.js',\s*out:\s*'switcher\.v1\.js',\s*dir:\s*legacyDir\s*\}/
+      );
+      expect(buildAssets).toMatch(
+        /\{\s*src:\s*'switcherBehaviors\.js',\s*out:\s*'switcher\.v2\.js'\s*\}/
+      );
     });
 
     it('a 2-locale fixture through generateStaticHTML emits switcher + lang + reciprocal hreflang', async () => {
@@ -188,8 +198,8 @@ describe('i18n honesty — `bilingual` capability is backed by real machinery (D
       expect(nl).toContain('<html lang="nl">');
 
       // switcher script injected on both docs
-      expect(en).toContain('/assets/switcher.v1.js');
-      expect(nl).toContain('/assets/switcher.v1.js');
+      expect(en).toContain('/assets/switcher.v2.js');
+      expect(nl).toContain('/assets/switcher.v2.js');
 
       // reciprocal hreflang (all locales + x-default) present on both docs
       const enUrl = resolveCanonicalURL({ slug: SLUG, canonicalPath: '/' });

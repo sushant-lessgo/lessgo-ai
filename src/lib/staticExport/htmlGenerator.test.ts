@@ -214,3 +214,113 @@ describe('generateStaticHTML — head XSS hardening (M4)', () => {
     expect(h).not.toContain('&amp;amp;');
   });
 });
+
+// ---------------------------------------------------------------------------
+// language-settings phase 5 — switcher.v2 emission + switcherStyle
+// ---------------------------------------------------------------------------
+describe('generateStaticHTML — locale switcher emission (v2 + switcherStyle)', () => {
+  const ALTERNATES = [
+    { hreflang: 'en', href: 'https://gate.lessgo.site/' },
+    { hreflang: 'nl', href: 'https://gate.lessgo.site/nl' },
+    { hreflang: 'x-default', href: 'https://gate.lessgo.site/' },
+  ];
+
+  async function renderDoc(overrides: Record<string, any> = {}) {
+    const res = await generateStaticHTML({
+      sections: [SECTION_ID],
+      content: buildPage(),
+      theme: {},
+      publishedPageId: 'p1',
+      pageOwnerId: 'u',
+      slug: 'gate',
+      title: 'Gate',
+      audienceType: 'service',
+      templateId: 'hearth',
+      paletteId: null,
+      variantId: null,
+      goal: null,
+      ...overrides,
+    });
+    return res.html;
+  }
+
+  it('multi-locale doc loads switcher.v2.js (NEVER v1 — old blobs keep the frozen v1)', async () => {
+    const html = await renderDoc({
+      locale: 'en',
+      localeConfig: { locales: ['en', 'nl'], defaultLocale: 'en' } as any,
+      localeAlternates: ALTERNATES,
+    });
+    expect(html).toContain('/assets/switcher.v2.js');
+    expect(html).not.toContain('/assets/switcher.v1.js');
+  });
+
+  it('stamps slug + style into the inline config so the runtime can derive its basePath', async () => {
+    const html = await renderDoc({
+      locale: 'nl',
+      localeConfig: { locales: ['en', 'nl'], defaultLocale: 'en' } as any,
+      localeAlternates: ALTERNATES,
+    });
+    expect(html).toContain(
+      'window.__lessgoLocales={"locales":["en","nl"],"defaultLocale":"en","current":"nl","slug":"gate","style":"dropdown"}'
+    );
+  });
+
+  it("switcherStyle 'none' omits the config AND the script (no pill, no geo redirect) but keeps hreflang", async () => {
+    const html = await renderDoc({
+      locale: 'en',
+      localeConfig: {
+        locales: ['en', 'nl'],
+        defaultLocale: 'en',
+        switcherStyle: 'none',
+      } as any,
+      localeAlternates: ALTERNATES,
+    });
+    expect(html).not.toContain('switcher.v2.js');
+    expect(html).not.toContain('__lessgoLocales');
+    // SEO is independent of widget style.
+    expect(html).toContain('<link rel="alternate" hreflang="nl" href="https://gate.lessgo.site/nl">');
+    expect(html).toContain('<link rel="alternate" hreflang="x-default" href="https://gate.lessgo.site/">');
+  });
+
+  it("switcherStyle 'dropdown' emits exactly the same bytes as an absent style", async () => {
+    const absent = await renderDoc({
+      locale: 'en',
+      localeConfig: { locales: ['en', 'nl'], defaultLocale: 'en' } as any,
+      localeAlternates: ALTERNATES,
+    });
+    const explicit = await renderDoc({
+      locale: 'en',
+      localeConfig: {
+        locales: ['en', 'nl'],
+        defaultLocale: 'en',
+        switcherStyle: 'dropdown',
+      } as any,
+      localeAlternates: ALTERNATES,
+    });
+    expect(explicit).toBe(absent);
+  });
+
+  it('single-locale + no-config output is byte-identical and carries no switcher at all', async () => {
+    const baseline = await renderDoc({});
+    // A declared single-locale config (ruling 10) is NOT multi-locale ⇒ no switcher,
+    // and with an 'en' default the bytes are unchanged.
+    const single = await renderDoc({
+      locale: 'en',
+      localeConfig: { locales: ['en'], defaultLocale: 'en', switcherStyle: 'none' } as any,
+    });
+    expect(single).toBe(baseline);
+    expect(baseline).not.toContain('switcher.v2.js');
+    expect(baseline).not.toContain('__lessgoLocales');
+    expect(baseline).toContain('<html lang="en">');
+  });
+
+  it('a declared single-locale nl config sets <html lang="nl"> without emitting a switcher', async () => {
+    const html = await renderDoc({
+      locale: 'nl',
+      localeConfig: { locales: ['nl'], defaultLocale: 'nl' } as any,
+    });
+    expect(html).toContain('<html lang="nl">');
+    expect(html).not.toContain('switcher.v2.js');
+    expect(html).not.toContain('hreflang');
+  });
+});

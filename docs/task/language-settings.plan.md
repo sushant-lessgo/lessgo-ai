@@ -165,7 +165,7 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     (e.g. `'Hindi'`) generate fine but declare no `defaultLocale`
   - founder/UX nit (not code): the picker renders below the whole `SlotBody`, so on a long
     identity slot it sits under the fields rather than beside them
-- phase 4 generation output-language directive: done (commit pending-sha, review loops 1, VERDICT ship)
+- phase 4 generation output-language directive: done (commit e42eb7d2, review loops 1, VERDICT ship)
   - seam closed both ways: `projectLocale.ts` = `resolvePromptLanguage` (first-gen, validates
     client code → `en` fallback → exonym, never throws/400s) + `readDefaultLocale` (regen).
     No prisma in the audience routes. Directive always emitted, English included.
@@ -188,7 +188,30 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     (doubles under StrictMode in dev; fire-and-forget, non-blocking, acceptable to ship as-is)
   - phase-7 known-limits: work regen with a bare code in `facts.languages` renders
     `## OUTPUT LANGUAGE — en` (pre-existing; `labelToLocaleCode` rejects bare codes)
-- phase 5 switcher.v2 asset + publish emission: pending
+- phase 5 switcher.v2 asset + publish emission: done (commit pending-sha, review loops 1, VERDICT ship)
+  - **v1 freeze verified byte-exact**: frozen source vs `HEAD:switcherBehaviors.js` = zero
+    differences EOL-normalized; `md5(public/assets/switcher.v1.js)` unchanged across a rebuild
+    (`169c32dde19ccc7709e636460518c226`), independently recomputed by the reviewer. Built v1
+    provably lacks the v2 tokens. **No already-published blob can change behavior.**
+  - `style:'none'` suppresses widget + geo redirect but NOT hreflang (SEO-safe, pinned)
+  - fake-control item CLOSED as option (b): picker hidden when `engine === 'work'`. Root cause
+    was worse than thought — the live `workContract` (`inputContracts.ts:185-208`) has **no
+    `languages` field at all** (it lives in the not-live `workSlots.ts`), so work users' only
+    language control drove nothing. Verified independently by the reviewer.
+  - **⛔ OWED → phase 6 (would be a live bug the moment phase 6 lands).** The hostname gate
+    (`switcherBehaviors.js:56`) omits `*.vercel.app`. Inert today only because `/p/{slug}`
+    injects no switcher yet — **the moment phase 6 injects it, preview-URL QA on
+    `…vercel.app/p/{slug}` computes `basePath=''` and rebuilds `/nl/p/{slug}`**, i.e. the exact
+    404 bug, visible only in the QA sandbox we rely on. Preferred fix per the reviewer: **stamp
+    `basePath` explicitly from the SSR renderer** (the server knows its mount path for certain)
+    rather than widening a host regex. Do this in phase 6.
+  - phase 6 must also reuse `style:'none'` suppression and stamp the same `slug`, or the blob
+    and SSR surfaces disagree
+  - founder-gate item: the work picker is **hidden**, not disabled+greyed — the standing rule
+    prefers a greyed control with a why-tooltip over silent omission. Work/granth users now get
+    no onboarding language control at all (they set it in Site Settings).
+  - optional hardening (phase 7): the freeze guard asserts existence only; a content hash of
+    `scripts/legacy/switcher.v1.src.js` would make an accidental edit to the frozen source fail loudly
 - phase 6 publish persistence + /p SSR locale awareness + e2e: pending
 - phase 7 docs + acceptance sweep: pending
 
