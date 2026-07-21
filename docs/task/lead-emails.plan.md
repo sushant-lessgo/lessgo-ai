@@ -13,6 +13,14 @@ Re-route the lead-notification email from the single founder inbox (`LEAD_NOTIFI
 
 - phase 1 owner-notification re-routing: done (commit 86b4c074, review loops 0 — standard tier defers impl-review to one whole-diff pass at the end). tsc clean, 49/49 tests green (src/lib/email + src/app/api/forms).
 
+- whole-diff impl-review (standard tier, 2 loops): **ship** (commit 6559ed57). Loop 1 = `fix first`, one blocking issue; loop 2 = `ship`, no new blockers.
+  - **Blocker found + fixed**: the auto-reply fired for EVERY formId including `blog-subscribe`, whose form definition is synthesized only into the published blob (`buildBlogPages.ts:57-63`) and never into `Project.content` — so a newsletter subscriber would have received "we received your message and will reply soon" with no way for the owner to disable it (the blog pilot is live on a custom domain). Fixed with an imported-constant guard + paired positive/negative regression tests.
+  - Four review-driven hardenings shipped alongside: owner-notification `replyTo` now uses `pickVisitorEmail` (previously broken for FormBuilder-built forms whose field ids aren't literally `email` — an unmet spec acceptance criterion); the whole email block (incl. the Clerk `getUser`) short-circuits when `RESEND_API_KEY` is unset; token substitution uses replacer functions, killing the `$&`/`` $` ``/`$'`/`$$` class; a new test pins `autoReplyTemplate`'s zero-import client-boundary invariant.
+  - Reviewer ran independent mutation checks on FIX-1/FIX-2/FIX-3 and deleted the 7 new `RESEND_API_KEY` stubs to prove they aren't vacuity-inducing (16 tests failed without them). All mutations reverted.
+- **Final gates**: `npx tsc --noEmit` exit 0 · `npm run test:run` 297 files / 4769 passed, 15 skipped (baseline 296/4751, no regressions) · `npm run lint` exit 0 · `npm run build` green.
+- Residual risk accepted: FIX-1 is a deny-by-id, so a FUTURE form synthesized straight into a published blob would inherit the ON-by-default auto-reply. The structural alternative ("only auto-reply when a stored form definition was found") would break legacy frozen `form.v1` blobs, which the spec requires to keep working.
+- Repo quirk: a full `test:run` leaves `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` line-ending-dirty with a ZERO-byte content diff. Do not stage it.
+
 ### Orchestrator rulings during the run
 
 - Plan's 5 unresolved questions answered: (1) From local-part FIXED, env-driven via `LEAD_NOTIFICATION_FROM` (prod/preview → `leads@mail.lessgo.site`), no per-site slug; (2) `LEAD_NOTIFICATION_EMAIL` fully retired on the forms/submit path, no BCC; (3) default auto-reply subject `We received your message`; (4) business-name chain `PublishedPage.title` → `Project.title` → `'Your website'`, with literal `'Untitled Project'` treated as a non-name; (5) auto-reply skipped when owner email unresolved.
