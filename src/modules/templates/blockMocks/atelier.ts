@@ -198,6 +198,54 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
       ],
     },
   },
+  {
+    // Wave 2 (phase 5) — DERIVED footer (marker footer_nav_mode:'derived'). Exercises
+    // the 3-col index shape (nav columns from the page set + contact) — the STORED
+    // shape stampWorkFooterNav writes; both renderers read it identically. Kept as a
+    // SEPARATE fixture so the primary `atelier-footer` proves the legacy (no-marker,
+    // Kundius byte-identical) footer stays untouched.
+    sectionType: 'footer',
+    layout: 'WorkFooter',
+    sectionId: 'atelier-footer-derived',
+    content: {
+      eyebrow: 'Get in touch',
+      heading: 'Let’s make yours.',
+      note: 'Portfolio headshots and brand photography, Netherlands — serving enterprise brands.',
+      copyright: '© 2026 Kristina Kundius',
+      footer_nav_mode: 'derived',
+      nav_columns: [
+        {
+          id: 'fc-explore',
+          heading: 'Explore',
+          links: [
+            { id: 'fnl-home', label: 'Home', href: '/' },
+            { id: 'fnl-works', label: 'Work', href: '/works' },
+          ],
+        },
+        {
+          id: 'fc-work',
+          heading: 'Work',
+          links: [
+            { id: 'fnl-works-brand', label: 'Brand Portraits', href: '/works/brand-portraits' },
+            { id: 'fnl-works-editorial', label: 'Editorial', href: '/works/editorial' },
+          ],
+        },
+      ],
+      contact_location: 'Amsterdam, Netherlands',
+      contact_reach: 'Serving enterprise brands worldwide',
+      socials: [
+        { id: 'fs1', network: 'Instagram', href: '#' },
+        { id: 'fs2', network: 'LinkedIn', href: '#' },
+      ],
+    },
+    editBasics: {
+      text: ['eyebrow', 'heading', 'note', 'copyright'],
+      button: [],
+      collections: [
+        { key: 'socials', countPrefix: 'socials.', itemPrefixes: ['socials.'], items: 2 },
+      ],
+    },
+  },
 
   // ── Phase 6 layout library — every built variant as its own stage section ──────
 

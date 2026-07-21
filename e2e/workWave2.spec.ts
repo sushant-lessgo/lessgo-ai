@@ -99,3 +99,34 @@ test.describe('work-wave2 hero slider', () => {
     await expect(single.locator('[data-wk-hero-slider][data-wk-interval]'), 'no interval hook when single-image (JS bails)').toHaveCount(0);
   });
 });
+
+test.describe('work-wave2 footer derived columns', () => {
+  test('a marked footer renders derived columns tracking the page list; an un-marked footer stays legacy', async ({ page }) => {
+    await page.goto(STAGE, { waitUntil: 'load' });
+    await page.waitForSelector('[data-parity-band="published"][data-parity-section="footer"]');
+
+    // Both bands assert the same DOM (both renderers read the SAME stored derived
+    // data — no render-time page-list divergence). The derived footer carries the
+    // marker → the .wk-footer__cols block; the legacy footer never does.
+    for (const kind of ['published', 'edit'] as const) {
+      // ── Derived footer (marker present) — located by the derived-only cols node.
+      const derived = page
+        .locator(`[data-parity-band="${kind}"][data-parity-section="footer"]`, {
+          has: page.locator('.wk-footer__cols'),
+        })
+        .first();
+      await expect(derived.locator('.wk-footer__col'), `${kind}: 3 footer columns (2 nav + contact)`).toHaveCount(3);
+      // Nav links track the page list (home + index + detail pages).
+      await expect(derived.locator('.wk-footer__col-link', { hasText: 'Brand Portraits' }), `${kind}: detail link`).toHaveCount(1);
+      await expect(derived.getByText('Amsterdam, Netherlands'), `${kind}: contact location`).toBeVisible();
+
+      // ── Legacy footer (no marker) — has a footer but NO derived cols block.
+      const legacy = page
+        .locator(`[data-parity-band="${kind}"][data-parity-section="footer"]`)
+        .filter({ hasNot: page.locator('.wk-footer__cols') })
+        .first();
+      await expect(legacy.locator('.wk-footer'), `${kind}: legacy footer renders`).toHaveCount(1);
+      await expect(legacy.locator('.wk-footer__cols'), `${kind}: legacy footer has no derived cols`).toHaveCount(0);
+    }
+  });
+});

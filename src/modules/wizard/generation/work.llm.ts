@@ -37,6 +37,7 @@ import {
   type CollectionFanOutResult,
 } from '@/modules/generation/multiPageAssembly';
 import { deriveWorksEntries, stampWorkGalleryBinding, stampHeroSlides } from '@/modules/generation/workCollections';
+import { stampWorkFooterNav } from '@/modules/generation/workFooterDerive';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
 import { templateMeta } from '@/modules/templates/templateMeta';
 import type { CollectionEntry } from '@/modules/brief/collections';
@@ -374,6 +375,16 @@ export async function runWorkLLMGeneration(
     // hero stays byte-identical). Never overwrites user-edited slides (guarded in
     // stampHeroSlides), so a resume re-run is idempotent.
     stampHeroSlides(fc, deriveWorksEntries(getWorkFacts(input.brief?.facts)));
+
+    // ─── Footer derived columns + contact (Wave 2) — first-gen only; SAME
+    // call-site family. Runs HERE (not in multiPageAssembly): only after the full
+    // sitemap fan-out + works-binding fan-out is `fc.pages` COMPLETE (incl. any CMS
+    // detail pages) — the per-page merge in multiPageAssembly sees only a partial
+    // page set, and finalizeMultiPageGeneration is audience-SHARED (would touch
+    // product/thing footers). Fresh gens get the marker + derived data; old drafts
+    // (Kundius) never reach this path → today's footer, byte-identical. Marker-gated
+    // re-stamp lives in resyncWorkContent for later CMS page-set changes.
+    stampWorkFooterNav(fc, getWorkFacts(input.brief?.facts));
 
     cb.onStage?.('saving');
     try {

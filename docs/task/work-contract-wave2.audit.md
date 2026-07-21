@@ -407,3 +407,72 @@ The primary `atelier-hero` fixture stays SINGLE-IMAGE (Kundius byte-identical + 
 - The multi-slide parity band carries a tiny (0.375%) edit-vs-published delta from the editor effect's runtime dot injection into an empty `[data-wk-dots]` (the published dev-stage band has no JS). It is the documented, expected shape (mirrors the atelier2 single-slide note) and sits far under the 3% threshold; on a REAL published page `work.v1.js` injects the same dots, so live edit==published holds.
 - No add/remove-slide affordance in the editor yet (Deviation 1); per-slide image override works. If designers need manual slide add/remove, a follow-on can extend the core to `E.List` with a per-first-item `is-active` mechanism.
 - Pre-existing `atelier2` parity timeouts remain (orthogonal; flag at merge gate).
+
+---
+
+## Phase 5 — Footer: derived columns + contact
+
+### Files changed
+
+- `src/modules/generation/workFooterDerive.ts` (NEW) — pure resolver + assembly stamp: `deriveFooterNav(fc)`, `deriveFooterContact(facts)`, `stampWorkFooterNav(fc, facts, {onlyIfMarked?})`, `FOOTER_NAV_MODE_DERIVED`, `FOOTER_WORK_LINK_CAP`.
+- `src/modules/generation/workFooterDerive.test.ts` (NEW) — derive/contact/stamp/gate unit tests + a `resyncWorkContent` integration case (14 tests).
+- `src/modules/wizard/generation/work.llm.ts` — first-gen stamp `stampWorkFooterNav(fc, getWorkFacts(input.brief?.facts))` in `runFanOut`, beside `stampHeroSlides` (import + one call). NOT on the plan's Phase-5 Files-touched — see Deviation 1.
+- `src/modules/generation/workLibrarySync.ts` — marker-gated footer re-stamp `stampWorkFooterNav(fc, facts, {onlyIfMarked:true})` as step (e) of `resyncWorkContent`, after the page-set add/prune (import + one call).
+- `src/modules/skeletons/work/blocks/Footer/WorkFooter.core.tsx` — derived branch (marker present -> 3-col index shape from stored data); legacy branch left EXACTLY as today; `WorkFooterContent` gains `footer_nav_mode?`/`nav_columns?`/`contact_location?`/`contact_reach?` + `WorkFooterNavLink`/`WorkFooterNavColumn` types.
+- `src/modules/skeletons/work/blocks/Footer/styles.ts` — `.wk-footer__cols`/`__col`/`__col-head`/`__col-list`/`__col-link`/`__contact-line` (derived-branch-only nodes -> legacy footer byte-identical).
+- `src/modules/skeletons/work/blocks/Footer/WorkFooter.tsx` — EDIT wrapper surfaces the derived keys from the raw store elements (needed — see Deviation 2).
+- `src/modules/templates/blockMocks/atelier.ts` — NEW `atelier-footer-derived` fixture (marker + 2 nav columns + contact); primary `atelier-footer` kept legacy (no marker).
+- `src/modules/skeletons/work/renderParity.work.test.tsx` — `NON_VISIBLE_KEY` += `^footer_nav_mode$` (the one real regex add this wave).
+
+NOT edited (plan listed as optional): `multiPageAssembly.ts` (Deviation 1); `WorkFooter.published.tsx` (no computed prop needed — the published renderer passes elements through wholesale); `blockMocks/harness.ts` (its generic per-key seeding already carries the array/scalar derived keys).
+
+### Stamp site + WHY (Deviation 1 — plan said multiPageAssembly.ts)
+
+The resolved columns + contact + marker are stamped in `work.llm.ts` `runFanOut`, not `multiPageAssembly.ts`. The task authorized this ("work.llm.ts runFanOut beside the other stamps ... verify where fc.pages is fully populated; use whatever site has the complete page set"). Verification:
+
+- `mergePageIntoFinalContent` builds the footer during the HOME-page merge — fc.pages is INCOMPLETE there (other body pages merge later in the loop; the /works index + detail pages are added afterward by `runWorksFanOut`). Deriving footer nav there misses most of the site.
+- `finalizeMultiPageGeneration` sees the complete page set but is audience-SHARED (thing/product call it) — a work-footer stamp there would mutate non-work footers.
+- `work.llm.ts` `runFanOut`, right after `runWorksFanOut` + `stampAboutSignature` + `stampHeroSlides`, is the ONLY site that is (a) post-full-fan-out so fc.pages is complete incl. CMS detail pages, (b) work-only, and (c) unreachable by scoped/story regen. This is the same correction Phases 3/4 made (their plans also listed multiPageAssembly.ts "only if needed" and used work.llm.ts).
+
+Net Files-touched delta vs the plan: +work.llm.ts, -multiPageAssembly.ts (one stamp call moved to the correct, precedent-matching site).
+
+### Marker-gating keeps Kundius byte-identical (NO live content touched)
+
+`footer_nav_mode:'derived'` is the opt-in. The core branches on it: absent -> the legacy return (unchanged markup). Kundius / any pre-Wave-2 draft has no marker -> today's footer exactly. First-gen stamps the marker only on the `work.llm.ts` fresh-generation path (never reached by an existing draft). The `resyncWorkContent` re-stamp is `onlyIfMarked:true` -> NEVER retroactively marks an un-opted footer. I touched NO Kundius/live-project content — enabling the derived footer on her live draft is the documented HUMAN GATE. Tripwires `kundiusPages`/`oldContentFallback` green untouched; legacy footer band [#6] = 0.179%.
+
+### Resolver API
+
+- `deriveFooterNav(fc): FooterNavColumn[]` — from fc.pages (same map `hasItemPage` reads). Emits an "Explore" column (home + singletons incl. a collection INDEX singleton) and a work column (one link per `kind:'collectionItem'` detail page, heading from the index singleton title, capped at `FOOTER_WORK_LINK_CAP=12`) — this is what makes columns TRACK a CMS collection adding/removing detail pages (spec acceptance). Link ids deterministic from the path. No pages -> [].
+- `deriveFooterContact(facts): {location?,reach?}` — from `facts.identity` (work facts carry no email/phone; contactMethod is a mechanism). Empty -> {} -> core falls back to today's note/copyright.
+- `stampWorkFooterNav(fc, facts, {onlyIfMarked?})` — writes the marker/columns/contact into every footer tree (fc.content footer-section, fc.pages[*].content, fc.chrome.footer.data) — mirrors the goal-CTA/gallery multi-tree stamp so each de-aliased tree carries its own marker post-JSON-persist. `onlyIfMarked` skips any footer whose marker != 'derived'.
+
+### Resync re-stamp wiring
+
+Added as step (e) of `resyncWorkContent`, AFTER the item-page add/prune (d) so columns reflect the FINAL page set. Gated `onlyIfMarked:true`. Tests prove a marked footer picks up current detail pages after resync and an un-marked footer's elements are byte-identical (JSON.stringify equality) through resync.
+
+### Wrapper edit — WHY WorkFooter.tsx WAS needed (Deviation 2)
+
+The derived keys are STAMPED into stored content but NOT declared in the footer contract schema (plan rule: NO contract field; workSections.ts not in scope). The edit path's `blockContent` comes from `extractLayoutContent`, which iterates the layout SCHEMA and drops non-schema keys — so the edit renderer lost `footer_nav_mode`/`nav_columns`/`contact_*` while the published renderer (direct `...elements` passthrough, LandingPagePublishedRenderer L38) kept them -> a dual-renderer divergence (renderParity.work caught it: edit MISSING, published yes). Fix: the edit wrapper reads those four keys from the raw store elements (single stable-ref useEditStore selector, unwrapping the {content}/{value} element shape) and merges them into the content it feeds the core. `WorkFooter.published.tsx` needed no edit. This is exactly the "touch the wrappers only if a computed prop is needed" case the plan flagged.
+
+### Full gate
+
+- `npx tsc --noEmit` — CLEAN (no founder.jpg phantom).
+- `npm run test:run` — 290 passed | 1 skipped; 4678 passed | 15 skipped (+1 file / +14 tests vs Phase 4 — new workFooterDerive). Green: renderParity.work, coreParity (count stays 19), skinPurity, conformance, kundiusPages, oldContentFallback, workContract, new workFooterDerive (14/14).
+- `npm run lint` — clean on all touched files.
+- `npm run build` — SUCCEEDED.
+- `npx playwright test e2e/workWave2.spec.ts` — 3 passed (packages quad + hero slider + footer: derived footer renders 3 columns tracking the page list + contact in BOTH bands; legacy footer has no `.wk-footer__cols`). NOTE: a first e2e run failed with a "Server Error / Jest worker child process exceptions" that was a STALE dev server on port 3000 (a dangling `npm run dev` from an earlier session), NOT the stage/my code — a fresh `curl /dev/blocks/atelier` returned HTTP 200, and after killing the PID on 3000 + `rm -rf .next` all 3 passed.
+- `npx playwright test e2e/parity.spec.ts` — 5 passed; atelier per-section all < 3%: atelier/footer legacy [#6] = 0.179%, atelier/footer DERIVED [#7] = 0.854%, packages [#19] = 0.697%. The 2 failures are the PRE-EXISTING atelier2 stale-registry timeouts (out of scope, flagged since Phase 2b).
+
+### Deviations from the plan
+
+1. Stamp site: work.llm.ts runFanOut, not multiPageAssembly.ts (+work.llm.ts, -multiPageAssembly.ts vs Files-touched). Task-authorized; only complete-page-set site that is work-only + regen-unreachable; Phases 3/4 precedent. Detailed above.
+2. WorkFooter.tsx (edit wrapper) edited — genuinely needed (schema-filtered edit path drops the non-schema derived keys). In Files-touched as a conditional edit.
+3. Derived nav links/contact render as PLAIN nodes (no edit primitive), not editable — they auto-derive from the page set (a manual edit would be clobbered on the next resync), so both renderers emit identical plain `<a>`/`<span>` (edit==published by construction). The renderParity.work href-parity check ("edit exposes a link affordance when the section has links") is satisfied by the footer's socials (E.Link -> wk-link-edit), which the derived fixture retains.
+4. deriveFooterContact surfaces location + reach only (not email/phone/action) — work facts carry no address; contactMethod without a target would be a dead label. Empty -> graceful fallback to today's note/copyright.
+5. Separate atelier-footer-derived fixture (primary atelier-footer kept legacy) — mirrors Phase 4's two-hero-fixture strategy so the legacy/Kundius footer band stays proven byte-identical AND the derived shape gets its own parity band.
+
+### Open risks
+
+- The derived footer is inert on existing drafts (no marker) by design; the LIVE Kundius opt-in remains the documented HUMAN GATE — NOT performed here.
+- FOOTER_WORK_LINK_CAP=12 caps the work column; a collection with >12 detail pages shows the first 12 by page order. Adjust if designers want an "all work" overflow link.
+- Pre-existing atelier2 parity timeouts remain (orthogonal; flag at merge gate).
