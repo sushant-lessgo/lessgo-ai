@@ -7,7 +7,27 @@
 
 ## Progress log
 
-- B1 Preview mode still shows editing affordances: pending
+- B1 Preview mode still shows editing affordances: **fixed** (commit `f221f85c`, review loops 1, verdict `ship`)
+
+**Green gate (worktree):** `tsc --noEmit` 0 errors · `test:run` 4717 passed / 15
+skipped (295 files) · `lint` warnings only (pre-existing `<img>` advisories) ·
+`build` succeeds.
+
+### QA watch-items from review (non-blocking, verify on preview)
+
+1. **granth + vestria have NO automated preview coverage** — the regression test
+   only enrols `BLOCK_MOCKS.atelier`. Their fix is verified by code shape + tsc
+   only. Eyeball a granth (writer) and vestria page in preview.
+2. **granth/vestria `Link` preview drops inline `position:relative;
+   display:inline-flex; gap:6px`** — matches published, but is a preview-only
+   layout change with no test. Check link alignment.
+3. **granth/vestria preview now renders element-excluded fields** (exclusion was
+   gated on `mode === 'edit'`). This MATCHES published — correct convergence —
+   but may look like a new bug: fields hidden in the editor can appear in
+   preview. Work's `Editable` keeps exclusion in preview, so the three families
+   differ. Flag if it reads wrong.
+4. Work-family links render as `<span>`/prevented anchors, so they don't navigate
+   in preview (pre-existing, out of scope).
 
 ---
 
