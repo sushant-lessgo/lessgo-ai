@@ -41,8 +41,19 @@ vi.mock('@/hooks/useEditStore', () => ({
 
 vi.mock('@/components/ui/ConfirmDialog', () => ({ confirmDialog }));
 
+// GlobalModals' siblings are irrelevant here (and drag in heavy trees) — the
+// suite only exercises the seo/settings slot.
+vi.mock('./ProductsModal', () => ({ ProductsModal: () => null }));
+vi.mock('@/components/layout/GlobalButtonConfigModal', () => ({
+  GlobalButtonConfigModal: () => null,
+}));
+vi.mock('@/components/editor/SocialProfilesPanel', () => ({
+  SocialProfilesPanel: () => null,
+}));
+
 import { LanguagesPanel } from './LanguagesPanel';
 import { SeoSettingsModal } from './SeoSettingsModal';
+import { GlobalModals, showSeoModal, hideSeoModal } from './GlobalModals';
 
 let container: HTMLDivElement;
 let root: Root;
@@ -393,5 +404,76 @@ describe('SeoSettingsModal — the Languages pane', () => {
     const domain = Array.from(nav.children).find((el) => el.textContent?.includes('Domain'))!;
     expect(domain.textContent).toContain('public');
     expect(domain.textContent).not.toContain('language');
+  });
+});
+
+// language-settings phase 2b — the header's `Languages` row must land ON the
+// Languages pane. That needs a section threaded header → showSeoModal →
+// GlobalModals state → SeoSettingsModal's initial `section`. This suite runs the
+// REAL chain from showSeoModal down (the header's own call is pinned by
+// GlobalAppHeader.menus.test.tsx), so dropping the thread anywhere goes red.
+describe('GlobalModals → SeoSettingsModal initial section (phase 2b)', () => {
+  const origFetch = global.fetch;
+  beforeEach(() => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ features: { trackingPixels: false } }),
+    }) as any;
+  });
+  afterEach(() => {
+    act(() => hideSeoModal());
+    global.fetch = origFetch;
+  });
+
+  function railRow(label: string): HTMLElement | null {
+    return (
+      Array.from(document.body.querySelectorAll('nav[aria-label="Site settings"] button')).find(
+        (b) => b.textContent?.includes(label),
+      ) as HTMLElement | undefined
+    ) ?? null;
+  }
+
+  async function open(options?: { section?: 'seo' | 'languages' }) {
+    setState((s) => {
+      s.pages = {};
+    });
+    mount(<GlobalModals />);
+    await act(async () => {
+      showSeoModal(options);
+    });
+    await settle();
+  }
+
+  it('showSeoModal({section:"languages"}) opens ALREADY on Languages, not SEO', async () => {
+    await open({ section: 'languages' });
+
+    expect(document.body.textContent).toContain('Site settings · Languages');
+    expect(document.body.textContent).toContain('Offer your site in more than one language.');
+    // The SEO pane's own marker for a page-less project — proof we did not just
+    // render both, and proof the window did not open on SEO.
+    expect(document.body.textContent).not.toContain('No pages found.');
+  });
+
+  it('the initial section is a starting point, not a lock — the rail still switches', async () => {
+    await open({ section: 'languages' });
+
+    click(railRow('SEO'));
+    expect(document.body.textContent).toContain('No pages found.');
+    expect(document.body.textContent).not.toContain('Site settings · Languages');
+
+    click(railRow('Languages'));
+    expect(document.body.textContent).toContain('Site settings · Languages');
+    expect(document.body.textContent).not.toContain('No pages found.');
+  });
+
+  it('showSeoModal() with no argument still opens on SEO (existing callers unchanged)', async () => {
+    await open();
+
+    expect(document.body.textContent).toContain('No pages found.');
+    expect(document.body.textContent).not.toContain('Site settings · Languages');
+
+    // …and Languages is still one click away.
+    click(railRow('Languages'));
+    expect(document.body.textContent).toContain('Site settings · Languages');
   });
 });

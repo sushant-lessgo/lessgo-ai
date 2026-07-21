@@ -103,7 +103,19 @@ function SavedPill() {
   );
 }
 
-export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
+/** Which rail pane the window shows. */
+export type SettingsSection = 'seo' | 'languages';
+
+export function SeoSettingsModal({
+  onClose,
+  initialSection = 'seo',
+}: {
+  onClose: () => void;
+  /** Pane to OPEN on (phase 2b — the header's Languages row). Not a lock: the
+   *  rail still switches freely afterwards. Defaults to SEO, so every caller
+   *  that omits it behaves exactly as before. */
+  initialSection?: SettingsSection;
+}) {
   // Render-read: pages (tabs + per-page seo), and the active-page working set
   // (currentPageId/sections/content/slug/title) that feeds the live preview meta.
   // updatePageSeo/triggerAutoSave/uploadImage are handler-only.
@@ -138,7 +150,9 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
     () => pages.find((p) => p.pathSlug === '/')?.id || pages[0]?.id || ''
   );
   // Which pane the rail is showing. SEO was hardcoded-active until phase 2.
-  const [section, setSection] = React.useState<'seo' | 'languages'>('seo');
+  // Seeded from `initialSection` (phase 2b) — a starting point only; the rail
+  // owns it from the first click on.
+  const [section, setSection] = React.useState<SettingsSection>(initialSection);
   const [uploading, setUploading] = React.useState<null | 'ogImage' | 'faviconUrl'>(null);
   const [uploadError, setUploadError] = React.useState<string | null>(null);
 

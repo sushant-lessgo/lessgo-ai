@@ -386,3 +386,116 @@ run here). Unchanged from phase 1; zero errors in any file this phase touched.
 
 (Phase 1 baseline was 290/4665; +1 file and +19 net tests — the new panel suite (15) plus
 the rewritten visibility suite going 4 → 8 cases.)
+
+---
+
+# Phase 2b — Languages entry in the header "Site settings" popover
+
+Founder addition made at the phase-2 human gate ("in the settings (in header) dropdown
+there should be a Languages option as well").
+
+## Files changed
+
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx`
+- `src/app/edit/[token]/components/ui/GlobalModals.tsx`
+- `src/app/edit/[token]/components/ui/SeoSettingsModal.tsx`
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.menus.test.tsx`
+- `src/app/edit/[token]/components/ui/languagesPanel.test.tsx`
+
+## Approach — how the section is threaded, and why
+
+Chosen: **an optional argument on the existing `showSeoModal()`**, not a sibling
+`showLanguagesModal()`.
+
+Rationale: there is exactly ONE window (the site-settings window); a second `show*`
+export would imply a second modal and would need its own `modalState` slot / hide
+function to stay coherent, duplicating state for what is a *starting pane*. The
+GlobalModals file's own idiom is one state slot per modal, so the pane belongs
+inside `seoModal`'s slot. `showSeoModal(options?: { section?: SettingsSection })`
+defaults to `'seo'`, so the single pre-existing no-arg caller (the header's SEO row)
+is byte-identical in behavior.
+
+Chain: header row → `showSeoModal({ section: 'languages' })` → `modalState.seoModal =
+{ isOpen: true, section }` → `<SeoSettingsModal initialSection={…}>` → seeds the
+phase-2 `section` useState. The modal unmounts on close (`{isOpen && <…/>}`), so the
+initializer re-runs on every open — no stale-pane risk. `hideSeoModal()` also resets
+the slot to `'seo'` for belt-and-braces.
+
+## Per file
+
+**`GlobalAppHeader.tsx`** — one new `AppPopoverItem` ("Languages", `AppIcon
+name="language"`, `size={18}`), placed after `Social & sharing` so the popover order
+matches the modal rail order (Domain / SEO / Social / Languages). Closes the menu
+first (`setShowSettingsMenu(false)`), same as every other wired row. The `language`
+glyph was freed by phase 2 (Domain moved to `public`), so no rail/menu glyph collision.
+
+**`GlobalModals.tsx`** — `seoModal` slot gains `section: SettingsSection` (type
+imported from the modal); `showSeoModal` takes the optional options object;
+`hideSeoModal` resets it; the render passes `initialSection`.
+
+**`SeoSettingsModal.tsx`** — exports `type SettingsSection = 'seo' | 'languages'`
+(the union already existed inline); accepts `initialSection?: SettingsSection = 'seo'`
+and seeds the existing `section` state from it. **No other change** — the rail's
+`setSection` handlers are untouched, so the initial section is a starting point, not a
+lock (explicitly asserted in the tests).
+
+**`GlobalAppHeader.menus.test.tsx`** — new case: `Settings → Languages` calls
+`showSeoModal` exactly once **with `{ section: 'languages' }`**, does not call
+`showSocialModal`, and closes the menu. The existing SEO case now also asserts
+`showSeoModal.mock.calls[0]` is `[]` (SEO stays a no-arg call).
+
+**`languagesPanel.test.tsx`** — new `describe` running the REAL chain from
+`showSeoModal` down: mounts `<GlobalModals />` (ProductsModal /
+GlobalButtonConfigModal / SocialProfilesPanel mocked to null; real store as in the
+rest of the file) and asserts (a) `{section:'languages'}` renders `Site settings ·
+Languages` + the panel copy and **not** the SEO pane's `No pages found.`, (b) the rail
+still switches both ways afterwards, (c) no-arg still opens on SEO and Languages is
+one click away.
+
+## Mutation checks (the tests can fail)
+
+- `useState<SettingsSection>(initialSection)` → `('seo')`:
+  `languagesPanel.test.tsx:450` red — received body text shows the SEO pane
+  (`…languageLanguages1No pages found.`). 1 failed / 17 passed.
+- header `showSeoModal({ section: 'languages' })` → `showSeoModal()`:
+  `GlobalAppHeader.menus.test.tsx` red on the `toHaveBeenCalledWith` assertion.
+  1 failed / 7 passed.
+Both mutations reverted afterwards (verified by grep).
+
+## Deviations from the brief
+
+None. (The brief left the threading shape to the implementer; the choice and its
+reasoning are above.)
+
+## Verification
+
+`npx tsc --noEmit` — clean, **zero output** (the brief's expected environmental
+`src/app/page.tsx` TS2307 `.jpg` error did not appear in this worktree run):
+
+```
+$ npx tsc --noEmit
+(no output)
+```
+
+`npm run test:run`:
+
+```
+ RUN  v4.1.8 C:/Users/susha/lessgo-ai/.claude/worktrees/language-settings
+
+ Test Files  291 passed | 1 skipped (292)
+      Tests  4688 passed | 15 skipped (4703)
+   Start at  16:15:53
+   Duration  78.89s
+```
+
+(Phase 2 baseline was 291 files / 4684 tests passing; now 4688 = +4 new cases — header
+suite +1, panel suite +3. No file count change.)
+
+## Open risks / notes for later phases
+
+- `SettingsSection` now lives in `SeoSettingsModal.tsx` and is imported by
+  `GlobalModals.tsx`. If a later phase adds a rail pane (e.g. the t16 Domain pane),
+  extend that union in one place and both the modal state and the header keep working.
+- Zero-diff holds: opening either pane still writes nothing to the store (pinned by
+  the phase-2 zero-diff case, unchanged).
+- No visual/CSS change to the modal or the popover beyond the one added row.

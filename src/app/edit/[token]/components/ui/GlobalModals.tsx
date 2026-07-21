@@ -4,6 +4,7 @@ import { GlobalButtonConfigModal } from '@/components/layout/GlobalButtonConfigM
 import { ProductsModal } from './ProductsModal';
 import { SeoSettingsModal } from './SeoSettingsModal';
 import { SocialProfilesPanel } from '@/components/editor/SocialProfilesPanel';
+import type { SettingsSection } from './SeoSettingsModal';
 
 // Global state for modals (outside React to persist)
 let modalState = {
@@ -12,6 +13,9 @@ let modalState = {
   },
   seoModal: {
     isOpen: false,
+    // language-settings phase 2b: which rail pane the window OPENS on. Only a
+    // starting point — the rail still switches freely once open.
+    section: 'seo' as SettingsSection,
   },
   socialModal: {
     isOpen: false,
@@ -31,13 +35,18 @@ export function hideProductsModal() {
   modalEvents.dispatchEvent(new Event('stateChange'));
 }
 
-export function showSeoModal() {
-  modalState.seoModal = { isOpen: true };
+/**
+ * Opens the site-settings window. `options.section` picks the pane it lands on
+ * (language-settings phase 2b — the header's Languages row passes `'languages'`);
+ * omitting it keeps every pre-existing no-arg caller on SEO, exactly as before.
+ */
+export function showSeoModal(options?: { section?: SettingsSection }) {
+  modalState.seoModal = { isOpen: true, section: options?.section ?? 'seo' };
   modalEvents.dispatchEvent(new Event('stateChange'));
 }
 
 export function hideSeoModal() {
-  modalState.seoModal = { isOpen: false };
+  modalState.seoModal = { isOpen: false, section: 'seo' };
   modalEvents.dispatchEvent(new Event('stateChange'));
 }
 
@@ -89,7 +98,7 @@ export function GlobalModals() {
       )}
 
       {state.seoModal.isOpen && (
-        <SeoSettingsModal onClose={hideSeoModal} />
+        <SeoSettingsModal initialSection={state.seoModal.section} onClose={hideSeoModal} />
       )}
 
       <SocialProfilesPanel isVisible={state.socialModal.isOpen} onClose={hideSocialModal} />

@@ -132,7 +132,7 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     codes (`'nl'` → null) — respect this when mapping the work engine's `facts.languages[0]`
   - note: store-action signatures went on `MetaActions` (not `ContentActions`) — plan pointer was
     impossible; precedent `actions.ts:442-448`. No type-checked caller until phase 2.
-- phase 2 Languages panel in Site Settings + retire globe: done (commit pending-sha, review
+- phase 2 Languages panel in Site Settings + retire globe: done (commit 1a3b62b9, review
   loops 1, VERDICT ship) — ⛔ AWAITING FOUNDER SIGN-OFF at the human gate
   - owed → phase 7 (now in its Files touched): the `removeLocale` default-locale guard in
     `i18nActions.ts` (UI-only enforcement today) + the dead `LanguageToggle` re-export
@@ -141,6 +141,15 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     becomes a genuine fake control.
   - manual-QA only (not provable in jsdom): nested `confirmDialog` portal stacking above the
     settings `Dialog` (z-index / focus trap)
+- phase 2b header Site-settings popover → Languages entry: done (commit pending-sha, review
+  loops 1, VERDICT ship) — **founder addition made AT the phase-2 gate** ("in the settings (in
+  header) dropdown there should be a Languages option as well"). FOUNDER SIGNED OFF phase 2 +
+  2b; pipeline resumed at phase 3.
+  - `showSeoModal(options?: {section})` now seeds the modal's rail pane; `SettingsSection`
+    (`'seo'|'languages'`) is exported from `SeoSettingsModal.tsx`. A later Domain pane extends
+    that union — do NOT invert the dependency (no-cycle rule, `SeoSettingsModal.tsx:239`).
+  - the section seed only takes effect on a **closed→open transition** (`useState` initializer +
+    conditional unmount). Unreachable today; matters if a future in-window deep-link is added.
 - phase 3 onboarding site-language capture: pending
 - phase 4 generation output-language directive: pending
 - phase 5 switcher.v2 asset + publish emission: pending
