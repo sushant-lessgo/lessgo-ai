@@ -27,6 +27,11 @@ vi.mock('@/lib/email/sendLeadNotification', () => ({ sendLeadNotification: vi.fn
 // lead-emails phase 1: the recipient is now the OWNER's Clerk email. Mocked so no
 // real Clerk client is constructed in tests (it throws without a secret key).
 vi.mock('@/lib/email/resolveOwnerEmail', () => ({ resolveOwnerEmail: vi.fn() }));
+// lead-emails phase 2: the visitor auto-reply. Mocked here — its own unit test
+// (src/lib/email/sendVisitorAutoReply.test.ts) covers rendering/sanitization; this
+// file only pins the ROUTE's wiring (called after the owner notification, with the
+// stored form config, and skipped when the owner email is unresolved).
+vi.mock('@/lib/email/sendVisitorAutoReply', () => ({ sendVisitorAutoReply: vi.fn() }));
 vi.mock('@/lib/integrations/convertkit', () => ({
   ConvertKitIntegration: vi.fn(),
   mapFormDataToSubscriber: vi.fn(() => ({})),
@@ -43,12 +48,14 @@ vi.mock('@/lib/security', () => ({
 import { prisma } from '@/lib/prisma';
 import { sendLeadNotification } from '@/lib/email/sendLeadNotification';
 import { resolveOwnerEmail } from '@/lib/email/resolveOwnerEmail';
+import { sendVisitorAutoReply } from '@/lib/email/sendVisitorAutoReply';
 import { checkLimit } from '@/lib/planManager';
 import { POST } from './route';
 
 const db = prisma as any;
 const notify = sendLeadNotification as unknown as ReturnType<typeof vi.fn>;
 const resolveOwner = resolveOwnerEmail as unknown as ReturnType<typeof vi.fn>;
+const autoReply = sendVisitorAutoReply as unknown as ReturnType<typeof vi.fn>;
 const limit = checkLimit as unknown as ReturnType<typeof vi.fn>;
 const OWNER_EMAIL = 'owner@example.com';
 
@@ -76,6 +83,7 @@ describe('/api/forms/submit — notify outcome row flag (F30b)', () => {
     db.formSubmission.count.mockResolvedValue(3); // under any cap by default
     limit.mockResolvedValue({ allowed: true, limit: 25, current: 3 });
     resolveOwner.mockResolvedValue({ email: OWNER_EMAIL });
+    autoReply.mockResolvedValue({ status: 'skipped' });
   });
 
   it('sets notifiedAt when the notification is sent', async () => {
@@ -130,6 +138,7 @@ describe('/api/forms/submit — monthly submission cap (pricing-v2 phase 2)', ()
     db.formSubmission.update.mockResolvedValue({ id: 'sub_1' });
     notify.mockResolvedValue({ status: 'skipped' });
     resolveOwner.mockResolvedValue({ email: OWNER_EMAIL });
+    autoReply.mockResolvedValue({ status: 'skipped' });
   });
 
   it('counts the current calendar month for the DERIVED page owner (not the body userId)', async () => {
@@ -178,6 +187,7 @@ describe('/api/forms/submit — server-side owner derivation (secrets-forms-secu
     limit.mockResolvedValue({ allowed: true, limit: 25, current: 3 });
     notify.mockResolvedValue({ status: 'skipped' });
     resolveOwner.mockResolvedValue({ email: OWNER_EMAIL });
+    autoReply.mockResolvedValue({ status: 'skipped' });
   });
 
   it('stores the DERIVED owner, never the forged body userId', async () => {
@@ -284,6 +294,7 @@ describe('/api/forms/submit — owner-email routing (lead-emails phase 1)', () =
     limit.mockResolvedValue({ allowed: true, limit: 25, current: 3 });
     notify.mockResolvedValue({ status: 'sent' });
     resolveOwner.mockResolvedValue({ email: OWNER_EMAIL });
+    autoReply.mockResolvedValue({ status: 'skipped' });
   });
 
   it('resolves the DERIVED owner and sends to that address with the page title as business name', async () => {
@@ -316,7 +327,7 @@ describe('/api/forms/submit — owner-email routing (lead-emails phase 1)', () =
     expect(notify.mock.calls[0][0].businessName).toBe('Your website');
   });
 
-  it('owner email unresolved → lead still saved, notifyError written, NO send attempted', async () => {
+  it('owner email unresolved → lead still saved, notifyError written, NO send attempted (and no auto-reply)', async () => {
     resolveOwner.mockResolvedValue({ error: 'owner lookup failed: clerk down' });
     const res: any = await POST(makeReq(BODY));
 
@@ -332,5 +343,109 @@ describe('/api/forms/submit — owner-email routing (lead-emails phase 1)', () =
     expect(arg.where).toEqual({ id: 'sub_1' });
     expect(arg.data.notifyError).toBe('owner lookup failed: clerk down');
     expect(arg.data.notifiedAt).toBeUndefined();
+    // No owner Reply-To target ⇒ the visitor auto-reply is skipped too.
+    expect(autoReply).not.toHaveBeenCalled();
+  });
+});
+
+// lead-emails phase 2: the ROUTE's auto-reply wiring. Rendering/sanitization is
+// covered by the helper's own unit test; here we pin who it is called with, that a
+// failure is never load-bearing, and that no DB column is written for it.
+describe('/api/forms/submit — visitor auto-reply wiring (lead-emails phase 2)', () => {
+  const STORED_FORM = {
+    id: 'contact',
+    name: 'Contact',
+    fields: [{ id: 'email', type: 'email', label: 'Email' }],
+    autoReply: { enabled: true, body: 'Custom {name}' },
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    db.publishedPage.findUnique.mockResolvedValue({ ...PAGE, title: 'Naayom Farms' });
+    db.project.findUnique.mockResolvedValue({ content: null, title: 'Naayom' });
+    db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
+    db.formSubmission.update.mockResolvedValue({ id: 'sub_1' });
+    db.formSubmission.count.mockResolvedValue(3);
+    limit.mockResolvedValue({ allowed: true, limit: 25, current: 3 });
+    notify.mockResolvedValue({ status: 'sent' });
+    resolveOwner.mockResolvedValue({ email: OWNER_EMAIL });
+    autoReply.mockResolvedValue({ status: 'sent' });
+  });
+
+  it('sends the auto-reply with the submitted data, business name and owner Reply-To', async () => {
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__body.success).toBe(true);
+    expect(autoReply).toHaveBeenCalledTimes(1);
+    const arg = autoReply.mock.calls[0][0];
+    expect(arg.data).toEqual(BODY.data);
+    expect(arg.businessName).toBe('Naayom Farms');
+    expect(arg.ownerEmail).toBe(OWNER_EMAIL);
+  });
+
+  it('passes the stored form definition from finalContent.forms (where the editor writes it)', async () => {
+    db.project.findUnique.mockResolvedValue({
+      content: { finalContent: { forms: { contact: STORED_FORM } } },
+      title: 'Naayom',
+    });
+
+    await POST(makeReq(BODY));
+
+    expect(autoReply.mock.calls[0][0].form).toEqual(STORED_FORM);
+  });
+
+  it('also accepts the legacy top-level content.forms location', async () => {
+    db.project.findUnique.mockResolvedValue({
+      content: { forms: { contact: STORED_FORM } },
+      title: 'Naayom',
+    });
+
+    await POST(makeReq(BODY));
+
+    expect(autoReply.mock.calls[0][0].form).toEqual(STORED_FORM);
+  });
+
+  it('no stored config → form is null, the helper falls back to data.email', async () => {
+    await POST(makeReq(BODY));
+
+    expect(autoReply.mock.calls[0][0].form).toBeNull();
+  });
+
+  it('writes NO row flag for the auto-reply (notifiedAt/notifyError stay owner-only)', async () => {
+    notify.mockResolvedValue({ status: 'skipped' });
+    autoReply.mockResolvedValue({ status: 'failed', error: 'Resend responded 422' });
+
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__body.success).toBe(true);
+    expect(db.formSubmission.update).not.toHaveBeenCalled();
+  });
+
+  it('an auto-reply that throws never affects the visitor response or the lead row', async () => {
+    autoReply.mockRejectedValue(new Error('boom'));
+
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__status).toBe(200);
+    expect(res.__body.success).toBe(true);
+    expect(db.formSubmission.create).toHaveBeenCalledTimes(1);
+    // the owner notification still happened
+    expect(notify).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs AFTER the owner notification (owner is never delayed by the visitor mail)', async () => {
+    const order: string[] = [];
+    notify.mockImplementation(async () => {
+      order.push('owner');
+      return { status: 'sent' };
+    });
+    autoReply.mockImplementation(async () => {
+      order.push('visitor');
+      return { status: 'sent' };
+    });
+
+    await POST(makeReq(BODY));
+
+    expect(order).toEqual(['owner', 'visitor']);
   });
 });

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { ConvertKitIntegration, mapFormDataToSubscriber } from '@/lib/integrations/convertkit';
 import { sendLeadNotification } from '@/lib/email/sendLeadNotification';
 import { resolveOwnerEmail } from '@/lib/email/resolveOwnerEmail';
+import { sendVisitorAutoReply } from '@/lib/email/sendVisitorAutoReply';
 import { BLOG_SUBSCRIBE_FORM_ID } from '@/lib/blog/buildBlogPages';
 import { FormSubmissionSchema, sanitizeForLogging } from '@/lib/validation';
 import { isServingPublishState } from '@/lib/publishState';
@@ -163,6 +164,10 @@ async function formSubmitHandler(request: NextRequest) {
       // → the submission is still stored with formName 'Unknown Form', and no
       // integrations fire.
       let formConfig: any = null;
+      // lead-emails phase 2: the form definition used for the VISITOR AUTO-REPLY
+      // (email-field pick + autoReply settings). Separate variable on purpose —
+      // see the lookup note below.
+      let autoReplyForm: any = null;
       let projectTitle: string | null = null;
       if (page.projectId) {
         const project = await prisma.project.findUnique({
@@ -180,6 +185,18 @@ async function formSubmitHandler(request: NextRequest) {
           if (forms && forms[formId]) {
             formConfig = forms[formId];
           }
+          // lead-emails phase 2 — LOOKUP LEVEL. `Project.content.forms` above only
+          // matches LEGACY projects (page data stored at the top level). The editor
+          // exports forms INSIDE finalContent (`persistenceActions.export()`), so a
+          // modern project keeps them at `content.finalContent.forms`. The auto-reply
+          // config + field list therefore also look there — otherwise the phase-3
+          // settings UI would write config that the send path never reads.
+          // Deliberately NOT widened for `formConfig`: that would change formName and
+          // start firing ConvertKit integrations that do not fire today (out of scope
+          // for this phase — flagged in the audit).
+          const nestedForms = (content as any).finalContent?.forms;
+          autoReplyForm =
+            formConfig || (nestedForms && nestedForms[formId]) || null;
         }
       }
 
@@ -287,19 +304,27 @@ async function formSubmitHandler(request: NextRequest) {
       // lead. Await-then-flag: record the notify outcome on the row so a
       // silently-failing inbox is visible in the dashboard (F30). The send never
       // affects form success.
-      try {
-        // Business name for the From display name: page title → project title →
-        // generic. Prisma's `"Untitled Project"` default is a non-name — fall through.
-        const pageTitle = (page.title || '').trim();
-        const projTitle = (projectTitle || '').trim();
-        const businessName =
-          pageTitle ||
-          (projTitle && projTitle !== 'Untitled Project' ? projTitle : '') ||
-          'Your website';
+      // Business name for the From display name: page title → project title →
+      // generic. Prisma's `"Untitled Project"` default is a non-name — fall through.
+      // (Hoisted out of the try below so the auto-reply block can reuse it.)
+      const pageTitle = (page.title || '').trim();
+      const projTitle = (projectTitle || '').trim();
+      const businessName =
+        pageTitle ||
+        (projTitle && projTitle !== 'Untitled Project' ? projTitle : '') ||
+        'Your website';
 
+      // Set when the owner's Clerk email resolved; the auto-reply needs it as
+      // Reply-To and is skipped without it.
+      let resolvedOwnerEmail: string | null = null;
+
+      try {
         // Owner's Clerk email is the recipient. A lookup failure is an outcome,
         // never an exception — the lead row is already saved either way.
         const ownerEmail = await resolveOwnerEmail(ownerUserId);
+        if (!('error' in ownerEmail)) {
+          resolvedOwnerEmail = ownerEmail.email;
+        }
         const outcome = 'error' in ownerEmail
           ? { status: 'failed' as const, error: ownerEmail.error }
           : await sendLeadNotification({
@@ -332,6 +357,37 @@ async function formSubmitHandler(request: NextRequest) {
       } catch (notifyErr) {
         // Helper never throws; a failed status-write must not 500 a saved lead.
         console.warn('[forms/submit] notify outcome write failed (non-fatal):', notifyErr);
+      }
+
+      // Visitor auto-reply (lead-emails phase 2). ON by default; disabled per form
+      // via `autoReply.enabled === false`. Same env gate as the owner notification
+      // (no RESEND_API_KEY ⇒ 'skipped'). Outcome is LOGGED ONLY — no DB column:
+      // notifiedAt/notifyError keep their owner-notification meaning (Decision 4).
+      // Skipped when the owner email did not resolve: without an owner Reply-To a
+      // visitor's reply would black-hole, so we say nothing rather than something
+      // unanswerable.
+      try {
+        if (!resolvedOwnerEmail) {
+          console.warn('[forms/submit] auto-reply skipped: owner email unresolved', {
+            formId,
+            pageId: publishedPageId,
+          });
+        } else {
+          const autoReplyOutcome = await sendVisitorAutoReply({
+            form: autoReplyForm,
+            data: data as Record<string, unknown>,
+            businessName,
+            ownerEmail: resolvedOwnerEmail,
+          });
+          console.log('[forms/submit] auto-reply outcome:', {
+            status: autoReplyOutcome.status,
+            formId,
+            pageId: publishedPageId,
+          });
+        }
+      } catch (autoReplyErr) {
+        // Helper never throws; this is belt-and-braces so a saved lead can't 500.
+        console.warn('[forms/submit] auto-reply failed (non-fatal):', autoReplyErr);
       }
 
       // A09: Security Logging - Safe success logging

@@ -19,6 +19,20 @@ export interface MVPFormField {
   options?: string[]; // for select fields
 }
 
+// Per-form visitor auto-reply settings (lead-emails).
+// Absent config = auto-reply ON with the default template (see
+// src/lib/email/autoReplyTemplate.ts). Read SERVER-SIDE at submit time from
+// the project's stored form definition — never from the client payload — so
+// old published blobs keep working without a republish.
+export interface MVPFormAutoReply {
+  /** false = never send the auto-reply for this form. Absent/undefined = ON. */
+  enabled: boolean;
+  /** Owner-authored subject. Empty/absent ⇒ DEFAULT_AUTO_REPLY_SUBJECT. */
+  subject?: string;
+  /** Owner-authored body; supports the {name} / {business} tokens only. */
+  body?: string;
+}
+
 // MVP Form configuration
 export interface MVPForm {
   id: string;
@@ -27,6 +41,8 @@ export interface MVPForm {
   submitButtonText: string;
   successMessage: string;
   integrations?: MVPFormIntegration[];
+  /** Visitor auto-reply settings (optional; absent ⇒ ON with the default text). */
+  autoReply?: MVPFormAutoReply;
   createdAt: Date;
   updatedAt: Date;
 }

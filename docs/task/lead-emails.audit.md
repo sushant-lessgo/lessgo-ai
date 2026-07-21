@@ -231,3 +231,171 @@ npm run test:run -- src/lib/email src/app/api/forms
 (5 files = `sendEmail.test.ts`, `resolveOwnerEmail.test.ts`, `sendLeadNotification.test.ts`,
 `sendBlogPostNotification.test.ts` (untouched, still green), `route.test.ts`. The 4 failures
 reported earlier are resolved; `route.test.ts` now has 22 tests, up from 18.)
+
+---
+
+## Phase 2 — Visitor auto-reply send path
+
+Branch: `feature/lead-emails` (verified via `git branch --show-current` before any edit).
+
+### Files changed
+
+- `src/types/core/forms.ts` (modified)
+- `src/lib/email/autoReplyTemplate.ts` (NEW)
+- `src/lib/email/sendVisitorAutoReply.ts` (NEW)
+- `src/lib/email/sendVisitorAutoReply.test.ts` (NEW)
+- `src/app/api/forms/submit/route.ts` (modified)
+- `src/app/api/forms/submit/route.test.ts` (modified)
+- `docs/task/lead-emails.audit.md` (this section appended)
+
+Nothing else was touched. (`docs/task/lead-emails.plan.md` shows as modified in
+`git status` — that is the orchestrator's own progress-log edit, not mine.)
+
+### Escalation check — saveDraft/loadDraft round-trip (plan step 1)
+
+**Result: NO field whitelist. `autoReply` round-trips. No escalation needed.** Evidence:
+
+- `src/lib/validation.ts:40` — `finalContent: z.unknown().optional()` in `DraftSaveSchema`.
+  The whole page payload (which carries `forms`) is unvalidated/unstripped by design; only
+  TOP-LEVEL keys are stripped by the schema.
+- `src/app/api/saveDraft/route.ts:194-199` — `updatedContent.finalContent = {...existing,
+  ...finalContent}`: a shallow spread, no per-key filtering.
+- `src/hooks/editStore/persistenceActions.ts:619` — `forms: state.forms || {}` is exported
+  wholesale into `finalContent`.
+- `src/hooks/editStore/persistenceActions.ts:214-221` — hydration does
+  `restoredForms[formId] = { ...form, createdAt, updatedAt }`. Unknown keys ride the spread;
+  the only gate is `form.id && Array.isArray(form.fields)` (shape guard, not a whitelist).
+- `src/app/api/loadDraft/route.ts:118-120, 150` — `finalContent` is returned whole.
+
+So the phase-3 FormBuilder can persist `autoReply` through the existing `updateForm` →
+autosave → reload path with zero persistence changes.
+
+### What changed, per file
+
+**`src/types/core/forms.ts`** — purely additive: new `MVPFormAutoReply { enabled; subject?;
+body? }` and `MVPForm.autoReply?`. No existing field changed, so every current form object
+still type-checks.
+
+**`src/lib/email/autoReplyTemplate.ts` (NEW)** — pure module, **zero imports** (phase 3
+imports it into the `'use client'` FormBuilder). Exports `DEFAULT_AUTO_REPLY_SUBJECT`
+(`We received your message`), `DEFAULT_AUTO_REPLY_BODY`
+(`Thanks {name} — {business} received your message and will reply soon.`),
+`AUTO_REPLY_NAME_MAX_LENGTH = 80`, `escapeHtml`, `sanitizeNameToken`, `renderAutoReply`.
+`renderAutoReply` substitutes ONLY `{name}`/`{business}` via two literal regexes — no eval,
+no dynamic key lookup, unknown tokens (`{email}`, `{__proto__}`) stay literal; an absent name
+removes the token plus its leading space (`Thanks — Acme …`, never a double space).
+
+**`src/lib/email/sendVisitorAutoReply.ts` (NEW)** — `sendVisitorAutoReply({form?, data,
+businessName, ownerEmail, fromAddress?}) → EmailSendOutcome`. Recipient = first
+`type === 'email'` field → `data[field.id]`, else `data.email`, validated; invalid/absent ⇒
+`skipped`. Enabled = `form?.autoReply?.enabled !== false`. `{name}` = first non-email field
+whose LABEL matches `/name/i` → else `data.name`, always through `sanitizeNameToken`.
+Subject and body both run through `renderAutoReply` (owner text wins, else the defaults).
+HTML = paragraph-wrapped, `escapeHtml`'d rendered text (defence in depth). Sends via
+`sendEmail` with `op: 'sendVisitorAutoReply'`, `from = buildFromHeader(business, fromAddress)`
+(**reused** from `sendLeadNotification` — the display-name/header-injection sanitizer is not
+duplicated), `replyTo = ownerEmail`. Wrapped in try/catch: never throws.
+
+**`src/app/api/forms/submit/route.ts`** — (a) `businessName` and a `resolvedOwnerEmail`
+holder hoisted just above the existing owner-notification `try` (no logic change to the
+notification itself); (b) a NEW `try` block after it calls `sendVisitorAutoReply`, awaited,
+outcome `console.log`-ed only — **no DB column written** (Decision 4); (c) when the owner
+email did not resolve, the auto-reply is skipped with a warn (no Reply-To target); (d) a new
+`autoReplyForm` lookup beside the existing `formConfig` read (see Deviation 2). The email
+work still sits strictly after `formSubmission.create`.
+
+**`src/app/api/forms/submit/route.test.ts`** — added the `sendVisitorAutoReply` mock (+ a
+`{status:'skipped'}` default in all four existing `beforeEach` blocks so pre-existing tests
+keep exercising their own subject), extended the phase-1 "owner unresolved" test with
+`expect(autoReply).not.toHaveBeenCalled()`, and added a `visitor auto-reply wiring` describe:
+args passed (data/businessName/ownerEmail), config read from `finalContent.forms`, config
+read from legacy top-level `content.forms`, no config ⇒ `form: null`, auto-reply failure
+writes NO row flag, a THROWING auto-reply still returns 200 with the owner notification sent,
+and call ORDER (owner before visitor).
+
+### Deviations from the plan / decisions taken
+
+1. **`sanitizeNameToken` DELETES markup characters (`< > " ' \` \\` and `{ }`) instead of
+   entity-escaping them.** The plan said "HTML-escape". Deleting is strictly stronger (nothing
+   tag-shaped can exist in EITHER the text or the HTML part even if a future caller forgets to
+   escape) and it stops the 80-char cap from ever slicing an HTML entity in half; the plain-text
+   part also stays readable instead of showing `&lt;script&gt;`. `escapeHtml` is still applied
+   to the whole body when building the HTML part.
+2. **⚠️ `autoReply` config is read from `content.finalContent.forms[formId]` as well as the
+   pre-existing `content.forms[formId]` — REVIEWER PLEASE SCRUTINIZE.** While wiring step 4 I
+   found that the route's existing form-config lookup (`route.ts`, `const forms =
+   (content as any).forms`) reads a level that **modern projects do not use**: the editor
+   exports forms INSIDE `finalContent` (`persistenceActions.ts:619`), and `saveDraft` stores
+   that at `Project.content.finalContent`. Top-level `content.forms` only exists for legacy
+   pre-`finalContent` projects. Consequence for phase 2: had I followed the plan literally,
+   `formConfig` would be `null` for essentially every current site, so the phase-3 settings UI
+   would write config the send path never reads (silent no-op feature).
+   Conservative in-scope fix: a SEPARATE `autoReplyForm` variable that falls back to the
+   nested location, used only by the auto-reply. I deliberately did **not** widen `formConfig`
+   itself — that would change `formName` on stored leads and start firing ConvertKit
+   integrations that do not fire today (out of scope, and security-adjacent). **The
+   pre-existing bug is left in place and is worth its own ticket** (it also means the owner
+   notification's `fields` labels and `formName` are usually missing today).
+3. **Local `isValidEmail`.** The plan said reuse "the existing `isValidEmail`", but it is a
+   private function inside `sendLeadNotification.ts`, which is NOT in this phase's
+   Files-touched list. Rather than edit an out-of-scope file to export it, the same 1-line
+   regex predicate is defined locally in `sendVisitorAutoReply.ts` with a comment. (The
+   From-header sanitizer WAS reused — `buildFromHeader` was already exported in phase 1.)
+4. **Typed-email-field pick does not fall back.** If a form declares an email field but its
+   submitted value is missing/invalid, the outcome is `skipped` (no fall back to `data.email`)
+   — literal reading of Decision 3 + "invalid ⇒ skipped".
+5. **Link stripping is over-eager** (any `word.tld`-shaped token is removed, so `j.smith`
+   becomes empty). Chosen deliberately: a mangled first name is cheaper than our verified
+   sending domain relaying a spam link.
+6. **Reply-To validation:** an invalid `ownerEmail` is dropped rather than sent (test-pinned).
+   The route already guarantees a resolved address, so this is belt-and-braces.
+
+### Test results (verbatim)
+
+```
+npx tsc --noEmit
+EXIT=0
+```
+
+```
+npm run test:run -- src/lib/email src/app/api/forms
+
+ Test Files  6 passed (6)
+      Tests  86 passed (86)
+```
+
+(6 files: `sendEmail`, `resolveOwnerEmail`, `sendLeadNotification`, `sendBlogPostNotification`,
+the new `sendVisitorAutoReply` (30 tests), and `route.test.ts` (now 29, up from 22).)
+
+**Mutation check (anti-inert-test verification).** `sanitizeNameToken` was temporarily
+neutered to `return raw` and the suite re-run: **7 tests failed** — all four hostile-input
+cases (script markup, links, newlines, 500-char cap), the `{business}` re-expansion case and
+both pure-helper cases. Restored afterwards and re-run green. The Decision-7 tests assert the
+ABSENCE of hostile substrings in the serialized Resend payload, not merely that a send
+happened.
+
+### Left for phase 3
+
+- FormBuilder "Auto-reply email" section (enable toggle + subject/body inputs, placeholdered
+  with `DEFAULT_AUTO_REPLY_SUBJECT`/`DEFAULT_AUTO_REPLY_BODY` imported from the pure
+  `autoReplyTemplate.ts` — do NOT import `sendVisitorAutoReply`/`sendEmail` there).
+- Persistence needs no work (see the round-trip evidence above).
+
+### Risks for the reviewer
+
+- **Deviation 2 is the one to check.** If the reviewer disagrees with the dual-location read,
+  the alternative is a separate ticket to fix the lookup level for the whole route — but then
+  the auto-reply settings UI is a no-op until that lands.
+- **Auto-reply outcome is log-only.** A silently failing auto-reply is visible in Sentry
+  (`op: 'sendVisitorAutoReply'`) and server logs, but nowhere in the product. Accepted per
+  Decision 4 (no schema change).
+- **Second outbound send per submission** on the hot path: submits now await two Resend calls
+  sequentially after the row write. Both are guarded and never block the 200, but p95 latency
+  of `/api/forms/submit` grows. Not parallelized (kept simple + ordered: owner first).
+- **Retro-behavior (Decision 2):** editing a draft form's auto-reply text changes live
+  behavior for already-published pages immediately.
+- **Business name double duty:** it lands both in the From display name and in the
+  `{business}` body token, so a headline-ish page title reads oddly in the visitor's email.
+- **Sender reputation:** the auto-reply is mail to a stranger from our shared domain. If
+  `LEAD_NOTIFICATION_FROM` is not the verified `…@mail.lessgo.site`, these will land in spam
+  (or bounce) at a higher rate than the owner notification did.
