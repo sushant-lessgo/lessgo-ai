@@ -74,6 +74,43 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
     },
   },
   {
+    // Multi-slide state (Wave 2) — ≥2 `slides` trips the slider fork: the core emits
+    // `.wk-hero__slide` set + arrows/`[data-wk-dots]`/`[data-wk-interval]` (the exact
+    // hooks work.v1.js queries), and a SECOND CTA (cta2). Two slides carry the SAME
+    // image url so the editor autoplay's is-active swap is visually inert → the
+    // edit↔published parity screenshot stays deterministic while still exercising the
+    // multi-slide DOM. (The single-image byte-identical state = the atelier-hero
+    // fixture above.)
+    sectionType: 'hero',
+    layout: 'WorkHeroSlider',
+    sectionId: 'atelier-hero-slides',
+    content: {
+      role_line: 'Professional Photographer',
+      name: 'Kristina <em>Kundius</em>',
+      quote: 'A body of work that does the persuading for you — browse it, then let’s make yours.',
+      portrait_image: '',
+      cta_label: 'Start Your Project',
+      cta_href: '#contact',
+      cta2_label: 'View portfolio',
+      cta2_href: '#work',
+      slides: [
+        { id: 'hs1', image: 'https://cdn.example.com/hero-slide.jpg' },
+        { id: 'hs2', image: 'https://cdn.example.com/hero-slide.jpg' },
+      ],
+      socials: [
+        { id: 'hss1', network: 'instagram', label: 'Instagram', href: '#' },
+      ],
+    },
+    editBasics: {
+      text: ['role_line', 'name', 'quote'],
+      button: ['cta_label', 'cta2_label'],
+      collections: [
+        { key: 'slides', countPrefix: 'slides.', itemPrefixes: ['slides.'], items: 2 },
+        { key: 'socials', countPrefix: 'socials.', itemPrefixes: ['socials.'], items: 1 },
+      ],
+    },
+  },
+  {
     sectionType: 'work',
     layout: 'WorkGalleryGrid',
     sectionId: 'atelier-work',

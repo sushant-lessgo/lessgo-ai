@@ -128,6 +128,43 @@ function stampTree(
  * No entries ⇒ no-op. Non-flipped templates (no /works pages) get covers stamped
  * but hrefs left alone — a visual no-op on old atelier (no `groups` consumers).
  */
+/**
+ * FIRST-GEN-ONLY hero-slides auto-derive (Wave 2 hero lane). Build one hero slide
+ * per works-group cover (the SAME `deriveWorksEntries` → `pickCover` pipeline the
+ * gallery covers use, so a dashboard-hidden photo never becomes a slide) and stamp
+ * them onto every `hero-…` section that has no slides yet. PURE (mutates fc in
+ * place, returns nothing). Zero authoring for photographers; the user overrides a
+ * slide via the editor picker.
+ *
+ * NEVER overwrites user-edited slides: a hero that ALREADY carries a non-empty
+ * `slides` array is skipped (so a per-slide picker edit + a resume re-run are both
+ * safe / idempotent). No entries with covers ⇒ no-op (single-portrait hero stays
+ * byte-identical). Slide id is derived from the group's STABLE slug so it is
+ * deterministic across a re-stamp.
+ */
+export function stampHeroSlides(fc: any, entries: readonly CollectionEntry[]): void {
+  if (!fc || !entries || entries.length === 0) return;
+  const slides = entries
+    .map((e) => ({ id: `slide-${e.slug}`, image: pickCover(e.photos) }))
+    .filter((s) => !!s.image); // one slide per group that actually has a cover
+  if (slides.length === 0) return;
+
+  const stampTree = (content: Record<string, any> | undefined): void => {
+    if (!content || typeof content !== 'object') return;
+    for (const sec of Object.values(content)) {
+      const id = (sec as any)?.id;
+      if (typeof id !== 'string' || !id.startsWith('hero-')) continue;
+      const el = (sec as any).elements;
+      if (!el || typeof el !== 'object') continue;
+      if (Array.isArray(el.slides) && el.slides.length > 0) continue; // never clobber user slides
+      el.slides = slides.map((s) => ({ ...s }));
+    }
+  };
+  stampTree(fc.content);
+  const pages = fc.pages && typeof fc.pages === 'object' ? fc.pages : {};
+  for (const page of Object.values(pages)) stampTree((page as any)?.content);
+}
+
 export function stampWorkGalleryBinding(fc: any, entries: readonly CollectionEntry[]): void {
   if (!fc || !entries || entries.length === 0) return;
   const bySlug = new Map<string, CollectionEntry>();

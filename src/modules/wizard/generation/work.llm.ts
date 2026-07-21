@@ -36,7 +36,7 @@ import {
   type MultiPageOnboardingData,
   type CollectionFanOutResult,
 } from '@/modules/generation/multiPageAssembly';
-import { deriveWorksEntries, stampWorkGalleryBinding } from '@/modules/generation/workCollections';
+import { deriveWorksEntries, stampWorkGalleryBinding, stampHeroSlides } from '@/modules/generation/workCollections';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
 import { templateMeta } from '@/modules/templates/templateMeta';
 import type { CollectionEntry } from '@/modules/brief/collections';
@@ -367,6 +367,13 @@ export async function runWorkLLMGeneration(
     // when empty. Runs unconditionally (unlike runWorksFanOut's photo-gated early
     // return) so a name-only default is never skipped. Idempotent on resume.
     stampAboutSignature(fc, getWorkFacts(input.brief?.facts)?.identity?.name);
+
+    // ─── Hero slides auto-derive (Wave 2) — first-gen only; SAME call-site family.
+    // One hero slide per works-group cover (reuses deriveWorksEntries → pickCover,
+    // so hidden photos never become slides). No covers ⇒ no-op (single-portrait
+    // hero stays byte-identical). Never overwrites user-edited slides (guarded in
+    // stampHeroSlides), so a resume re-run is idempotent.
+    stampHeroSlides(fc, deriveWorksEntries(getWorkFacts(input.brief?.facts)));
 
     cb.onStage?.('saving');
     try {

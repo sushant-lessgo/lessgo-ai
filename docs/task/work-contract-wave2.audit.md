@@ -324,3 +324,86 @@ Store test on the `createAIActions(set, get)` harness (cloned from `aiActions.cr
 - Edit-mode empty portrait shows a picker affordance box in the EDITOR (editor-only; published collapses via `:empty`) — same accepted behavior as Phase-2 packages image. The live Kundius PUBLISHED page stays byte-identical; the editor gains an "add portrait" affordance. No migration.
 - Badge is `manual_preferred` → AI drafts it fresh; if the model echoes the eyebrow despite the binding rule it is an editable copy nit, not a structural regression.
 - Pre-existing `atelier2` parity timeouts remain (orthogonal; flag at merge gate).
+
+---
+
+## Phase 4 — Hero: `slides[]` collection + 2nd CTA
+
+### Files changed
+
+- `src/modules/engines/workSections.ts` — hero contract: explicit `slides` collection + `cta2_label`/`cta2_href` scalars on the `fromDonor`-built hero schema.
+- `src/modules/generation/workCollections.ts` — NEW pure `stampHeroSlides(fc, entries)` (reuses `pickCover` + `deriveWorksEntries` output).
+- `src/modules/generation/workCollections.test.ts` — NEW `stampHeroSlides` describe block (6 tests).
+- `src/modules/wizard/generation/work.llm.ts` — first-gen `stampHeroSlides` call in `runFanOut` (import + one call beside `stampAboutSignature`).
+- `src/modules/audience/work/copyPrompt.ts` — `cta2_label` char cap (28).
+- `src/modules/skeletons/work/blocks/Hero/WorkHeroSlider.core.tsx` — the two-branch slider fork + 2nd CTA; content type gains `slides`/`cta2_label`/`cta2_href`.
+- `src/modules/skeletons/work/blocks/Hero/styles.ts` — slider (slides/arrows/dots) + ghost-CTA CSS.
+- `src/modules/templates/blockMocks/atelier.ts` — NEW multi-slide hero fixture (`atelier-hero-slides`); the primary `atelier-hero` fixture kept single-image.
+- `e2e/workWave2.spec.ts` — hero-slider assertions (multi-slide hooks + single-image bail).
+
+`multiPageAssembly.ts` (listed "only if the stamp must run post-fan-out") was NOT needed — the stamp runs in `work.llm.ts` `runFanOut` (facts in scope), same call-site family as Phase 3's `stampAboutSignature`.
+
+### Contract shape (donor-add mechanism)
+
+`hero` is `fromDonor(writerElementSchema.GranthArchedHero, 'hero')`; `fromDonor` copies only the donor's own keys, so Wave-2 hero fields are assigned onto the returned schema EXPLICITLY:
+
+```
+cta2_label:  str('optional')                                                  // manual_preferred — AI-drafted, char cap 28
+cta2_href:   { type:'string', requirement:'optional', fillMode:'system', default:'' }  // manual lane — never AI-emitted
+collections.slides: {
+  requirement:'optional', fillMode:'manual_preferred', constraints:{min:0,max:6},
+  fields: { id:{type:'string',fillMode:'system'}, image:{type:'string',fillMode:'system',default:''} }  // both manual/system
+}
+```
+
+All optional (validation-storm safe). `slides.image`/`slides.id`/`cta2_href` = `fillMode:'system'` → excluded from the AI spec by the existing `isSystemField` skip and auto-dropped by the Phase-2 `stripSystemKeys` parse guard (no `parseCopy.ts` edit needed — verified: system fields covered generically). `cta2_label` = `manual_preferred` → AI-drafted + regenerable normally.
+
+### `stampHeroSlides` — derive + where called + never-overwrite guard
+
+New pure exported helper in `workCollections.ts`: builds `{id:'slide-<slug>', image:<cover>}` per entry, reusing `pickCover(entry.photos)` and dropping entries whose cover is empty (a hidden cover already fell back / a hidden-only group has no cover → no slide, since `deriveWorksEntries` is the single hide-not-destroy choke point). Walks `fc.content` (flat home) + every `fc.pages[*].content`, matches sections by `id.startsWith('hero-')`, and writes `el.slides` ONLY when the hero has no non-empty `slides` array — the never-clobber-user-slides guard (so a per-slide picker edit + a resume re-run are both idempotent). No entries / no covers ⇒ no-op (single-portrait hero byte-identical).
+
+Call site: `runFanOut` (`work.llm.ts`), immediately after `stampAboutSignature`, as `stampHeroSlides(fc, deriveWorksEntries(getWorkFacts(input.brief?.facts)))`. First-gen ONLY (unreachable by scoped/story regen → no clobber by construction), runs unconditionally on fresh gen (not inside `runWorksFanOut`, which early-returns when there are no derivable works entries).
+
+### Hero hooks added (EXACT — match workBehaviors.js verbatim)
+
+The core previously emitted only root `data-wk-hero-slider` + one `wk-hero__media`/`wk-hero__media-in`. Added, spelled exactly as `workBehaviors.js` L42-72 (and the editor `WorkHeroSlider.tsx` effect, which was ALREADY wired for them) query them:
+
+- `[data-wk-interval]` on the `[data-wk-hero-slider]` section root (value `"5000"`) — multi-slide branch only.
+- `.wk-hero__slide` per slide (first slide carries `is-active` in static markup → shows with no JS).
+- `[data-wk-prev]` / `[data-wk-next]` on the two arrow `<button>`s.
+- `[data-wk-dots]` on the EMPTY dots container (JS injects `.wk-hero__dot`).
+
+No existing hero selector renamed; no `workBehaviors.js` edit; `work.v1.js` UNCHANGED (git-verified: `git status public/assets/` clean after `npm run build`; still exactly `work.v1.js`, no new filename). The dot/`is-active` class names also match the styles I added (`.wk-hero__dot`, `.wk-hero__slide.is-active`).
+
+### Fork logic + byte-identical single-image fallback
+
+`isSlider = slides.length >= 2`. `slides>=2` → `.wk-hero__slides` wrapper with per-slide `.wk-hero__slide` (E.Img per slide, picker-wired via `slides.<id>.image`) + arrows + empty dots + `data-wk-interval` on the root. `else` (0/1 slide, incl. Kundius) → EXACTLY today's `wk-hero__media` / `wk-hero__media-in` single-media DOM from `portrait_image`, with NO `data-wk-interval` on the root → the JS bails (<2 slides). Kundius (empty `slides`) renders the single-media branch byte-identical (kundiusPages / oldContentFallback green untouched). Slides rendered via a manual `.map` (not `E.List`) so the first slide can carry `is-active` in static markup — required for the no-JS/degradation state and for edit↔published parity on the parity stage (E.List applies its `itemClassName` uniformly and cannot mark only the first item). Per-slide picker override still works (each slide is an `E.Img` on the collection-item path); add/remove-slide chrome is not exposed (slides are auto-derived; deviation below).
+
+### 2nd-CTA href-gating refinement (orchestrator-approved)
+
+The plan said "renders only when label set". Refined to render the 2nd CTA ONLY when `cta2_href` is present: `cta2_label` is AI-drafted but `cta2_href` is manual, so gating on label alone would ship a dead hrefless button on fresh generation. When `cta2_href` is present but `cta2_label` is empty, the label falls back to a sensible default ("Learn more") via the primitive placeholder (published `Txt` renders `value || placeholder`). Ghost/outline style variant (`.wk-hero__cta--ghost`).
+
+### Fixture strategy (why two fixtures)
+
+The primary `atelier-hero` fixture stays SINGLE-IMAGE (Kundius byte-identical + the e2e single-image bail case). A NEW `atelier-hero-slides` fixture (layout `WorkHeroSlider`, 2 slides + cta2) exercises the multi-slide fork. The two slides use the SAME image url so the editor `WorkHeroSlider.tsx` effect's autoplay (is-active swap across slides) is visually inert on the parity stage → deterministic edit↔published screenshot, while still exercising the 2-slide DOM. The ONLY residual edit-vs-published divergence on that band is the JS-injected dots (editor injects `.wk-hero__dot`; the dev-stage published band has no JS) — measured at 0.375% (see parity band below). `NON_VISIBLE_KEY` unchanged (slide `image`/`id` match `image`/`^id$`; `cta2_href` matches `href`).
+
+### Full gate
+
+- `npx tsc --noEmit` — CLEAN (after fixing one self-inflicted error: backticks inside a CSS comment in the `WORK_HERO_STYLES` template literal terminated the string — the same trap the Phase-2b audit records; removed the backticks).
+- `npm run test:run` — **289 passed | 1 skipped; 4664 passed | 15 skipped** (+10 vs Phase 3). Green: `renderParity.work`, `coreParity` (count stays 19 — a collection/fixture is not a new core), `skinPurity`, `conformance`, `kundiusPages`, `oldContentFallback`, `workContract`, `work.llm`, new `stampHeroSlides` (6/6).
+- `npm run lint` — clean on all touched files.
+- `npm run build` — SUCCEEDED; `work.v1.js` unchanged, no new asset filename (`git status public/assets/` clean).
+- `npx playwright test e2e/workWave2.spec.ts` — **2 passed** (packages quad + hero slider: 2 slide nodes, first `is-active`, arrows/dots/interval hooks, empty dots container, 2nd CTA visible; single-image band = exactly 1 `wk-hero__media`, 0 `.wk-hero__slide`, no interval hook).
+- `npx playwright test e2e/parity.spec.ts` — atelier ALL bands < 3%: **atelier/hero [#1] (single-image) = 0.014%**, **atelier/hero [#2] (NEW multi-slide) = 0.375%**, arrangement heroes [#11/#12/#13] = 0.064/0.133/0.149%. meridian/hearth green. The 2 `atelier2` failures are the PRE-EXISTING stale-registry timeouts (atelier2 not in the registry → 404 → `waitForSelector` timeout), documented in the Phase 2b/3 audit + progress log; `parity.spec.ts` + `registry.ts` are outside this phase's Files-touched.
+
+### Deviations from the plan
+
+1. **Slides rendered via a manual `.map`, not `E.List`.** The plan named "`E.List` + per-item `E.Img`". `E.List` applies its `itemClassName` uniformly and cannot put `is-active` on only the FIRST slide — which is required both for the no-JS degradation state and for edit↔published parity (the dev-stage published band has no JS to add `is-active`; without it in the markup the published band would show a blank hero vs the editor's active first slide → parity break). Manual `.map` keeps per-slide `E.Img` picker override; the add/remove-slide list chrome is not exposed (slides are auto-derived, and the load-bearing need is per-slide image override).
+2. **2nd CTA gates on `cta2_href`, not `cta2_label`** — the orchestrator-approved refinement recorded above.
+3. **Two hero fixtures (single-image primary kept + new multi-slide added), multi-slide uses identical slide images** — to keep the primary/Kundius band byte-identical AND the multi-slide parity screenshot deterministic under the editor autoplay effect. Recorded above.
+
+### Open risks
+
+- The multi-slide parity band carries a tiny (0.375%) edit-vs-published delta from the editor effect's runtime dot injection into an empty `[data-wk-dots]` (the published dev-stage band has no JS). It is the documented, expected shape (mirrors the atelier2 single-slide note) and sits far under the 3% threshold; on a REAL published page `work.v1.js` injects the same dots, so live edit==published holds.
+- No add/remove-slide affordance in the editor yet (Deviation 1); per-slide image override works. If designers need manual slide add/remove, a follow-on can extend the core to `E.List` with a per-first-item `is-active` mechanism.
+- Pre-existing `atelier2` parity timeouts remain (orthogonal; flag at merge gate).

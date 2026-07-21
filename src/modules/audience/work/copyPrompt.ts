@@ -76,6 +76,7 @@ const WORK_CHAR_CAPS: Record<string, number> = {
   note: 160,
   copyright: 80,
   cta_label: 28,
+  cta2_label: 28, // optional second hero CTA — same restraint as the primary CTA
   description: 140,
   price_line: 40,
   category: 24, // per-tier category label — 1-3 words (e.g. "Portrait", "Wedding")

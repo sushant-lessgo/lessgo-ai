@@ -61,3 +61,41 @@ test.describe('work-wave2 packages quad', () => {
     }
   });
 });
+
+test.describe('work-wave2 hero slider', () => {
+  test('multi-slide hero emits the exact work.v1.js hooks; single-image hero stays single-media', async ({ page }) => {
+    await page.goto(STAGE, { waitUntil: 'load' });
+    await page.waitForSelector('[data-parity-band="published"][data-parity-section="hero"]');
+
+    // ── Multi-slide (≥2 slides) — the PUBLISHED band the slider JS would activate.
+    // Hooks spelled EXACTLY as workBehaviors.js queries them: .wk-hero__slide,
+    // [data-wk-prev]/[data-wk-next], [data-wk-dots], [data-wk-interval] on the root.
+    const slider = page
+      .locator('[data-parity-band="published"][data-parity-section="hero"]', {
+        has: page.locator('.wk-hero__slide'),
+      })
+      .first();
+    await expect(slider.locator('.wk-hero__slide'), '2 slide nodes').toHaveCount(2);
+    await expect(slider.locator('.wk-hero__slide.is-active'), 'first slide active for no-JS').toHaveCount(1);
+    await expect(slider.locator('[data-wk-prev]'), 'prev arrow hook').toHaveCount(1);
+    await expect(slider.locator('[data-wk-next]'), 'next arrow hook').toHaveCount(1);
+    await expect(slider.locator('[data-wk-dots]'), 'dots container hook').toHaveCount(1);
+    // Dots container ships EMPTY — the JS injects .wk-hero__dot at runtime.
+    await expect(slider.locator('[data-wk-dots] .wk-hero__dot'), 'dots empty in static HTML').toHaveCount(0);
+    // The interval hook lives on the slider ROOT — autoplay dies without it.
+    await expect(slider.locator('[data-wk-hero-slider][data-wk-interval]'), 'interval hook on root').toHaveCount(1);
+    // Second CTA rides the same fixture (cta2_href present → button renders).
+    await expect(slider.getByText('View portfolio'), 'second CTA').toBeVisible();
+
+    // ── Single-image WorkHeroSlider — EXACTLY today's single-media DOM, no slide
+    // wrapper → the JS bails (<2 slides) → static render unchanged (Kundius-shape).
+    const single = page
+      .locator('[data-parity-band="published"][data-parity-section="hero"]', {
+        has: page.locator('.wk-hero__media'),
+      })
+      .first();
+    await expect(single.locator('.wk-hero__media'), 'exactly one single-media node').toHaveCount(1);
+    await expect(single.locator('.wk-hero__slide'), 'no slide wrapper on single-image hero').toHaveCount(0);
+    await expect(single.locator('[data-wk-hero-slider][data-wk-interval]'), 'no interval hook when single-image (JS bails)').toHaveCount(0);
+  });
+});

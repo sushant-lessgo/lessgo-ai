@@ -166,8 +166,36 @@ const headerContract: UIBlockSchemaV2 = {
   },
 };
 
-// opening. Donor: GranthArchedHero.
+// opening. Donor: GranthArchedHero. `fromDonor` copies only the donor's OWN keys
+// (role_line · name · quote · portrait_image · cta_label · cta_href + socials[]),
+// so Wave-2 hero fields must be added to the returned schema EXPLICITLY.
+//   • slides — MANUAL media lane: an optional multi-image cover slider. Per-item
+//     `id`/`image` are `fillMode:'system'` (never AI-emitted; auto-stripped at
+//     parse; set via the editor picker OR auto-derived from works-group covers by
+//     stampHeroSlides at first-gen). Empty / <2 slides → today's single-media hero
+//     exactly (graceful-empty; Kundius byte-identical).
+//   • cta2_label — optional SECOND CTA label. AI-drafted + editable
+//     (`manual_preferred`, char-capped in copyPrompt).
+//   • cta2_href — the second CTA destination. MANUAL lane (`fillMode:'system'`):
+//     never AI-emitted; the button renders only once this href is set (a button
+//     needs a destination).
 const heroContract = fromDonor(writerElementSchema.GranthArchedHero, 'hero');
+heroContract.elements.cta2_label = str('optional');
+heroContract.elements.cta2_href = {
+  type: 'string', requirement: 'optional', fillMode: 'system', default: '',
+};
+heroContract.collections = {
+  ...(heroContract.collections ?? {}),
+  slides: {
+    requirement: 'optional',
+    fillMode: FILL,
+    constraints: { min: 0, max: 6 },
+    fields: {
+      id: { type: 'string', fillMode: 'system' },
+      image: { type: 'string', fillMode: 'system', default: '' },
+    },
+  },
+};
 
 // work gallery — a group REFERENCE onto the `works` collection (no forked item
 // shape; items live in COLLECTIONS.works). `groups` are the promoted top-level
