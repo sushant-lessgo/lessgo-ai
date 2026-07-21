@@ -57,10 +57,17 @@ export const DraftSaveSchema = z.object({
   // through this schema untouched and merges via the existing `...finalContent`
   // shallow spread in the route (an explicit `{}` there CLEARS the stored map).
   // Declaring it top-level would be wrong. See the saveDraft route merge sites.
+  //
+  // `switcherStyle` (language-settings phase 1) is OPTIONAL inside the object:
+  // absent ⇒ 'dropdown' ⇒ today's behavior, so a legacy/monolingual save is
+  // byte-identical. It rides inside LocaleConfig (never a top-level key), which
+  // is why no route change is needed — saveDraft already replaces the object
+  // wholesale.
   localeConfig: z
     .object({
       locales: z.array(z.string().max(20)).max(50),
       defaultLocale: z.string().max(20),
+      switcherStyle: z.enum(['dropdown', 'none']).optional(),
     })
     .nullable()
     .optional(),

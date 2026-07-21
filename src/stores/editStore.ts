@@ -33,6 +33,7 @@ import { createCSSVariableActions } from '../hooks/editStore/cssVariableActions'
 import { createRegenerationActions } from '../hooks/editStore/regenerationActions';
 import { createPageActions } from '../hooks/editStore/pageActions';
 import { createCmsActions } from '../hooks/editStore/cmsActions';
+import { createI18nActions } from '../hooks/editStore/i18nActions';
 
 // Import storage utilities
 import { getStorageKey, trackProjectAccess, isStorageAvailable } from '@/utils/storage';
@@ -429,6 +430,7 @@ export function createEditStore(tokenId: string) {
             ...createRegenerationActions(set, get),
             ...createPageActions(set, get),
             ...createCmsActions(set, get),
+            ...createI18nActions(set, get),
 
             // Token-specific actions
             loadFromOnboarding: () => {

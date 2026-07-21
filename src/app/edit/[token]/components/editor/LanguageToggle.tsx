@@ -11,27 +11,13 @@
 import React from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 import { isMultiLocale } from '@/lib/i18n/localeContent';
+import { LOCALE_DISPLAY_NAMES, localeLabel } from '@/lib/i18n/localeNames';
 
-// Minimal display-name map for the supported locales (LanguageToggle +
-// LocaleSettings share it). Falls back to the raw code for anything unmapped.
-export const LOCALE_DISPLAY_NAMES: Record<string, string> = {
-  en: 'English',
-  ja: '日本語',
-  es: 'Español',
-  pt: 'Português',
-  fr: 'Français',
-  it: 'Italiano',
-  id: 'Indonesia',
-  nl: 'Nederlands',
-  th: 'ไทย',
-  vi: 'Tiếng Việt',
-  de: 'Deutsch',
-  pl: 'Polski',
-};
-
-export function localeLabel(code: string): string {
-  return LOCALE_DISPLAY_NAMES[code] || code.toUpperCase();
-}
+// language-settings phase 1: the display-name map + localeLabel MOVED to the
+// plain module `@/lib/i18n/localeNames` (server prompt builders need names and
+// may not import this `'use client'` file). Re-exported here so existing
+// importers (LocaleSettings, retired in phase 2) keep compiling.
+export { LOCALE_DISPLAY_NAMES, localeLabel };
 
 // TODO(i18n): unauthored-field affordance (Phase 4 step 4) is deferred. Marking
 // fields that show base fallback (no overlay value yet) in a non-default locale

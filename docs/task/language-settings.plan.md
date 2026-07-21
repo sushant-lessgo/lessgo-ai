@@ -123,7 +123,15 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
 
 ## Progress log
 
-- phase 1 locale contracts + store actions: pending
+- phase 1 locale contracts + store actions: done (commit pending-sha, review loops 1, VERDICT ship)
+  - carries into phase 2: keep the DEFAULT locale non-removable in `LanguagesPanel`
+    (`i18nActions.ts:74-91` clears a non-English site's config if its default is removed —
+    unreachable today only because the picker excludes it; a `if (code === cfg.defaultLocale) return;`
+    guard would make it self-enforcing)
+  - carries into phase 3: `labelToLocaleCode()` accepts LABELS only and returns `null` for bare
+    codes (`'nl'` → null) — respect this when mapping the work engine's `facts.languages[0]`
+  - note: store-action signatures went on `MetaActions` (not `ContentActions`) — plan pointer was
+    impossible; precedent `actions.ts:442-448`. No type-checked caller until phase 2.
 - phase 2 Languages panel in Site Settings + retire globe: pending
 - phase 3 onboarding site-language capture: pending
 - phase 4 generation output-language directive: pending
