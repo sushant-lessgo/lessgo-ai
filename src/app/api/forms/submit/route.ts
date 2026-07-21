@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ConvertKitIntegration, mapFormDataToSubscriber } from '@/lib/integrations/convertkit';
 import { sendLeadNotification } from '@/lib/email/sendLeadNotification';
+import { resolveOwnerEmail } from '@/lib/email/resolveOwnerEmail';
 import { BLOG_SUBSCRIBE_FORM_ID } from '@/lib/blog/buildBlogPages';
 import { FormSubmissionSchema, sanitizeForLogging } from '@/lib/validation';
 import { isServingPublishState } from '@/lib/publishState';
@@ -81,7 +82,8 @@ async function formSubmitHandler(request: NextRequest) {
 
     const page = await prisma.publishedPage.findUnique({
       where: { id: publishedPageId },
-      select: { userId: true, projectId: true, publishState: true },
+      // `title` feeds the lead-email From display name (business name).
+      select: { userId: true, projectId: true, publishState: true, title: true },
     });
 
     // Unknown page, or a page that must not serve (`draft` / `unpublishing` — see
@@ -161,14 +163,17 @@ async function formSubmitHandler(request: NextRequest) {
       // → the submission is still stored with formName 'Unknown Form', and no
       // integrations fire.
       let formConfig: any = null;
+      let projectTitle: string | null = null;
       if (page.projectId) {
         const project = await prisma.project.findUnique({
           where: { id: page.projectId },
-          // Only `content` is read below. The other JSON columns
+          // Only `content` + `title` are read below. The other JSON columns
           // (themeValues/computedDesign/brief/aiBaseline) are pure wire cost on
-          // every submission.
-          select: { content: true },
+          // every submission. `title` is the business-name fallback for the
+          // lead-email From display name.
+          select: { content: true, title: true },
         });
+        projectTitle = project?.title ?? null;
         const content = project?.content;
         if (content && typeof content === 'object') {
           const forms = (content as any).forms;
@@ -277,18 +282,41 @@ async function formSubmitHandler(request: NextRequest) {
         }
       }
 
-      // Email notification to the configured inbox (env-gated; no-op + never
-      // throws when unset). Double-guarded so a send failure can't 500 a saved lead.
-      // Await-then-flag: record the notify outcome on the row so a silently-failing
-      // inbox is visible in the dashboard (F30). The send never affects form success.
+      // Email notification to the PAGE OWNER (env-gated on RESEND_API_KEY; no-op +
+      // never throws when unset). Double-guarded so a send failure can't 500 a saved
+      // lead. Await-then-flag: record the notify outcome on the row so a
+      // silently-failing inbox is visible in the dashboard (F30). The send never
+      // affects form success.
       try {
-        const outcome = await sendLeadNotification({
-          formName,
-          data: data as Record<string, string>,
-          fields: formConfig?.fields,
-          replyTo: (data as any)?.email,
-          pageId: publishedPageId,
-        });
+        // Business name for the From display name: page title → project title →
+        // generic. Prisma's `"Untitled Project"` default is a non-name — fall through.
+        const pageTitle = (page.title || '').trim();
+        const projTitle = (projectTitle || '').trim();
+        const businessName =
+          pageTitle ||
+          (projTitle && projTitle !== 'Untitled Project' ? projTitle : '') ||
+          'Your website';
+
+        // Owner's Clerk email is the recipient. A lookup failure is an outcome,
+        // never an exception — the lead row is already saved either way.
+        const ownerEmail = await resolveOwnerEmail(ownerUserId);
+        const outcome = 'error' in ownerEmail
+          ? { status: 'failed' as const, error: ownerEmail.error }
+          : await sendLeadNotification({
+              formName,
+              data: data as Record<string, string>,
+              fields: formConfig?.fields,
+              replyTo: (data as any)?.email,
+              pageId: publishedPageId,
+              to: ownerEmail.email,
+              businessName,
+            });
+        if ('error' in ownerEmail) {
+          console.warn('[forms/submit] owner email unresolved; notification skipped:', {
+            userId: ownerUserId.substring(0, 8) + '...',
+            reason: ownerEmail.error,
+          });
+        }
         if (outcome.status === 'sent') {
           await prisma.formSubmission.update({
             where: { id: submission.id },
