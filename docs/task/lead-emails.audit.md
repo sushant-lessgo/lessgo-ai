@@ -399,3 +399,151 @@ happened.
 - **Sender reputation:** the auto-reply is mail to a stranger from our shared domain. If
   `LEAD_NOTIFICATION_FROM` is not the verified `…@mail.lessgo.site`, these will land in spam
   (or bounce) at a higher rate than the owner notification did.
+
+---
+
+## Phase 3 — FormBuilder auto-reply settings UI
+
+Branch: `feature/lead-emails` (verified via `git branch --show-current` before any edit).
+
+### Files changed
+
+- `src/components/forms/FormBuilder.tsx` (modified)
+- `src/components/forms/FormBuilder.test.tsx` (modified)
+- `docs/task/lead-emails.audit.md` (this section appended)
+
+Nothing else was touched. (`docs/task/lead-emails.plan.md` shows modified in `git status` —
+that is the orchestrator's progress-log edit, not mine.) No edits to
+`src/types/store/formActions.ts`, `src/stores/*`, `src/hooks/editStore*`; no rename of the
+`addForm`/`createForm` pair.
+
+### What changed, per file
+
+**`src/components/forms/FormBuilder.tsx`**
+
+1. Imports: added the `MVPFormAutoReply` type and `DEFAULT_AUTO_REPLY_SUBJECT` /
+   `DEFAULT_AUTO_REPLY_BODY` from `@/lib/email/autoReplyTemplate`, with a comment pinning WHY
+   that import is legal (pure zero-import module) and naming the three modules that must never
+   be imported here (`sendVisitorAutoReply` / `sendEmail` / `resolveOwnerEmail`).
+2. Edit-load effect: `autoReply: existingForm.autoReply ? {...existingForm.autoReply} : undefined`
+   (shallow clone, same idiom as `fields`/`integrations`); the new-form/reset branch sets
+   `autoReply: undefined` so a stale draft cannot leak across opens.
+3. New `handleUpdateAutoReply(updates: Partial<MVPFormAutoReply>)` — local-draft only
+   (`setFormData(prev => ...)`), no store write. Base object is
+   `{ enabled: prev.autoReply?.enabled !== false, ...(prev.autoReply ?? {}), ...updates }`, so the
+   FIRST write (e.g. the owner just types a subject) records `enabled: true` rather than
+   accidentally minting a config with a falsy `enabled`.
+4. Derived `autoReplyEnabled = formData.autoReply?.enabled !== false` — mirrors the server's
+   `form?.autoReply?.enabled !== false` exactly.
+5. New "Auto-reply email" section rendered immediately after the Success Message block (plan
+   precedent `:311-320`), using the modal's existing primitives only: a bordered
+   `border rounded-lg p-4 bg-gray-50` card (same idiom as the field/integration rows), the plain
+   `<input type="checkbox" className="rounded" />` + `Label` pattern used by "Required field" and
+   the integration enable toggles, `Input` for Subject, `Textarea rows={3}` for Message. No new
+   visual pattern, no new dependency, no Radix Switch introduced.
+   - Placeholders are the shipped defaults, so the UI can never promise wording the send path
+     does not use.
+   - Helper text documents that `{name}` and `{business}` are the only tokens, and that leaving
+     both boxes empty uses the default wording.
+   - When the toggle is off, Subject/Body are `disabled` AND greyed
+     (`bg-gray-100 text-gray-400`, labels `text-gray-400`) and a reason line
+     (`data-testid="auto-reply-disabled-reason"`) states that visitors get no confirmation email —
+     greyed-with-a-why, never silently hidden.
+   - Test ids added: `auto-reply-section`, `auto-reply-enabled`, `auto-reply-subject`,
+     `auto-reply-body`, `auto-reply-disabled-reason`.
+   - Persistence rides the untouched `handleSave` → `updateForm(editingFormId, formData)` path.
+
+**`src/components/forms/FormBuilder.test.tsx`** — additive only; the 11 existing tests are
+unmodified and still pass. Added three helpers (`typeInto` — native value setter + `input` event,
+the repo's no-testing-library convention; `q(testid)`; `clickSave()`) and a new describe block
+`FormBuilder — visitor auto-reply settings` (6 tests) against the REAL store:
+
+1. defaults — section renders, toggle checked with an ABSENT config, both inputs empty and
+   enabled, placeholders `toBe` the imported constants, section text contains `{name}` and
+   `{business}`.
+2. saved config re-opens with the owner's subject/body/toggle state.
+3. toggle off ⇒ both inputs `disabled`, both carry `text-gray-400`, reason line present, store
+   still `undefined` BEFORE Save (local-draft model), and after Save the store holds
+   `{enabled: false}`.
+4. edited subject + body ⇒ asserts the EXACT payload handed to `updateForm` (captured by
+   replacing the action with a wrapper that still calls the real one) **and** the committed store
+   state; also asserts nothing was written pre-Save.
+5. untouched section ⇒ `autoReply` stays ABSENT after Save (absent = ON by default; this pins
+   that we never mint a stray/false config).
+6. re-enabling a disabled config clears `enabled:false` and keeps the existing text.
+
+### Decisions / assumptions (in-scope judgment calls)
+
+1. **Absent means absent.** Saving without touching the section leaves `autoReply` undefined
+   rather than writing `{enabled:true}`. Conservative: matches the server default and avoids
+   rewriting every existing form's JSON on an unrelated save. Pinned by test 5.
+2. **`enabled` is stored as a real boolean on first touch** (typing only a subject yields
+   `{enabled:true, subject}`) — required because `MVPFormAutoReply.enabled` is non-optional.
+3. **Plain checkbox, not a Switch.** `components/ui` has no Switch in use in this modal; the two
+   existing toggles here are plain checkboxes. Matching them satisfies "use the modal's existing
+   primitives / don't invent a visual pattern".
+4. **Section placement is literally "after Success Message"** per the plan, which puts it above
+   the "Start from a template" picker. Consequence: `handleLoadTemplate` (unchanged) resets the
+   whole draft, so it also clears an untouched-form auto-reply draft. Left as-is — it already
+   resets name/fields/successMessage, so this is consistent, and the picker only appears for a
+   NEW form. Flagged here rather than silently "fixed", since it touches existing behaviour.
+5. **No validation added** on subject/body (e.g. unknown-token warnings). `renderAutoReply`
+   leaves unknown tokens literal by design; adding lint-y validation was not in scope.
+
+### Verification (verbatim)
+
+```
+npx tsc --noEmit
+EXIT=0
+```
+
+```
+npm run lint
+EXIT=0
+```
+(only pre-existing `@next/next/no-img-element` + one `react-hooks/exhaustive-deps` warning
+across template/provider files; grepping the full lint output for `FormBuilder` and for `Error:`
+returns NOTHING. No bare `useEditStore()` introduced — the file still uses
+`useEditStore((s) => s.forms)` + `useEditStoreApi()` exactly as before.)
+
+```
+npm run test:run -- src/components/forms src/lib/email src/app/api/forms
+
+ Test Files  7 passed (7)
+      Tests  103 passed (103)
+```
+(7 files: `FormBuilder.test.tsx` — now 17 tests, up from 11 — plus the 6 phase-1/2 email +
+route files, all still green.)
+
+**Mutation check (anti-inert-test verification).** Two mutations were applied and reverted:
+
+- `handleSave` → `updateForm(id, {...formData, autoReply: undefined})` (the exact "field never
+  reaches `updateForm`" bug the brief warns about): **3 tests failed** (toggle-off save,
+  subject/body round-trip, re-enable).
+- `autoReplyEnabled` → `formData.autoReply?.enabled === true` (server default inverted):
+  **2 tests failed** (defaults, re-enable).
+
+Suite re-run green after reverting both.
+
+### For the whole-diff reviewer to scrutinize
+
+- **Client-boundary import.** `FormBuilder.tsx` (`'use client'`) now imports
+  `@/lib/email/autoReplyTemplate`. That module is deliberately zero-import; if anyone later adds
+  a Sentry/logger/prisma import to it, server code enters the client bundle. There is no
+  automated guard on that property — only the comments in both files.
+- **`handleUpdateAutoReply` spread order** — `{enabled: default, ...prev.autoReply, ...updates}`.
+  Correct today because `prev.autoReply` never carries `enabled: undefined`, but a future writer
+  that sets `enabled: undefined` explicitly would defeat the default.
+- **Decision 2 (settled) still applies:** these edits change LIVE auto-reply behaviour for
+  already-published pages as soon as the draft is autosaved — no publish required, and no UI here
+  says so.
+- **Phase-2 Deviation 2 dependency:** this UI writes into
+  `Project.content.finalContent.forms[id].autoReply`; the send path only sees it because phase 2
+  added the nested-location lookup. If that dual-location read is reverted at review, this
+  settings UI becomes a silent no-op.
+- **Test-only store mutation:** the round-trip test swaps `updateForm` on the real store via
+  `store.setState({updateForm: wrapper})` to capture arguments. It calls through to the real
+  action, and the same test also asserts the resulting store state, so it is not a
+  mock-only assertion — but it is the one place the tests reach into store internals.
+- Founder gate still owed (plan): preview end-to-end — custom text arrives in a real inbox,
+  toggle-off actually stops the auto-reply, owner notification unaffected.

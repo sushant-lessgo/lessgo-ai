@@ -11,7 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 // (see the field row below). ChevronUp/Down are the real reorder controls.
 import { Plus, X, ChevronUp, ChevronDown, Settings } from 'lucide-react';
 import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
-import type { MVPForm, MVPFormField, MVPFormFieldType, MVPFormIntegration } from '@/types/core/forms';
+import type {
+  MVPForm,
+  MVPFormAutoReply,
+  MVPFormField,
+  MVPFormFieldType,
+  MVPFormIntegration,
+} from '@/types/core/forms';
+// lead-emails phase 3: autoReplyTemplate.ts is a PURE, zero-import module by design —
+// safe to pull into this 'use client' file. Never import sendVisitorAutoReply/sendEmail/
+// resolveOwnerEmail here: those drag Sentry/fetch/Clerk server code into the client bundle.
+import { DEFAULT_AUTO_REPLY_SUBJECT, DEFAULT_AUTO_REPLY_BODY } from '@/lib/email/autoReplyTemplate';
 import {
   getServiceFormTemplate,
   SERVICE_FORM_TEMPLATE_GOALS,
@@ -107,6 +117,9 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
         submitButtonText: existingForm.submitButtonText,
         successMessage: existingForm.successMessage,
         integrations: existingForm.integrations ? [...existingForm.integrations] : [],
+        // Absent autoReply stays ABSENT (server treats absent as ON with the default
+        // template) — we only persist a config once the owner touches this section.
+        autoReply: existingForm.autoReply ? { ...existingForm.autoReply } : undefined,
       });
     } else {
       // Reset for new form
@@ -116,6 +129,7 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
         submitButtonText: 'Submit',
         successMessage: 'Thank you for your submission!',
         integrations: [],
+        autoReply: undefined,
       });
     }
     setErrors({});
@@ -243,6 +257,28 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
     });
   };
 
+  /**
+   * Visitor auto-reply settings — LOCAL-DRAFT ONLY (lead-emails phase 3).
+   *
+   * Same contract as every other field here: edits land in `formData` and are
+   * committed by `handleSave` → `updateForm`. Do NOT write to the store mid-draft
+   * (see the desync note on `handleMoveField` above).
+   *
+   * `enabled` defaults to TRUE because the send path treats an ABSENT config as ON
+   * (`sendVisitorAutoReply`: `form?.autoReply?.enabled !== false`), so the first
+   * write must not silently flip the feature off.
+   */
+  const handleUpdateAutoReply = (updates: Partial<MVPFormAutoReply>) => {
+    setFormData(prev => ({
+      ...prev,
+      autoReply: {
+        enabled: prev.autoReply?.enabled !== false,
+        ...(prev.autoReply ?? {}),
+        ...updates,
+      },
+    }));
+  };
+
   const handleAddIntegration = (type: 'dashboard' | 'convertkit') => {
     const newIntegration: MVPFormIntegration = {
       id: `integration-${Date.now()}`,
@@ -273,6 +309,9 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
       integrations: prev.integrations?.filter((_, index) => index !== integrationIndex) || [],
     }));
   };
+
+  // Mirrors the server default: absent config = auto-reply ON.
+  const autoReplyEnabled = formData.autoReply?.enabled !== false;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -317,6 +356,81 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
               placeholder="Thank you for your submission!"
               rows={2}
             />
+          </div>
+
+          {/* Auto-reply email (lead-emails phase 3) */}
+          <div data-testid="auto-reply-section" className="border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-medium">Auto-reply email</h3>
+                <p className="text-xs text-gray-600 mt-1">
+                  Sent automatically to the visitor's email address after they submit. Replies go
+                  to your inbox.
+                </p>
+              </div>
+              <div className="flex items-center space-x-2 shrink-0">
+                <input
+                  type="checkbox"
+                  id="auto-reply-enabled"
+                  data-testid="auto-reply-enabled"
+                  checked={autoReplyEnabled}
+                  onChange={(e) => handleUpdateAutoReply({ enabled: e.target.checked })}
+                  className="rounded"
+                />
+                <Label htmlFor="auto-reply-enabled">Send auto-reply</Label>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div>
+                <Label
+                  htmlFor="auto-reply-subject"
+                  className={autoReplyEnabled ? undefined : 'text-gray-400'}
+                >
+                  Subject
+                </Label>
+                <Input
+                  id="auto-reply-subject"
+                  data-testid="auto-reply-subject"
+                  value={formData.autoReply?.subject || ''}
+                  onChange={(e) => handleUpdateAutoReply({ subject: e.target.value })}
+                  placeholder={DEFAULT_AUTO_REPLY_SUBJECT}
+                  disabled={!autoReplyEnabled}
+                  className={autoReplyEnabled ? undefined : 'bg-gray-100 text-gray-400'}
+                />
+              </div>
+
+              <div>
+                <Label
+                  htmlFor="auto-reply-body"
+                  className={autoReplyEnabled ? undefined : 'text-gray-400'}
+                >
+                  Message
+                </Label>
+                <Textarea
+                  id="auto-reply-body"
+                  data-testid="auto-reply-body"
+                  value={formData.autoReply?.body || ''}
+                  onChange={(e) => handleUpdateAutoReply({ body: e.target.value })}
+                  placeholder={DEFAULT_AUTO_REPLY_BODY}
+                  rows={3}
+                  disabled={!autoReplyEnabled}
+                  className={autoReplyEnabled ? undefined : 'bg-gray-100 text-gray-400'}
+                />
+                <p className="text-xs text-gray-600 mt-1">
+                  {'Use {name} for the visitor’s name and {business} for your business name. '}
+                  Leave both boxes empty to use the default wording.
+                </p>
+              </div>
+            </div>
+
+            {/* Greyed-and-disabled with a stated reason — never silently hidden. */}
+            {!autoReplyEnabled && (
+              <p data-testid="auto-reply-disabled-reason" className="text-xs text-gray-500 mt-3">
+                Auto-reply is off, so visitors get no confirmation email. Turn it back on to edit
+                the text.
+              </p>
+            )}
           </div>
 
           {/* Start-from-template picker — only for a new form */}
