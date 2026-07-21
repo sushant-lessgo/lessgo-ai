@@ -1,12 +1,12 @@
 import { prisma } from '@/lib/prisma';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
-import { usesTemplateModule, type TemplateId } from '@/types/service';
 import { buildPageMetadata, flattenContent } from '@/lib/staticExport/buildPageMetadata';
-import { buildStructuredData, serializeJsonLd, extractLogoUrl } from '@/lib/staticExport/structuredData';
-import { getPublishedGoal } from '@/lib/staticExport/getPublishedGoal';
 import { isServingPublishState } from '@/lib/publishState';
+import { renderPublishedRoot } from './renderPublishedRoot';
+import { buildLocaleAlternateMap, switcherTagsForSsr } from '@/lib/i18n/publishedLocale';
 
 // ISR configuration - revalidate every hour
 export const revalidate = 3600;
@@ -46,10 +46,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     baseUrl: 'https://lessgo.ai',
   });
 
+  // i18n (phase 6): reciprocal hreflang for every declared locale + x-default,
+  // same map the static export bakes. Single/absent locale config ⇒ {} ⇒ the key
+  // is omitted and this metadata is byte-identical to before.
+  const languages = buildLocaleAlternateMap({
+    config: (page.content as any)?.localeConfig,
+    slug: params.slug,
+    canonicalDomain,
+    barePath: '/',
+  });
+
   return {
     title: meta.title,
     description: meta.description,
-    alternates: { canonical: meta.canonicalURL },
+    alternates: {
+      canonical: meta.canonicalURL,
+      ...(Object.keys(languages).length ? { languages } : {}),
+    },
     ...(meta.noIndex ? { robots: { index: false, follow: false } } : {}),
     ...(meta.faviconUrl ? { icons: { icon: meta.faviconUrl } } : {}),
     openGraph: {
@@ -119,87 +132,30 @@ export default async function PublishedPage({ params }: PageProps) {
   const content = page.content as any;
   sanitizeContentForPublish(content); // Sanitize for pages published before this feature
 
-  const { LandingPagePublishedRenderer } = await import('@/modules/generatedLanding/LandingPagePublishedRenderer');
-  const { CriticalFontPreload } = await import('@/modules/templates/CriticalFontPreload');
-
-  // Preload the template module so the sync renderer can resolve blocks.
-  // STRICT: keep templateId as stored (no default-synthesis) — a legacy
-  // product page (templateId=null + 47-block content) must stay on the legacy
-  // path. Only default to 'hearth' for service (its null-templateId legacy).
-  const audienceType =
-    page.audienceType === 'service' ? 'service'
-    : page.audienceType === 'writer' ? 'writer'
-    : 'product';
-  const templateId = page.templateId || (
-    audienceType === 'service' ? 'hearth'
-    : audienceType === 'writer' ? 'granth'
-    : null
-  );
-  if (usesTemplateModule(audienceType, templateId)) {
-    const { preloadTemplate } = await import('@/modules/templates/registry');
-    await preloadTemplate(templateId as any);
-  }
-
-  // Merge section content and forms for renderer
-  const mergedContent = {
-    ...(content.content || {}),  // Section data
-    forms: content.forms || {},   // Forms data
-    legalPages: content.legalPages || undefined,  // Page-level legal pages (privacy etc.)
-  };
-
-  // JSON-LD (SEO Phase 3): same builder as the static export so the SSR fallback
-  // matches the blob HTML. Root page only; JSON-LD in <body> is valid for Google.
-  const flat = flattenContent(content);
-  const jsonLdMeta = buildPageMetadata({
+  // i18n (phase 6): the SSR fallback now injects the same locale switcher the blob
+  // HTML carries, with the SAME suppression semantics (single/absent config or
+  // switcherStyle 'none' ⇒ nothing at all) and the SAME `slug` — otherwise the two
+  // published surfaces would disagree. `basePath` is stamped server-side (this doc
+  // IS served at /p/{slug} unless middleware rewrote a publish subdomain / custom
+  // domain onto it), so the client never has to guess it.
+  const switcher = switcherTagsForSsr({
+    config: content?.localeConfig,
+    current: content?.localeConfig?.defaultLocale || 'en',
     slug: params.slug,
-    pageTitle: page.title || '',
-    content: flat,
-    canonicalDomain:
-      page.customDomainStatus === 'live' && page.customDomain ? page.customDomain : undefined,
-    canonicalPath: '/',
-    baseUrl: 'https://lessgo.ai',
-  });
-  const jsonLd = buildStructuredData({
-    type: (content.seo as any)?.structuredDataType,
-    audienceType,
-    name: jsonLdMeta.title,
-    description: jsonLdMeta.description,
-    url: jsonLdMeta.canonicalURL,
-    logoUrl: extractLogoUrl(flat),
-    imageUrl: jsonLdMeta.ogImage,
+    // Lazy: only a page that actually emits a switcher reads headers() (which
+    // would otherwise opt this ISR route into dynamic rendering for everyone).
+    host: () => headers().get('host'),
   });
 
-  // scale-04 (phase 3): resolve the project goal via the shared helper (same as
-  // the blob-bake path) so GOAL_REF primaries resolve on the SSR fallback too and
-  // don't diverge from the baked blob. Null goal → legacy fallback.
-  const goal = await getPublishedGoal(page.id);
-
-  return (
-    <>
-      {jsonLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
-        />
-      )}
-      {/* Preload the hero-headline (LCP) display face for this template/variant —
-          p/layout only preloads the shared near-body faces. */}
-      <CriticalFontPreload templateId={templateId as TemplateId | null} variantId={page.variantId} />
-      <LandingPagePublishedRenderer
-        sections={content.layout?.sections || []}
-        content={mergedContent}
-        theme={content.layout?.theme || {}}
-        publishedPageId={page.id}
-        pageOwnerId={page.userId}
-        slug={page.slug}
-        analyticsEnabled={page.analyticsEnabled || false}
-        audienceType={audienceType}
-        templateId={templateId}
-        variantId={page.variantId}
-        paletteId={page.paletteId}
-        mood={(page.themeValues as any)?.mood ?? null}
-        goal={goal}
-      />
-    </>
-  );
+  return renderPublishedRoot({
+    page,
+    slug: params.slug,
+    content,
+    extras: switcher ? (
+      <>
+        <script dangerouslySetInnerHTML={{ __html: switcher.configScript }} />
+        <script src={switcher.scriptSrc} defer />
+      </>
+    ) : null,
+  });
 }

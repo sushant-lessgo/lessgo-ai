@@ -30,6 +30,8 @@ type Cfg = {
   current: string;
   slug?: string;
   style?: string;
+  /** phase 6: explicitly stamped by the /p/{slug} SSR renderer. */
+  basePath?: string;
 };
 
 interface RunOpts {
@@ -189,6 +191,45 @@ describe('switcher v2 — basePath detection + target building', () => {
       hash: '#x',
     });
     expect(r.clickLocale('nl')).toBe('/p/gate/nl?a=1#x');
+  });
+
+  // ── phase 6: the SSR renderer STAMPS basePath (it knows its mount path) ──
+  // The client's hostname heuristic does not know *.vercel.app, so preview-URL QA
+  // on `…vercel.app/p/{slug}` would have rebuilt `/nl/p/{slug}` (a 404) — the whole
+  // point of the stamp is that the server never has to be guessed at.
+  it('STAMPED basePath wins on a preview host the hostname gate does not know', () => {
+    const r = runSwitcher({
+      cfg: CFG({ basePath: '/p/gate' }),
+      pathname: '/p/gate',
+      hostname: 'lessgo-ai-git-x.vercel.app',
+    });
+    expect(r.clickLocale('nl')).toBe('/p/gate/nl');
+    expect(r.clickLocale('nl')).not.toBe('/nl/p/gate');
+  });
+
+  it('STAMPED empty basePath wins over detection (custom-domain rewrite onto /p/{slug})', () => {
+    const r = runSwitcher({
+      cfg: CFG({ basePath: '' }),
+      pathname: '/p/gate',
+      hostname: 'lessgo.ai',
+    });
+    // Detection alone would have said '/p/gate'; the stamp says host root.
+    expect(r.clickLocale('nl')).toBe('/nl/p/gate');
+  });
+
+  it('the geo redirect uses the stamped base path too', () => {
+    const r = runSwitcher({
+      cfg: CFG({ basePath: '/p/gate' }),
+      pathname: '/p/gate',
+      hostname: 'lessgo-ai-git-x.vercel.app',
+      navLanguage: 'nl-NL',
+    });
+    expect(r.replaced).toBe('/p/gate/nl');
+  });
+
+  it('an UNSTAMPED config still uses runtime detection (published blobs)', () => {
+    const r = runSwitcher({ cfg: CFG(), pathname: '/p/gate', hostname: 'lessgo.ai' });
+    expect(r.clickLocale('nl')).toBe('/p/gate/nl');
   });
 
   it('a config without a slug never claims a base path', () => {

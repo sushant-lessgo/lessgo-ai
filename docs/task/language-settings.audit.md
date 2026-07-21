@@ -1159,3 +1159,224 @@ cb6584ff6b82bd9681ae28b6311c065e *public/assets/switcher.v2.js   <- new
   language (the live work contract has no `languages` field; only the frozen `workSlots.ts` table
   does). If the work-onboarding track lands that question, the work locale declaration starts working
   through the phase-3 `workLocaleConfigPatch` with no change here.
+
+# Phase 6 — publish persistence + `/p/{slug}` SSR locale awareness + published-switcher e2e
+
+## Files changed
+
+- `src/app/api/publish/route.ts`
+- `src/app/api/publish/route.test.ts`
+- `src/app/api/domains/verify-dns/route.ts`
+- `src/lib/i18n/publishedLocale.ts` (**new**)
+- `src/lib/i18n/publishedLocale.test.ts` (**new**)
+- `src/app/p/[slug]/renderPublishedRoot.tsx` (**new** — shared root-render extraction)
+- `src/app/p/[slug]/page.tsx`
+- `src/app/p/[slug]/[...subpath]/page.tsx`
+- `e2e/i18n-switcher.spec.ts` (**new**)
+- `src/lib/staticExport/switcherBehaviors.js` — **owed phase-5 item**, assigned to this phase by the
+  orchestrator (stamped `basePath` support). Not on the plan's phase-6 list; see Deviations.
+- `src/lib/staticExport/switcherBehaviors.v2.test.ts` — coverage for the same item.
+- `public/assets/switcher.v2.js` — **generated** by `npm run build` (tracked dir, build artifact,
+  never hand-edited). `switcher.v1.js` is byte-unchanged (md5 below).
+
+## (A) Publish persistence — one enriched object, presence-gated
+
+`route.ts` now builds ONE `publishedContent` immediately after the DB reads:
+
+```
+const publishedContent: any = localeConfig
+  ? { ...content, localeConfig, ...(projectLocaleContent ? { localeContent: sanitizeLocaleOverlay(projectLocaleContent) } : {}) }
+  : content;
+```
+
+and uses it for the **update** row write, the **create** row write, and the
+`renderPublishedExport({ content: publishedContent })` call. The late in-memory seeding block
+(old `:424-435`) is retired — nothing mutates `content` after the row write any more, so the
+persisted row and the baked blob describe the same locale data **by construction** (pinned by a
+test asserting `exported.content === writtenContent()`, an identity check, not a shape check).
+
+**Presence-gating evidence (monolingual zero-diff):** with no `localeConfig`, `publishedContent`
+IS `content` — the same object reference, no spread, no new keys. The test
+"MONOLINGUAL project ⇒ the persisted content gains NO new keys" asserts
+`'localeConfig' in stored === false`, `'localeContent' in stored === false` (key ABSENCE, not
+falsiness) **and** `stored === exportedContent` (reference identity). A declared config with no
+overlay yet persists `localeConfig` only — no empty `localeContent` key.
+
+`verify-dns/route.ts` now passes `localeConfig: (page.content as any)?.localeConfig ?? null` to the
+go-live regen. Old rows have no key ⇒ `null` ⇒ today's single-locale behavior; a republish heals.
+
+## (B) `/p/{slug}` SSR locale awareness
+
+- **`src/lib/i18n/publishedLocale.ts`** (server-safe, no `'use client'` imports):
+  `resolvePublishedLocale` (mirrors switcher.v2 `segAt` — first segment only, declared
+  NON-default only, `isMultiLocale`-gated so a ruling-10 single-locale config never creates locale
+  routes), `resolveSsrBasePath`, `switcherConfigJson` (same `<`-escaping as htmlGenerator),
+  `switcherTagsForSsr`, `buildLocaleAlternateMap` (same semantics as the export's
+  `buildAlternates`, incl. `x-default`). **No overlay wrapper** — both SSR routes call the shared
+  `resolveLocaleElements` directly, exactly as `renderPublishedExport` does.
+- **`renderPublishedRoot.tsx`**: the root-render body (template preload, merged content, JSON-LD,
+  `CriticalFontPreload`, renderer) extracted ONCE. Both published roots (`/p/{slug}` and
+  `/p/{slug}/{loc}`) go through it — no ~50-line copy. Takes an optional `locale` (overlay applied
+  via `resolveLocaleElements`; absent ⇒ same object back ⇒ pre-phase-6 output) and an `extras`
+  slot for the switcher tags.
+- **`p/[slug]/page.tsx`**: re-pointed onto the helper; injects the switcher config + script;
+  `generateMetadata` gains `alternates.languages` when multi-locale (key omitted otherwise).
+- **`p/[slug]/[...subpath]/page.tsx`**: resolves the locale BEFORE the subpage lookup.
+  `/{loc}` (empty remainder) renders the ROOT through `renderPublishedRoot` (was `notFound()`);
+  `/{loc}/{sub}` does the subpage lookup on the remainder with the overlay applied; no locale match
+  ⇒ the exact pre-change path (`localeHit === null` ⇒ `pathSlug`/`servedPath` are the old values and
+  every overlay call is a no-op returning the same reference). `generateMetadata` mirrors this
+  (localized canonical `/{loc}{path}`, localized hero/product SEO, hreflang map).
+- **`revalidate = 3600` preserved for monolingual pages**: `headers()` (which would force dynamic
+  rendering) is passed as a LAZY thunk and is only invoked after the multi-locale + `style !== 'none'`
+  gates pass. Pinned by a test that counts host reads (0 for null/`'none'` configs, 1 when emitting).
+
+**Dual-renderer parity:** `switcherTagsForSsr` reuses phase 5's suppression semantics verbatim
+(single/absent config ⇒ nothing; `switcherStyle: 'none'` ⇒ no config, no script ⇒ no pill AND no geo
+redirect; hreflang unaffected) and stamps the SAME `slug`.
+
+## ⛔ The owed vercel.app / basePath item — how it was closed
+
+**Closed by stamping, per the reviewer's preference — the host regex was NOT widened.**
+
+- `resolveSsrBasePath(host, slug)` returns `/p/{slug}` for hosts that reach this route by its literal
+  URL (localhost, `*.vercel.app`, `lessgo.ai`, `app.lessgo.ai`) and `''` for hosts that middleware
+  REWRITES onto it (publish subdomains via `matchPublishSubdomain`, custom domains via
+  `!isLessgoAppHost`) — those browsers see no `/p` prefix (`src/middleware.ts:134,162`). The server
+  decides; the client no longer guesses on the SSR surface.
+- `switcherBehaviors.js` now prefers a stamped `cfg.basePath` (`typeof cfg.basePath === 'string'`)
+  and keeps the hostname heuristic ONLY as the fallback for docs that stamp nothing — i.e. every
+  blob. Stamping `''` is honored (it is a string), so a rewritten host wins over detection.
+- **Immutability-contract reasoning (confirmed, not assumed):** the frozen source is
+  `scripts/legacy/switcher.v1.src.js` and the v1 build entry reads only `legacyDir`, so this edit
+  cannot reach the v1 filename — `md5(public/assets/switcher.v1.js)` is still
+  `169c32dde19ccc7709e636460518c226`, identical to the phase-5 value, after a full `npm run build`.
+  v2 itself is editable here because **no published blob references `switcher.v2.js` yet**: it was
+  introduced on this unmerged branch and `htmlGenerator` only started emitting it in phase 5, so
+  there is no immutable consumer to break. Once this branch ships, the same rule applies to v2 as to
+  v1: any further semantic change needs a v3.
+- Backwards-compatible in both directions: old blobs (no `basePath`) keep the phase-5 detection path
+  (pinned by an explicit "UNSTAMPED config still uses runtime detection" test).
+
+## Tests
+
+- **New** `src/lib/i18n/publishedLocale.test.ts` (17): the locale-route matrix (default locale is
+  never a prefix — incl. the nl-default mirror where `en` IS prefixed; undeclared segment ⇒ null;
+  single-locale/absent ⇒ null; empty/deep remainders), `resolveSsrBasePath` per host class (the
+  vercel.app case is asserted explicitly), config-JSON exact string + `<`-escape breakout,
+  suppression parity, the lazy-host counter, and the hreflang map (root, subpage, custom domain).
+- **Extended** `src/app/api/publish/route.test.ts` (+5): bilingual round-trip (config + SANITIZED
+  overlay on the row — the injected `<script>` is gone from the persisted headline), row-object
+  identity with the export payload, the CREATE path (not just update), monolingual zero-diff, and
+  config-without-overlay.
+- **Extended** `switcherBehaviors.v2.test.ts` (+4): stamped basePath wins on an unknown-to-the-regex
+  preview host; stamped `''` wins over detection; the geo redirect uses the stamp; unstamped configs
+  still detect.
+- **New** `e2e/i18n-switcher.spec.ts` (5, Playwright, unauthed, fully deterministic — `page.route`
+  serves both the fixture documents and the LIVE `switcherBehaviors.js` source, so no DB/Blob/KV and
+  no prior asset build): host-root doc ⇒ `/nl`; `/p/{slug}` doc ⇒ `/p/{slug}/nl` and explicitly not
+  `/nl/p/{slug}`; localStorage persistence; geo redirect honors the base path; `style:'none'` ⇒ no
+  pill and no redirect.
+
+**Mutation checks (each proven able to fail, then restored by re-editing / file-copy — no
+`git checkout`):**
+
+- `content: publishedContent` → `content: content` in both row writes ⇒ publish route tests
+  **4 failed / 9 passed**.
+- deleting the `cfg.basePath` preference line ⇒ v2 unit tests **3 failed / 19 passed**.
+- forcing `buildPath` to drop the base path ⇒ e2e **3 failed / 2 passed**.
+
+## Deviations from the plan
+
+1. **Two extra files** (`switcherBehaviors.js`, `switcherBehaviors.v2.test.ts`) beyond the plan's
+   phase-6 list: the orchestrator assigned the owed phase-5 basePath item to this phase and
+   explicitly described the stamped-basePath fix, which cannot land without them. Recorded here as
+   the phase's only scope addition.
+2. **⛔ OWED / BLOCKING FOR THE SPEC TO EVER RUN — `playwright.config.ts` is NOT edited.** It is
+   outside the Files-touched list, so per the scope rule I did not touch it. Playwright projects use
+   an ALLOWLIST `testMatch` (the config's own comment documents this false-confidence trap), so
+   `e2e/i18n-switcher.spec.ts` currently matches NO project and `npm run test:e2e` will not run it.
+   **Required one-line follow-up:** add `/i18n-switcher\.spec\.ts/` to the `public` project's
+   `testMatch` array. I verified the spec really passes by running it through a TEMPORARY scratch
+   config at the repo root (`playwright.i18n.tmp.config.ts`, no webServer since every request is
+   route-mocked), which was deleted afterwards — `git status` is clean of it.
+3. **`switcherTagsForSsr` takes a lazy `host: () => …`** rather than a plain string (plan step 3
+   sketched `switcherScriptTags({...})`). Reason: `headers()` opts a route out of ISR; a plain string
+   argument would have made EVERY published SSR page dynamic, breaking `revalidate = 3600` for
+   monolingual projects — a zero-diff violation the plan did not foresee.
+4. **SSR script src is RELATIVE** (`/assets/switcher.v2.js`), unlike the blob's absolute
+   `{assetBase}/assets/…`. The SSR document is served by the app itself on whatever host the visitor
+   used, and `/assets/*.js` is excluded from the middleware matcher, so a relative src always
+   resolves against the deployment actually serving the page. An absolute `NEXT_PUBLIC_APP_URL` would
+   have made preview deployments load prod's (currently non-existent) v2 asset — i.e. it would have
+   re-broken exactly the QA sandbox this phase was told to protect.
+5. **Locale-doc metadata/JSON-LD use the LOCALIZED sections** (root + subpage), matching what the
+   blob path derives from `locRoot`. The plan only asked for hreflang; leaving title/description in
+   the default language would have been a visible SSR-vs-blob divergence.
+6. **`[...subpath]` select widened** with `title`, `customDomain`, `customDomainStatus` — required by
+   the shared root helper (JSON-LD canonical) for the `/{loc}` root case. Same file, no new file.
+7. `buildLocaleAlternateMap` is an addition to the plan's helper list (the plan said "add
+   `alternates.languages`" without naming a home); it lives in `publishedLocale.ts` so both routes
+   and both surfaces share one definition of the hreflang set.
+
+## Plan pointers checked against the tree
+
+- `api/publish/route.ts` — DB reads at `:193-203`, row writes `:286-291`/`:321-327`, late seeding
+  `:424-435`, export call `:452-473`: **all correct** pre-edit.
+- `verify-dns/route.ts:128-151` — correct (no `localeConfig` param). Note it also omits `knobs`,
+  a pre-existing gap left untouched (out of scope).
+- `p/[slug]/page.tsx:120-204` root-render body and the `[...subpath]` `notFound()` — correct.
+- `localeContent.ts:48-74` `resolveLocaleElements` — correct.
+- `renderPublishedExport.ts` — **untouched in this phase** (`git status` shows no entry), as required.
+
+## Verification (actual output)
+
+```
+$ npx tsc --noEmit
+TSC-EXIT:0            (no output)
+
+$ npm run test:run
+ Test Files  299 passed | 1 skipped (300)
+      Tests  4829 passed | 15 skipped (4844)
+   Duration  77.24s
+   (phase-5 baseline 4803 passed / 15 skipped → +26 new tests, zero regressions)
+
+$ npm run build          # full build: published-css → assets → next build
+✅ switcher.v1.js
+✅ switcher.v2.js
+ ✓ Compiled successfully
+ ✓ Generating static pages (33/33)
+├ ƒ /p/[slug]                                       1.73 kB         751 kB
+├ ƒ /p/[slug]/[...subpath]                          1.73 kB         751 kB
+
+$ md5sum public/assets/switcher.v1.js public/assets/switcher.v2.js
+169c32dde19ccc7709e636460518c226 *public/assets/switcher.v1.js   <- UNCHANGED (freeze intact)
+afdab6a4033062b3034134563c78f42d *public/assets/switcher.v2.js   <- rebuilt with the basePath stamp
+
+$ npx playwright test -c <temp config>   # see Deviation 2
+  5 passed (2.1s)
+```
+
+`npm run test:e2e` as a whole was NOT run: the authed projects need a Clerk session + a live dev
+server with real credentials, which this environment cannot provide. The new spec was run in
+isolation (above) and mutation-verified. `render.spec.ts` / `publish.spec.ts` were likewise not run
+here — flagged for the founder QA gate.
+
+## Open risks / what phase 7 must know
+
+- **The e2e registration (Deviation 2) is the one blocking follow-up.** Until
+  `/i18n-switcher\.spec\.ts/` is added to `playwright.config.ts`, the suite goes green having never
+  run it — the exact trap that config warns about.
+- **`<html lang>` on the SSR path is NOT per-locale** (accepted gap, plan step 6): it comes from the
+  app root layout. The blob docs DO carry the right `lang`. Document it in phase 7.
+- **Pages published before this feature have no `localeConfig` on their row**, so the SSR path shows
+  no switcher and `/p/{slug}/nl` still 404s for them until a republish. Same healing story as
+  verify-dns. Worth a line in the docs sweep.
+- **Multi-locale SSR pages are now dynamically rendered** (they read `headers()`), i.e. no ISR on that
+  fallback path. Monolingual pages are unaffected. The blob fast path is the normal serving surface,
+  so this only costs on the fallback.
+- `docs/architecture/publishArch.md` should gain: publish-time persistence of `localeConfig` +
+  `localeContent` onto `PublishedPage.content`, the SSR `basePath` stamp (and why it exists), the
+  relative SSR asset src, and the v2 config shape now including `basePath`.
+- Phase-5's note stands: `src/modules/templates/fit.ts:32,:61` still name `switcher.v1.js` in
+  comments (phase-7 sweep).

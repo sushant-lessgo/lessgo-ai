@@ -188,7 +188,7 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     (doubles under StrictMode in dev; fire-and-forget, non-blocking, acceptable to ship as-is)
   - phase-7 known-limits: work regen with a bare code in `facts.languages` renders
     `## OUTPUT LANGUAGE — en` (pre-existing; `labelToLocaleCode` rejects bare codes)
-- phase 5 switcher.v2 asset + publish emission: done (commit pending-sha, review loops 1, VERDICT ship)
+- phase 5 switcher.v2 asset + publish emission: done (commit 0fe161c7, review loops 1, VERDICT ship)
   - **v1 freeze verified byte-exact**: frozen source vs `HEAD:switcherBehaviors.js` = zero
     differences EOL-normalized; `md5(public/assets/switcher.v1.js)` unchanged across a rebuild
     (`169c32dde19ccc7709e636460518c226`), independently recomputed by the reviewer. Built v1
@@ -212,7 +212,22 @@ to the `/p` SSR renderer. Auto-translate and change-site-language ship greyed vi
     no onboarding language control at all (they set it in Site Settings).
   - optional hardening (phase 7): the freeze guard asserts existence only; a content hash of
     `scripts/legacy/switcher.v1.src.js` would make an accidental edit to the frozen source fail loudly
-- phase 6 publish persistence + /p SSR locale awareness + e2e: pending
+- phase 6 publish persistence + /p SSR locale awareness + e2e: done (commit pending-sha, review
+  loops 1, VERDICT ship)
+  - **the round-1 fatal defect is CLOSED**: `publishedContent` feeds both row writes AND the
+    export; monolingual = the SAME object reference (no spread) so zero-diff holds; late seeding
+    retired so persisted-vs-rendered drift is impossible by construction
+  - basePath owed-item closed by **stamping** from the SSR renderer (server knows its mount path)
+    with client detection kept as the fallback for existing blobs — `*.vercel.app` preview QA works
+  - ISR verified NOT lost: `headers()` is reachable only after the multi-locale + style gates
+  - **owed → phase 7 (mandatory step 0)**: register `e2e/i18n-switcher.spec.ts` in
+    `playwright.config.ts` — `testMatch` is an allowlist, so today it never runs
+  - **founder QA gate must cover** (no automated test renders the `/p` SSR pages end-to-end):
+    direct-load `/p/{slug}/nl` on the preview host · pill click on `/p/{slug}` · Switcher-style
+    None ⇒ no pill, on BOTH the blob and SSR surfaces
+  - phase-7 doc lines owed: `<html lang>` is not per-locale on the SSR path (App Router root-layout
+    constraint; blob docs DO carry it — a genuine SSR-vs-blob delta) · pages published BEFORE this
+    feature carry no `localeConfig`, so `/p/{slug}/nl` 404s and no switcher appears until republish
 - phase 7 docs + acceptance sweep: pending
 
 ## Load-bearing design rulings (the sharp edges, decided up front)
@@ -985,11 +1000,22 @@ NOT touched in this phase.
 - `docs/architecture/copyEngines.md`
 - `src/lib/i18n/README.md` (new or updated)
 - `src/modules/templates/fit.ts` (comment-only)
+- `playwright.config.ts` — **owed from phase 6, MANDATORY** (see step 0 below)
 - `src/hooks/editStore/i18nActions.ts` — **owed from phase 2** (see step below)
 - `src/hooks/editStore/i18nStoreState.test.ts` — pin the new guard
 - `src/app/edit/[token]/components/editor/LanguageToggle.tsx` — drop the dead re-export
 
 **Owed cleanup carried into this phase (added by orchestrator after the phase-2 gate)**
+
+0. **⛔ REGISTER THE E2E SPEC — do this FIRST; without it the phase-6 test is theatre.**
+   `e2e/i18n-switcher.spec.ts` (the first and only coverage of the published switcher) is NOT
+   matched by any Playwright project: `testMatch` is an **allowlist**, and phase 6 could not
+   edit `playwright.config.ts` (out of its scope). As shipped, `npm run test:e2e` never runs
+   it — a test that exists but cannot execute is the inert-assertion trap in its purest form,
+   and it would silently void the deterministic-QA rule for this feature's riskiest surface.
+   Add `/i18n-switcher\.spec\.ts/` to the `public` project's `testMatch`, then **actually run
+   `npm run test:e2e` and report real output** — do not infer it passes because it passed under
+   phase 6's temporary scratch config.
 
 1. **Default-locale removal guard (correctness, not cosmetic).** Add
    `if (code === cfg.defaultLocale) return;` at the top of `removeLocale` in

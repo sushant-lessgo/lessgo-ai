@@ -148,6 +148,15 @@ export async function POST(req: NextRequest) {
         baseUrl: 'https://lessgo.ai',
         canonicalDomain: customHost,
         removeBranding,
+        // i18n (language-settings phase 6): WITHOUT this a bilingual site going
+        // live on a custom domain regenerates single-locale — dropping its `/{loc}`
+        // docs and their KV routes. The publish route now persists the declaration
+        // onto PublishedPage.content (and the overlay rides on
+        // `content.localeContent`, which renderPublishedExport reads itself), so the
+        // go-live regen can rebuild the full locale fan-out. Pages published BEFORE
+        // this feature have no key ⇒ null ⇒ exactly today's behavior; a republish
+        // heals them.
+        localeConfig: (page.content as any)?.localeConfig ?? null,
       });
     } catch (e) {
       console.error('[verify-dns] canonical regen failed (non-fatal)', e);

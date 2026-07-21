@@ -3,7 +3,7 @@
  * htmlGenerator.ts ONLY when a project declares >1 locale (multi-locale). It renders
  * its OWN minimal floating pill — it does NOT depend on any template markup (per D2:
  * templates stay untouched). Reads window.__lessgoLocales = { locales, defaultLocale,
- * current, slug, style } stamped inline just before this tag.
+ * current, slug, style, basePath? } stamped inline just before this tag.
  *
  * ⚠️ IMMUTABLE-ASSET CONTRACT (scripts/buildAssets.js:10-29): published blobs hardcode
  * an asset filename. `switcher.v1.js` is FROZEN at scripts/legacy/switcher.v1.src.js and
@@ -22,6 +22,10 @@
  *    so a custom-domain site that happens to own a page literally at `/p/{slug}` is not
  *    misread (middleware rewrites are internal — the browser pathname on the custom-domain
  *    SSR fallback carries no `/p` prefix).
+ *    phase 6: an explicitly STAMPED `cfg.basePath` (emitted by the `/p/{slug}` SSR
+ *    renderer, which knows its mount path for certain) always wins over the hostname
+ *    heuristic — that is what makes preview hosts (*.vercel.app) correct without
+ *    widening the host regex. Blobs stamp no basePath ⇒ detection, exactly as before.
  *  • `style: 'none'` ⇒ NO pill AND NO geo redirect ("None" means no automatic locale
  *    behavior at all). Defense in depth: the generator already omits the whole block.
  *    Absent style ⇒ 'dropdown' ⇒ exactly v1 behavior.
@@ -50,6 +54,12 @@
 
   // ---- basePath: '' at host root, '/p/{slug}' on the lessgo preview path ----
   var basePath = (function () {
+    // STAMPED wins (language-settings phase 6): the `/p/{slug}` SSR renderer knows
+    // its own mount path with certainty and stamps `cfg.basePath`, so no hostname
+    // guess is needed there — this is what makes preview deployments
+    // (*.vercel.app/p/{slug}, outside the host regex below) build correct targets.
+    // Runtime detection stays as the fallback for docs that stamp no basePath.
+    if (typeof cfg.basePath === 'string') return cfg.basePath;
     var slug = cfg.slug;
     if (!slug) return '';
     var host = location.hostname || '';
