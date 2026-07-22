@@ -94,7 +94,7 @@ is deliberately NOT in any phase's Files touched and not referenced by any step.
 
 ## Progress log
 
-- phase 1 slice 1 — guard test + palette record + harbor + default flip + popover gate + dev seed: pending
+- phase 1 slice 1 — guard test + palette record + harbor + default flip + popover gate + dev seed: **done** (commit `ab3dcd1f`, review loops 1, verdict ship). Guard mutation-proven RED-then-GREEN by BOTH implementer and reviewer (3 independent mutations incl. picker-gate). Blocker fixed: assertion 6 flaked at 5927ms vs vitest's 5000ms default under full-suite load → explicit `30_000` timeout; 3 consecutive full-suite runs green (5092 passed). forest value-identity + all 19 harbor values verified against `git show HEAD` / designer table. Seed route: prod-404 first statement, no `paletteId` in either branch. **AWAITING SLICE-1 HUMAN GATE.**
 - phase 2 slice 2 B1 — shared/sharedStyles.ts: pending
 - phase 3 slice 2 B2 — Footer family: pending
 - phase 4 slice 2 B3 — dual-renderer inline pairs + parity test: pending
