@@ -8,6 +8,7 @@ import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineT
 import { promptDialog } from '@/components/ui/ConfirmDialog';
 import { useEditStore } from '@/hooks/useEditStore';
 import { usesTemplateModule } from '@/types/service';
+import { resolveSectionSurface } from '@/modules/skeletons/styleTokens';
 
 import { logger } from '@/lib/logger';
 import { EDITOR_DEBUG } from '@/lib/debugFlags';
@@ -68,6 +69,14 @@ export function EditablePageRenderer({
   const { audienceType, templateId } = useEditStore(
     useShallow((s) => ({ audienceType: s.audienceType, templateId: s.templateId })),
   );
+  // section-background D4: the id-keyed user override map (Project.themeValues.
+  // styleTokens). Object identity is stable between edits — the writer
+  // (`setSectionStyleTokens`) replaces the section entry, so a new map identity is
+  // exactly the signal to re-resolve.
+  const styleTokens = useEditStore(
+    (s) => (s.themeValues as Record<string, any> | null)?.styleTokens as
+      import('@/modules/skeletons/styleTokens').StyleTokens | undefined,
+  );
   const { ready: templateReady, tmpl } = useTemplateModule(audienceType, templateId);
 
   // Template-backed projects: paint the section's surface in edit so it matches
@@ -75,9 +84,16 @@ export function EditablePageRenderer({
   // is injected globally by the template's ThemeInjector but only applies where the
   // wrapper carries data-surface — preview/published add it, edit didn't (→ light bg,
   // invisible headline). Mirror LandingPageRenderer; same 'cream' fallback to avoid drift.
+  // The user's per-section override (section-background D4) wins over the skin's
+  // type-keyed default; absent/'default'/non-skeleton template → the skin default.
   const usesTemplate = usesTemplateModule(audienceType, templateId);
   const surface = usesTemplate
-    ? (tmpl?.getSurfaceForSection(extractSectionType(sectionId)) ?? 'cream')
+    ? resolveSectionSurface(
+        templateId,
+        styleTokens,
+        sectionId,
+        tmpl?.getSurfaceForSection(extractSectionType(sectionId)) ?? 'cream',
+      )
     : undefined;
 
   const LayoutComponent = getComponent(sectionId, layout, audienceType, templateId);

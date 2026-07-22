@@ -25,6 +25,7 @@ import { normalizeCtas, buildNormalizeCtasContext } from '@/utils/normalizeCtas'
 import type { Brief } from '@/types/brief';
 import type { KnobSelection } from '@/types/template';
 import type { StyleTokens } from '@/modules/skeletons/styleTokens';
+import { resolveSectionSurface } from '@/modules/skeletons/styleTokens';
 
 /**
  * Extract content fields from elements structure
@@ -153,7 +154,15 @@ export function LandingPagePublishedRenderer({
         // Template-backed projects: skip product theme background. Wrap in a
         // template surface div per the template's sectionRules.
         if (usesTemplate) {
-          const surface = tmpl?.getSurfaceForSection(sectionType) ?? 'cream';
+          // section-background D4: id-keyed user override (Project.themeValues.
+          // styleTokens) wins over the skin's type-keyed default; gated to
+          // skeleton-backed templates so a template switch can't leak a surface.
+          const surface = resolveSectionSurface(
+            templateId,
+            styleTokens,
+            sectionId,
+            tmpl?.getSurfaceForSection(sectionType) ?? 'cream',
+          );
           return (
             <div key={sectionId} id={anchorMap[sectionId]} data-surface={surface} style={{ scrollMarginTop: 80 }}>
 

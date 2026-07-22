@@ -27,6 +27,7 @@ import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThem
 import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 import type { HearthPalette } from '@/types/service';
 import { usesTemplateModule } from '@/types/service';
+import { resolveSectionSurface } from '@/modules/skeletons/styleTokens';
 import type { MeridianPalette } from '@/types/product';
 // import { VariableBackgroundRenderer } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer'; // Disabled
 import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';
@@ -520,7 +521,14 @@ export default function LandingPageRenderer({ className = '', tokenId, published
       // wrap on the page.
       if (usesTemplate) {
         const sectionTypeKey = extractSectionTypeRaw(sectionId);
-        const surface = tmpl?.getSurfaceForSection(sectionTypeKey) ?? 'cream';
+        // section-background D4: id-keyed user override (themeValues.styleTokens)
+        // wins over the skin's type-keyed default; gated to skeleton templates.
+        const surface = resolveSectionSurface(
+          templateId,
+          (themeValues as Record<string, any> | null)?.styleTokens,
+          sectionId,
+          tmpl?.getSurfaceForSection(sectionTypeKey) ?? 'cream',
+        );
         return (
           <SectionTracker
             key={sectionId}

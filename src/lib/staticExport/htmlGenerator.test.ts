@@ -129,6 +129,102 @@ describe('generateStaticHTML — styleTokens in static export (AC-L123)', () => 
   });
 });
 
+// section-background phase 1 — the PUBLISHED-side proof of BOTH delivery channels
+// (D2): the `[data-sid]{--u-bg;--u-fg}` CSS pair AND the wrapper `data-surface`
+// attribute, resolved from the SAME stored value. Also pins the no-bleed guarantee
+// (a second, unstyled section keeps the skin default) and the `id`+`data-surface`
+// attribute PAIR that `analyticsGenerator.js:126` reads (`[data-surface][id]`).
+//
+// This case owns a LOCAL two-section fixture — the shared buildPage()/render()
+// helpers above are used by every other suite in this file and are not mutated.
+// String-level assertions are the published equivalent of a computed-style check:
+// jsdom cannot resolve the `var()` cascade (the live computed-style check is the
+// phase-2 e2e).
+describe('generateStaticHTML — per-section background override (both channels)', () => {
+  const HERO = 'hero-aaa11111';
+  const ABOUT = 'about-bbb22222';
+
+  async function renderTwoSections(
+    styleTokens?: import('@/modules/skeletons/styleTokens').StyleTokens | null,
+  ) {
+    const content: Record<string, any> = {
+      layout: { sections: [HERO, ABOUT] },
+      [HERO]: {
+        id: HERO,
+        type: 'hero',
+        layout: 'workherocenter',
+        elements: { headline: 'A studio that holds the room.' },
+      },
+      [ABOUT]: {
+        id: ABOUT,
+        type: 'about',
+        layout: 'workabout',
+        elements: { about_heading: 'About the studio.' },
+      },
+    };
+    const res = await generateStaticHTML({
+      sections: [HERO, ABOUT],
+      content,
+      theme: {},
+      publishedPageId: 'p',
+      pageOwnerId: 'u',
+      slug: 'gate',
+      title: 'Gate',
+      audienceType: 'service',
+      templateId: 'atelier',
+      paletteId: null,
+      variantId: null,
+      goal: null,
+      styleTokens: styleTokens ?? null,
+    });
+    return res.html;
+  }
+
+  // The wrapper's `id` is the in-page ANCHOR (buildSectionAnchorMap: first section
+  // of a type keeps the bare type), not the sectionId — `data-sid` lives on the
+  // block core root inside.
+  const HERO_ANCHOR = 'hero';
+  const ABOUT_ANCHOR = 'about';
+
+  /** The wrapper div for an anchor — matched on the `id`+`data-surface` pair. */
+  function wrapperFor(html: string, anchor: string): string {
+    const m = html.match(new RegExp(`<div[^>]*id="${anchor}"[^>]*>`));
+    return m?.[0] ?? '';
+  }
+
+  it('CHANNEL 1 (CSS): emits the [data-sid] block with BOTH --u-bg and --u-fg', async () => {
+    const html = await renderTwoSections({ [ABOUT]: { background: 'dark' } });
+    const block = html.match(new RegExp(`\\[data-sid="${ABOUT}"\\]\\{[^}]*\\}`))?.[0] ?? '';
+    expect(block).toContain('--u-bg:var(--wk-dark);');
+    expect(block).toContain('--u-fg:var(--wk-on-dark);');
+    // The untouched sibling gets no block at all.
+    expect(html).not.toContain(`[data-sid="${HERO}"]{`);
+  });
+
+  it('CHANNEL 2 (wrapper): data-surface carries the override, id intact, no bleed', async () => {
+    const html = await renderTwoSections({ [ABOUT]: { background: 'dark' } });
+
+    const about = wrapperFor(html, ABOUT_ANCHOR);
+    expect(about).toContain('data-surface="dark"');
+    // analyticsGenerator.js reads `[data-surface][id]` — BOTH attrs must survive.
+    expect(about).toContain(`id="${ABOUT_ANCHOR}"`);
+
+    // No-bleed: the sibling wrapper is byte-identical to the no-override baseline.
+    // (Compared against a baseline rather than "not dark" — the atelier skin's own
+    // hero default IS dark, so a value assertion would be vacuous here.)
+    const baseline = await renderTwoSections(null);
+    expect(wrapperFor(html, HERO_ANCHOR)).toBe(wrapperFor(baseline, HERO_ANCHOR));
+    expect(wrapperFor(html, HERO_ANCHOR)).toContain('data-surface=');
+  });
+
+  it('absent override → the wrapper keeps the skin default (byte-neutral)', async () => {
+    const baseline = await renderTwoSections(null);
+    const withDefault = await renderTwoSections({ [ABOUT]: { background: 'default' } });
+    expect(wrapperFor(withDefault, ABOUT_ANCHOR)).toBe(wrapperFor(baseline, ABOUT_ANCHOR));
+    expect(withDefault).not.toContain(`[data-sid="${ABOUT}"]{`);
+  });
+});
+
 // publish-trust M4: the <head> is a raw template string, so every user-influenced value
 // interpolated into it is a stored-XSS sink on live customer domains (*.lessgo.site).
 // These are the end-to-end guards: hostile input must be inert, benign input unchanged.

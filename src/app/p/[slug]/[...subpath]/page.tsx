@@ -320,6 +320,10 @@ export default async function PublishedSubpage({ params }: PageProps) {
         variantId={page.variantId}
         paletteId={page.paletteId}
         mood={(page.themeValues as any)?.mood ?? null}
+        // section-background D4 — SSR fallback gap (see renderPublishedRoot).
+        // sectionIds are globally unique across a project's pages, so one
+        // project-wide map is safe to hand every subpage.
+        styleTokens={(page.themeValues as any)?.styleTokens ?? null}
         goal={goal}
       />
       {switcherTags}

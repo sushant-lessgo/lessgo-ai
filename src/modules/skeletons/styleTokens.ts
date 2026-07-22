@@ -19,6 +19,10 @@
 // consumes `var(--u-*, <skeleton default>)`, so an absent/`default` value falls
 // through to the skeleton's baseline.
 
+// `./ids` is the ONLY import here and is pure data (no React, no skeleton/template
+// modules) — importing it keeps this file firewall-safe.
+import { isSkeletonBacked } from './ids';
+
 // ── Value enums (each a curated coordinate) ─────────────────────────────────
 export type UBackground = 'default' | 'paper' | 'paper-2' | 'dark' | 'accent';
 export type USpacingY   = 'default' | 'compact' | 'normal' | 'spacious';
@@ -53,10 +57,16 @@ export type StyleTokens = Record<string, SectionStyleTokens>;
 
 type Decls = ReadonlyArray<readonly [string, string]>;
 
+// CONTRAST INVARIANT (section-background D2): every NON-default surface emits the
+// COMPLETE `--u-bg` + `--u-fg` pair. Dark-default block roots (`.wk-hero`,
+// `.wk-hero-img`, `.wk-footer`) declare `color:var(--u-fg, var(--wk-on-dark))` at
+// the root, which BEATS any colour inherited from the wrapper's
+// `[data-surface="paper"]` rule — so a bg-only `paper`/`paper-2` override would
+// paint light-on-light. Never add a background-only row here.
 const BACKGROUND_CSS: Record<UBackground, Decls> = {
   default: [],
-  paper:     [['--u-bg', 'var(--wk-paper)']],
-  'paper-2': [['--u-bg', 'var(--wk-paper-2)']],
+  paper:     [['--u-bg', 'var(--wk-paper)'], ['--u-fg', 'var(--wk-ink)']],
+  'paper-2': [['--u-bg', 'var(--wk-paper-2)'], ['--u-fg', 'var(--wk-ink)']],
   dark:      [['--u-bg', 'var(--wk-dark)'], ['--u-fg', 'var(--wk-on-dark)']],
   accent:    [['--u-bg', 'var(--wk-accent)'], ['--u-fg', 'var(--wk-accent-ink, #fff)']],
 };
@@ -141,4 +151,32 @@ export function serializeStyleTokens(styleTokens?: StyleTokens | null): string {
     blocks.push(`[data-sid="${safeId}"]{${decls.join('')}}`);
   }
   return blocks.join('\n');
+}
+
+/**
+ * Resolve the `data-surface` value for ONE section wrapper (section-background D4).
+ *
+ * The user's per-section background override is ID-keyed
+ * (`styleTokens[sectionId].background`); the template skin's default is TYPE-keyed
+ * and is passed in as `fallback` (callers compute it via
+ * `tmpl.getSurfaceForSection(sectionType)`), so the two key spaces never mix.
+ *
+ * GATED on `isSkeletonBacked(templateId)`: `styleTokens` is project-GLOBAL while the
+ * templateId is user-switchable, so an ungated resolver would leak a `dark`/`paper-2`
+ * value picked on the work skeleton onto hearth/lex after a template switch. The
+ * surface vocabulary is a SKELETON concept — `isSkeletonBacked` is the axis, not
+ * `isWorkCopyTemplate` (that's the copy-engine axis).
+ *
+ * Absent tokens, an absent section entry, or the explicit `'default'` → `fallback`.
+ */
+export function resolveSectionSurface(
+  templateId: string | null | undefined,
+  styleTokens: StyleTokens | null | undefined,
+  sectionId: string,
+  fallback: string,
+): string {
+  if (!isSkeletonBacked(templateId)) return fallback;
+  const override = styleTokens?.[sectionId]?.background;
+  if (!override || override === 'default') return fallback;
+  return override;
 }

@@ -145,6 +145,10 @@ export async function renderPublishedRoot(args: {
         variantId={page.variantId}
         paletteId={page.paletteId}
         mood={(page.themeValues as any)?.mood ?? null}
+        // section-background D4 — SSR fallback gap: without this the non-blob
+        // fallback silently drops per-section background overrides that the baked
+        // blob renders (publish/route.ts:478 → generateStaticHTML).
+        styleTokens={(page.themeValues as any)?.styleTokens ?? null}
         goal={goal}
       />
       {args.extras}

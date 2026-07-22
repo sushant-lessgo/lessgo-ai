@@ -479,6 +479,19 @@ export interface MetaActions {
 
   // Meta Data Management
   updateMeta: (meta: Partial<any>) => void;
+  /**
+   * The ONE writer of `themeValues.styleTokens` (section-background D3).
+   *
+   * Deep-merges `patch` into `themeValues.styleTokens[sectionId]`, preserving every
+   * OTHER `themeValues` key and every other section's tokens, then triggers autosave.
+   * The merge obligation lives here and nowhere else: `saveDraft` REPLACES the whole
+   * `themeValues` column with whatever the store holds, so a shallow write at a call
+   * site would silently drop sibling keys (mood/knobs/…).
+   */
+  setSectionStyleTokens: (
+    sectionId: string,
+    patch: Partial<import('@/modules/skeletons/styleTokens').SectionStyleTokens>,
+  ) => void;
   loadFromOnboarding: () => void;
   updateOnboardingData: (data: any) => void;
   updatePublishingState: (state: any) => void;

@@ -267,4 +267,30 @@ describe('serializeStyleTokens — user style-token serializer', () => {
     const css = serializeStyleTokens({ 'header-1': { headerMode: 'fixed' } });
     expect(css).toBe('');
   });
+
+  // section-background D2 — CONTRAST PAIR INVARIANT.
+  // Dark-default block roots (`.wk-hero`, `.wk-hero-img`, `.wk-footer`) declare
+  // `color:var(--u-fg, var(--wk-on-dark))` AT THE ROOT, which beats any colour
+  // inherited from the wrapper's `[data-surface]` rule. So a surface that emits
+  // `--u-bg` without `--u-fg` paints light-on-light there. Every non-default
+  // surface must emit BOTH. (Resolver-side coverage lives in
+  // `src/modules/skeletons/styleTokens.test.ts`.)
+  it.each(['paper', 'paper-2', 'dark', 'accent'] as const)(
+    'background "%s" emits BOTH --u-bg and --u-fg (contrast pair)',
+    (background) => {
+      const css = serializeStyleTokens({ 'about-1': { background } });
+      expect(css).toContain('[data-sid="about-1"]{');
+      expect(css).toMatch(/--u-bg:[^;]+;/);
+      expect(css).toMatch(/--u-fg:[^;]+;/);
+    },
+  );
+
+  it('maps paper / paper-2 to the ink foreground', () => {
+    expect(serializeStyleTokens({ 'about-1': { background: 'paper' } })).toBe(
+      '[data-sid="about-1"]{--u-bg:var(--wk-paper);--u-fg:var(--wk-ink);}',
+    );
+    expect(serializeStyleTokens({ 'about-1': { background: 'paper-2' } })).toBe(
+      '[data-sid="about-1"]{--u-bg:var(--wk-paper-2);--u-fg:var(--wk-ink);}',
+    );
+  });
 });

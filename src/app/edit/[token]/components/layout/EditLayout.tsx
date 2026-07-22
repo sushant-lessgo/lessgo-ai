@@ -58,6 +58,14 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   const mood = useStoreState(
     state => (state.themeValues as Record<string, any> | null)?.mood as string | undefined
   );
+  // section-background D4 — editor injector gap: the edit route emitted NO
+  // `[data-sid]{--u-*}` CSS at all because styleTokens were never passed here
+  // (published does, via LandingPageRenderer/SSRTokens). Without this the #1
+  // dual-renderer trap fires: editor shows nothing, published shows the band.
+  // Templates that don't consume the prop ignore it.
+  const styleTokens = useStoreState(
+    state => (state.themeValues as Record<string, any> | null)?.styleTokens
+  );
   const usesTemplate = usesTemplateModule(audienceType, templateId);
   const { tmpl } = useTemplateModule(audienceType, templateId);
   const effectivePalette = (paletteId as any) || tmpl?.defaultPaletteId;
@@ -280,6 +288,8 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
         // Neutral mood (vestria) — undefined for other templates / unset
         // drafts; injectors default it (bone). Mirrors LandingPageRenderer.
         mood={mood}
+        // Per-section user style tokens (Project.themeValues.styleTokens).
+        styleTokens={styleTokens}
       >
         {shell}
       </ThemeInjector>

@@ -892,6 +892,28 @@ export function createPersistenceActions(set: any, get: any) {
       });
     },
 
+    /**
+     * section-background D3 — the ONE writer of `themeValues.styleTokens`.
+     * Immer deep-merge: only `styleTokens[sectionId]` is touched; every other
+     * `themeValues` key (mood, knobs, …) and every other section's tokens survive.
+     * `saveDraft` REPLACES the whole `themeValues` column from the store's blob
+     * (autoSaveDraft spreads it wholesale), so the merge MUST happen here — never
+     * at a call site.
+     */
+    setSectionStyleTokens: (sectionId: string, patch: Partial<any>) => {
+      set((state: EditStore) => {
+        const tv = ((state as any).themeValues ??= {});
+        const map = (tv.styleTokens ??= {});
+        map[sectionId] = { ...(map[sectionId] ?? {}), ...patch };
+        state.lastUpdated = Date.now();
+        state.version += 1;
+        state.persistence.isDirty = true;
+      });
+      // Same choreography as the i18n mutators: isDirty above, then flush —
+      // triggerAutoSave is GATED on isDirty.
+      get().triggerAutoSave?.();
+    },
+
     reorderSections: (newOrder: string[]) =>
       set((state: EditStore) => {
         state.sections = newOrder;
