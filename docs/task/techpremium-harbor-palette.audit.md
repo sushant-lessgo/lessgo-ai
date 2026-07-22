@@ -402,3 +402,153 @@ Known-and-accepted forest deltas introduced by this phase, all pre-ruled in the 
 scope: `:56`'s shadow tint 0.30→0.325 L; `:35`/`:79`'s hue-140 values collapse onto `--on-dark`
 (`0.840 0.022 140`); `:43`'s hover chroma 0.185→0.176. `:11`'s midpoint and `:12`'s tag colour are
 value-exact. Phase 3 not started.
+
+---
+
+## Phase 3 (slice 2 — B2: Footer family)
+
+Branch verified FIRST, before any edit: `git -C <WORKDIR> branch --show-current` →
+`feature/techpremium-harbor-palette`. Match.
+
+### Files changed
+
+1. `src/modules/templates/techpremium/blocks/Footer/footerStyles.ts`
+2. `src/modules/templates/techpremium/blocks/Footer/TechPremiumFooter.tsx`
+3. `docs/task/techpremium-harbor-palette.audit.md` (this append)
+
+Exactly the phase's 2 Files-touched source files. `git status --porcelain` after the work shows
+those two source files and nothing else. **`TechPremiumFooter.published.tsx` was NOT touched**
+(it carries 0 colour literals by design — verified `grep -c "oklch(" … → 0` before and after —
+and imports `FOOTER_STYLES`, so the `footerStyles.ts` edit covers both renderers). No phase-4/5
+file was opened for modification.
+
+### `footerStyles.ts` — 7 in-scope replacements (before → after)
+
+The file carries **9** `oklch(` literals: 7 in-scope + 2 scope-out. Diff: `7 insertions(+),
+7 deletions(-)` — one literal per line, so lines = occurrences here.
+
+| # | line | selector / role | before | after | source of the string |
+|---|---|---|---|---|---|
+| 1 | `:5` | `.tp-footer` body ink | `oklch(0.84 0.022 140 / 0.82)` | `color-mix(in oklch, var(--on-dark) 82%, transparent)` | canonical hue-140 form @ ORIGINAL α 0.82 — byte-identical to phase 2's `sharedStyles.ts:35` |
+| 2 | `:8` | `.tp-footer__mk` panel fill | `oklch(0.34 0.045 158)` | `var(--forest)` | canonical "`var(--forest)` for `0.34 0.045 158`" / scout §G row 7 (the single footer-panel site) |
+| 3 | `:12` | `.tp-footer__blurb` | `oklch(0.84 0.022 140 / 0.78)` | `color-mix(in oklch, var(--on-dark) 78%, transparent)` | canonical hue-140 form @ ORIGINAL α 0.78 |
+| 4 | `:17` | `.tp-footer__social a` | `oklch(0.84 0.022 140 / 0.7)` | `color-mix(in oklch, var(--on-dark) 70%, transparent)` | canonical hue-140 form @ ORIGINAL α 0.7 |
+| 5 | `:25` | `.tp-soc-pop input::placeholder` | `oklch(0.84 0.022 140 / 0.5)` | `color-mix(in oklch, var(--on-dark) 50%, transparent)` | canonical hue-140 form @ ORIGINAL α 0.5 |
+| 6 | `:27` | `.tp-soc-pop button` | `oklch(0.84 0.022 140 / 0.7)` | `color-mix(in oklch, var(--on-dark) 70%, transparent)` | canonical hue-140 form @ ORIGINAL α 0.7 |
+| 7 | `:41` | `.tp-news__input::placeholder` | `oklch(0.84 0.022 140 / 0.55)` | `color-mix(in oklch, var(--on-dark) 55%, transparent)` | canonical hue-140 form @ ORIGINAL α 0.55 |
+
+### `TechPremiumFooter.tsx` `EDIT_EXTRA` — 10 in-scope replacements (before → after)
+
+All 10 are the same base value `oklch(0.84 0.022 140)` at three alphas; all sit inside
+`EDIT_EXTRA` (`:236-263`), editor-only chrome. Diff: `10 insertions(+), 10 deletions(-)`.
+After the edit the whole file contains **zero** `oklch(` occurrences (asserted programmatically
+during the replacement).
+
+| # | line | selector / role | before | after |
+|---|---|---|---|---|
+| 1 | `:238` | `.tp-footer__col-remove, .tp-footer__link-remove` | `oklch(0.84 0.022 140 / 0.6)` | `color-mix(in oklch, var(--on-dark) 60%, transparent)` |
+| 2 | `:239` | `.tp-footer__link-cfg` | `oklch(0.84 0.022 140 / 0.7)` | `color-mix(in oklch, var(--on-dark) 70%, transparent)` |
+| 3 | `:242` | `.tp-foot-add` (add-link chip) | `oklch(0.84 0.022 140 / 0.7)` | `color-mix(in oklch, var(--on-dark) 70%, transparent)` |
+| 4 | `:243` | `.tp-news__field` | `oklch(0.84 0.022 140 / 0.7)` | `color-mix(in oklch, var(--on-dark) 70%, transparent)` |
+| 5 | `:245` | `.tp-news-setup` | `oklch(0.84 0.022 140 / 0.82)` | `color-mix(in oklch, var(--on-dark) 82%, transparent)` |
+| 6 | `:246` | `.tp-news-status` | `oklch(0.84 0.022 140 / 0.7)` | `color-mix(in oklch, var(--on-dark) 70%, transparent)` |
+| 7 | `:254` | `.tp-legal-edit button` | `oklch(0.84 0.022 140 / 0.6)` | `color-mix(in oklch, var(--on-dark) 60%, transparent)` |
+| 8 | `:255` | `.tp-wa-edit` | `oklch(0.84 0.022 140 / 0.7)` | `color-mix(in oklch, var(--on-dark) 70%, transparent)` |
+| 9 | `:259` | `.tp-flogo-edit__btn` | `oklch(0.84 0.022 140 / 0.7)` | `color-mix(in oklch, var(--on-dark) 70%, transparent)` |
+| 10 | `:261` | `.tp-flogo-edit__x` | `oklch(0.84 0.022 140 / 0.6)` | `color-mix(in oklch, var(--on-dark) 60%, transparent)` |
+
+The hover states in `EDIT_EXTRA` (`:240`, `:260`, `:262`) and `footerStyles.ts` (`:18`, `:28`)
+already use `var(--lime)` — no literal there, nothing to change; they follow the palette
+automatically.
+
+### Byte-identity of the canonical strings
+
+`grep -oh "color-mix(in oklch, var(--on-dark) [0-9]*%, transparent)"` across both Footer files +
+phase 2's `sharedStyles.ts`:
+
+```
+1 … 50%, transparent)   1 … 55%, transparent)   3 … 60%, transparent)
+8 … 70%, transparent)   1 … 78%, transparent)   1 … 80%, transparent)   3 … 82%, transparent)
+```
+
+Every occurrence matches the canonical template character-for-character (same spacing, same
+`in oklch, `, same `%, transparent)` tail); the 82% and 80% forms are byte-shared with phase 2's
+`:35`/`:79`. The phase-4 parity test over these strings will see one spelling only.
+
+### Scope-outs — verified untouched
+
+`grep -n "oklch(" footerStyles.ts` post-edit returns exactly two hits, both originals:
+
+```
+46:… box-shadow:0 14px 34px -12px oklch(0.55 0.16 150 / 0.6);   # .tp-wa-fab       (hue 150)
+47:… box-shadow:0 18px 40px -12px oklch(0.55 0.16 150 / 0.7);   # .tp-wa-fab:hover (hue 150)
+```
+
+So the Footer family now contributes **0** to hues 158/159/140/128 and keeps its **2** to the
+phase-5 hue-150 anchor (repo-wide 11). Nothing else in either file changed: colour values only —
+no selector, declaration, markup, JSX, import, or structural change.
+
+### Deviations from the plan
+
+**None.** No value invented; each replacement traces to the plan's canonical hue-140 rule
+(`color-mix(in oklch, var(--on-dark) N%, transparent)` at the site's original alpha) or the
+canonical `var(--forest)` for `0.34 0.045 158`.
+
+Two in-scope judgment calls, resolved conservatively:
+
+1. **All 10 EDIT_EXTRA literals used the `--on-dark` (not `--on-dark-2`) form.** The canonical
+   rule reserves `var(--on-dark-2)` for "the opaque tag cluster"; all 10 here carry an explicit
+   alpha (0.6/0.7/0.82) and are the same `0.84 0.022 140` base as the `--on-dark` family, so they
+   take the alpha-mix form. No opaque hue-140 literal exists in either file.
+2. **Alpha → percentage is a literal transcription** (`/ 0.82`→`82%`, `/ 0.78`→`78%`,
+   `/ 0.7`→`70%`, `/ 0.6`→`60%`, `/ 0.55`→`55%`, `/ 0.5`→`50%`). Nothing rounded or harmonised;
+   the collapse is in the base value (drifted `0.84 0.022 140` → `--on-dark` `0.840 0.022 140`,
+   which for THIS file is value-exact under forest to 3 decimals), not in the alphas.
+
+**Line-ending note (housekeeping, no code effect):** my first scripted pass rewrote
+`footerStyles.ts` with LF endings (the repo has `core.autocrlf=true` and the working-tree file was
+CRLF). I detected this and restored CRLF byte-for-byte (53 CRLF, matching the original). `git
+diff` shows the 7 intended lines only, no whitespace churn. `TechPremiumFooter.tsx` was edited in
+binary mode and kept its 263 CRLF endings throughout.
+
+### Commands run and their real results
+
+| command | result |
+|---|---|
+| `git branch --show-current` (FIRST action) | `feature/techpremium-harbor-palette` — match |
+| `npx tsc --noEmit` | **0 errors** (exit 0, no output) |
+| `npm run test:run` | **316 passed \| 1 skipped (317 files); 5092 passed \| 15 skipped (5107 tests)** — 87.43s |
+| `git status --porcelain` | exactly 2 modified source files (the two above) |
+| `git diff --stat` | `2 files changed, 17 insertions(+), 17 deletions(-)` (7 + 10) |
+| `grep -c "oklch(" TechPremiumFooter.published.tsx` | `0` (unchanged, file untouched) |
+| `grep -n "oklch(" footerStyles.ts` post-edit | 2 hits — `:46`/`:47` scope-outs only |
+
+Totals are **identical** to phases 1 and 2 (5092/15) — nothing dropped or newly skipped, and the
+phase-1 forest cascade guard (`palettes.test.ts`, 8 tests) still holds. That guard covers the
+TOKEN layer only; it cannot see block literals, so it is evidence phase 3 broke nothing upstream,
+**not** evidence that these 17 replacements render correctly.
+
+### What is NOT verified — outstanding, and it matters
+
+I have no browser and ran no dev server. **I make no visual claim whatsoever.** Specifically
+outstanding for the founder/human gate:
+
+- **The footer in the editor under BOTH palettes**, including the EDIT_EXTRA affordances (column/
+  link remove buttons, link-config icon, add-link chips, newsletter field + setup button +
+  status, legal edit, WhatsApp edit row, footer-logo chips) **and their hover states** — the
+  chrome must stay legible on the navy band under harbor and unchanged-looking under forest.
+- **A published render of the footer**, confirming `footerStyles.ts` really carried both renderers
+  (the whole asymmetry argument rests on it, and I verified it only by reading the import at
+  `.published.tsx:13`).
+- The `color-mix(…, transparent)` premultiplied-alpha engine behaviour still applies to all 16
+  alpha sites here (phase 2 flagged it; nothing in this phase re-tests it). No test in this repo
+  catches that class of failure — these are string substitutions that type-check and unit-test
+  green while potentially rendering wrong.
+- `npm run build` not run (orchestrator, after phase 5). No `/dev/seed-techpremium` hit, no DB
+  touched.
+
+Known-and-accepted forest deltas from this phase (all pre-ruled in the plan's AC #4 scope):
+the 16 hue-140 sites collapse from `0.84 0.022 140` onto `--on-dark` (`0.840 0.022 140` — a
+zero-visible-difference collapse for this file, since every literal here shared the one base
+value), and `:8`'s panel fill moves `0.34 0.045 158` → `--forest` `0.325 0.045 158` (slightly
+darker 34px logo mark). Phase 4 not started.
