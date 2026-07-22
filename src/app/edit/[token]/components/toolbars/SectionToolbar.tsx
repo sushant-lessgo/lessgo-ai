@@ -24,6 +24,9 @@ import { showSocialModal } from '../ui/GlobalModals';
 // SAME predicate `resolveSectionSurface` uses, so the toolbar and the renderer can
 // never drift about which projects have surfaces.
 import { isSkeletonBacked } from '@/modules/skeletons/ids';
+// phase 3: the read-side slides coercion (pure data) — the chip label must agree
+// with what the canvas renders, so it runs the SAME normalizer the panel does.
+import { normalizeSlides } from '@/modules/skeletons/work/heroSlides';
 import { BackgroundPanel } from './BackgroundPanel';
 
 // Shared chrome (header/footer) is site-wide: hide per-page structural actions.
@@ -81,10 +84,11 @@ function sectionTypeOf(sectionId: string): string {
 // Each entry is the mandatory "why" tooltip for a greyed placeholder (founder
 // ruling 9) — a dead button with no explanation reads as a bug.
 const BACKGROUND_DENIED_SECTION_TYPES: Record<string, string> = {
-  // Phase 3 (D7): on the slider/image hero variants the band is fully covered by
-  // `.wk-hero__media`/`__slides` + `__scrim`, so Color is INVISIBLE there until
-  // `bgMode:'color'` suppresses the media. The hero ships as ONE coherent control.
-  hero: 'Hero background lands with image mode.',
+  // (`hero` WAS denied here through phase 2 — "Hero background lands with image
+  // mode." Phase 3 ships that image mode, so the hero is now LIVE: its panel adds
+  // Color | Image | Video(greyed) tabs and `bgMode:'color'` suppresses the media
+  // that used to cover the band.)
+  //
   // D5 / orchestrator R2: `--wk-header-bg` is declared on `:root` and cannot be
   // retro-bound per-section; the header's surface belongs to the header toolbar.
   header: 'Header background comes with the header toolbar.',
@@ -204,6 +208,24 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
   const backgroundDisabledTitle = !backgroundSupported
     ? BACKGROUND_UNSUPPORTED_TITLE
     : backgroundDeniedReason;
+
+  // ── Dynamic chip label (section-background phase 3, D7) ──────────────────────
+  // Slideshow is NOT a fourth background type — it is EMERGENT from image count
+  // (spec §A), matching the renderer's own `slides.length >= 2` fork. The chip is
+  // therefore the only place the state is named: `Slideshow · N` when this hero is
+  // actually playing N slides, `Background` otherwise. Gated on the SLIDER layout
+  // (the only variant that renders a slide set) and on `bgMode !== 'color'` (in
+  // Color mode no slide is on screen, so calling it a slideshow would lie).
+  const bgMode = useEditStore(
+    (s) => (s.themeValues as Record<string, any> | null)?.styleTokens?.[sectionId]?.bgMode,
+  ) as string | undefined;
+  const backgroundLabel = useMemo(() => {
+    if (sectionTypeOf(sectionId) !== 'hero') return 'Background';
+    if (String(currentSectionLayout || '').toLowerCase() !== 'workheroslider') return 'Background';
+    if (bgMode === 'color') return 'Background';
+    const norm = normalizeSlides(content[sectionId]?.elements as any);
+    return norm.isSlideshow ? `Slideshow · ${norm.slides.length}` : 'Background';
+  }, [sectionId, currentSectionLayout, bgMode, content]);
 
   // Close the panel on ANY section switch. This component is RE-RENDERED, not
   // remounted, when the user selects a different section while the toolbar shell
@@ -417,7 +439,9 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
     // param is TYPE-keyed skin data and is deliberately left alone (D6).
     {
       id: 'background',
-      label: 'Background',
+      // phase 3: reads `Slideshow · N` when this hero is playing N slides (the
+      // state stays legible without a menu entry — spec §A).
+      label: backgroundLabel,
       icon: 'palette',
       disabled: Boolean(backgroundDisabledTitle),
       disabledTitle: backgroundDisabledTitle,

@@ -89,6 +89,10 @@ export const WORK_HERO_SPLIT_STYLES = `
 .wk-hero-split__socials{ display:flex; gap:18px; margin-top:4px; flex-wrap:wrap; }
 .wk-hero-split__social{ color:inherit; text-decoration:none; font-family:var(--wk-ff-body); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.85; }
 .wk-hero-split__social:hover{ opacity:1; }
+/* Color mode (section-background phase 3): the media COLUMN is not rendered, so the
+   two-column grid would otherwise keep an empty 0.95fr track and squeeze the copy
+   into the left half. NEW selector only — no existing rule above is touched. */
+.wk-hero-split--no-media .wk-hero-split__in{ grid-template-columns:1fr; }
 @media(max-width:820px){ .wk-hero-split__in{ grid-template-columns:1fr; } }
 `;
 

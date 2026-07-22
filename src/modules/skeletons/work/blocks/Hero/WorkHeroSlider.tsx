@@ -14,6 +14,7 @@
 // Autoplay pauses while the hero has focus so inline editing is never interrupted.
 
 import React from 'react';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useWorkBlock } from '../../hooks/useWorkBlock';
 import { WorkEditProvider, editPrimitives, useWorkEditCtx } from '../editPrimitives';
 import { WorkHeroSliderCore, type WorkHeroSliderContent } from './WorkHeroSlider.core';
@@ -22,6 +23,13 @@ export default function WorkHeroSlider({ sectionId }: { sectionId: string }) {
   const { blockContent, handleContentUpdate, handleCollectionUpdate } =
     useWorkBlock<WorkHeroSliderContent>({ sectionId });
   const ctx = useWorkEditCtx(sectionId, blockContent, handleContentUpdate, handleCollectionUpdate);
+  // Design state (Design ▾ / Background layer), NOT a content-contract key — the
+  // WorkHeader `headerMode` precedent. SCALAR selector (plan D4): one string, so
+  // this block re-renders only when ITS OWN bgMode changes, never on unrelated
+  // styleTokens churn. Absent → today's behaviour.
+  const bgMode = useEditStore(
+    (s) => (s as any).themeValues?.styleTokens?.[sectionId]?.bgMode,
+  ) as string | undefined;
 
   const rootRef = React.useRef<HTMLDivElement>(null);
   // Re-run when the number of slides changes (future multi-slide content).
@@ -104,14 +112,17 @@ export default function WorkHeroSlider({ sectionId }: { sectionId: string }) {
       // Reset to the parity baseline (first slide active).
       slides.forEach((s, i) => s.classList.toggle('is-active', i === 0));
     };
-  }, [slideCount]);
+    // `bgMode` is a dep because Color mode removes the whole slide set from the
+    // DOM: without it the effect would keep an interval running against detached
+    // nodes until the next content change.
+  }, [slideCount, bgMode]);
 
   return (
     <WorkEditProvider ctx={ctx}>
       {/* display:contents → the grouping div is layout-transparent, so editor DOM
           parity with the published wrapper (no extra box) is preserved. */}
       <div ref={rootRef} style={{ display: 'contents' }}>
-        <WorkHeroSliderCore content={blockContent} E={editPrimitives} sectionId={sectionId} />
+        <WorkHeroSliderCore content={blockContent} E={editPrimitives} sectionId={sectionId} bgMode={bgMode} />
       </div>
     </WorkEditProvider>
   );

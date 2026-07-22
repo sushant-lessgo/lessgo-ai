@@ -21,18 +21,27 @@ const MEDIA_PH = (
 );
 
 export function WorkHeroImageCore({
-  content, E, sectionId,
-}: { content: WorkHeroSliderContent; E: WorkPrimitives; sectionId: string }) {
+  content, E, sectionId, bgMode,
+}: { content: WorkHeroSliderContent; E: WorkPrimitives; sectionId: string; bgMode?: string }) {
   const socials = content.socials || [];
+  // COLOR MODE (section-background phase 3, D7 matrix): both the media and the
+  // scrim are `position:absolute;inset:0` overlays covering the whole band, so
+  // dropping those two layers is the entire change — the root's
+  // `background:var(--u-bg, …)` then shows through. Absent/`'image'` → today's
+  // exact markup, byte-identical. (Removing the element, not hiding it: a
+  // `display:none` image is still downloaded.)
+  const colorMode = bgMode === 'color';
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: WORK_HERO_IMAGE_STYLES }} />
       <section className="wk-hero-img" data-sid={sectionId} data-section-id={sectionId} data-wk-hero-image="">
-        <div className="wk-hero-img__media">
-          <E.Img elementKey="portrait_image" src={content.portrait_image} alt={content.name}
-            className="wk-hero-img__media-in" placeholder={MEDIA_PH} eager />
-        </div>
-        <div className="wk-hero-img__scrim" aria-hidden="true" />
+        {!colorMode && (
+          <div className="wk-hero-img__media">
+            <E.Img elementKey="portrait_image" src={content.portrait_image} alt={content.name}
+              className="wk-hero-img__media-in" placeholder={MEDIA_PH} eager />
+          </div>
+        )}
+        {!colorMode && <div className="wk-hero-img__scrim" aria-hidden="true" />}
 
         <div className="wk-hero-img__in">
           <E.Txt elementKey="role_line" value={content.role_line} as="p"

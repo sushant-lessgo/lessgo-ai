@@ -571,3 +571,387 @@ all green and unmodified within the full `test:run`.
   later overrides a section type, the hint follows automatically (same source as the canvas).
 - The e2e `'paper'` expectation for the gallery is skin-data-dependent — if the atelier skin
   ever adds a `work`/`gallery` surface override, that one assertion needs updating.
+
+---
+
+## Phase 3 — Hero: Color + Image mode + `bgMode` + slides invariant (Slice 2)
+
+Branch: `feature/section-background` (verified with `git branch --show-current` BEFORE any edit).
+
+### Files changed
+
+Created:
+- `src/modules/skeletons/work/heroSlides.ts`
+- `src/modules/skeletons/work/heroSlides.test.ts`
+- `src/modules/skeletons/work/blocks/__tests__/heroBackground.test.tsx`
+
+Modified:
+- `src/modules/skeletons/styleTokens.ts`
+- `src/modules/skeletons/work/tokenContract.test.ts`
+- `src/modules/generation/workCollections.ts`
+- `src/modules/generation/workCollections.test.ts`
+- `src/modules/skeletons/work/blocks/Hero/WorkHeroSlider.core.tsx` / `.tsx` / `.published.tsx`
+- `src/modules/skeletons/work/blocks/Hero/WorkHeroImage.core.tsx` / `.tsx` / `.published.tsx`
+- `src/modules/skeletons/work/blocks/Hero/WorkHeroSplit.core.tsx` / `.tsx` / `.published.tsx`
+- `src/modules/skeletons/work/blocks/Hero/styles.ts`
+- `src/modules/generatedLanding/LandingPagePublishedRenderer.tsx`
+- `src/app/edit/[token]/components/toolbars/BackgroundPanel.tsx`
+- `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx`
+- `e2e/section-background.spec.ts`
+- `docs/task/section-background.audit.md` (this section)
+
+**No file outside the phase's Files-touched list was edited** (zero scope additions this phase).
+Shows as modified but NOT edited by me (`git diff` empty — Vitest CRLF rewrite on Windows, same as
+phases 1/2): `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap`.
+Dirty from before the phase: the designer-handoff HTML + `docs/temp/message.md`.
+
+### Per-file
+
+**`styleTokens.ts`** — added `UBgMode = 'color' | 'image'` + `bgMode?: UBgMode` on
+`SectionStyleTokens`, with the "stored, not derived / absent → derive from data / never `'video'`"
+rationale. It is absent from `FIELD_ORDER`, so `serializeStyleTokens` emits nothing for it (the
+`headerMode` pattern) — pinned by a new test. Delivering it as a CSS var was rejected in D8 for a
+concrete reason now recorded in the code: a `display:none` hero image is still DOWNLOADED.
+
+**`heroSlides.ts` (new)** — every D8 helper, pure, no React/store/skeleton imports:
+`normalizeSlides` · `promoteToSlides` · `demoteToSingle` · `reorderSlides` · `replaceSlide` ·
+`removeSlide` (+ `newSlideId`, `MAX_HERO_SLIDES=6`, `MIN_HERO_SLIDES=2`). Phase 4 adds none.
+- `normalizeSlides` is the READ-side coercion: `>=2` → slideshow; otherwise single-image state with
+  the **`portrait_image`-wins** tie-break (the core forks at `>=2`, so that is what the canvas
+  shows, and the panel must agree with the user's eyes). It does NOT mutate its input (tested).
+- Every mutation returns a two-shape `HeroSlidesPatch`: `{kind:'slides'}` (always >=2) or
+  `{kind:'single', portraitImage}` = "set the scalar and DELETE the `slides` key".
+- One private `settle()` is the single choke point that enforces "never length 1" on every return.
+- `promoteToSlides` carries a pre-existing SINGLE slide over **id and all**; only a never-rendered
+  orphan that lost the tie-break is dropped. It also APPENDS when already a slideshow and refuses
+  to exceed the cap.
+- Defensive `unwrap()` handles the raw value and a legacy wrapper.
+  **CORRECTION (phase-3 review):** as shipped in phase 3 it unwrapped `{value}` ONLY — not the
+  live `{content, …}` wrapper — so this line's "BOTH element storage shapes" claim was false.
+  Fixed in "Phase 3 — review fixes" below.
+
+**`workCollections.ts`** — `stampHeroSlides` now skips when the derived array is `< 2` (was
+`=== 0`): the WRITE-side door on the invariant. A single-cover collection leaves the hero
+byte-identical.
+
+**Hero cores (3)** — each takes an optional `bgMode` and implements ITS OWN row of the D7 matrix:
+- slider: `'color'` drops the `__slides`/`__media` layer **and** the `__scrim` (both are
+  `position:absolute;inset:0` overlays) and suppresses `data-wk-interval`.
+- image: same two overlay layers dropped.
+- split: the media is a GRID COLUMN, so the core omits it **and** adds `wk-hero-split--no-media`.
+- Absent or `'image'` → today's exact markup (proved byte-for-byte, see Tests).
+
+**`Hero/styles.ts`** — ONE new selector,
+`.wk-hero-split--no-media .wk-hero-split__in{ grid-template-columns:1fr; }`. No existing rule
+changed. Without it the grid keeps an empty `0.95fr` track and squeezes the copy into the left half.
+
+**Hero wrappers (6)** — edit wrappers read the D4 **scalar** selector
+(`s.themeValues?.styleTokens?.[sectionId]?.bgMode`, no `useShallow`); published wrappers accept the
+new per-section `styleTokens` prop (plus a flat `bgMode` fallback for stages that pass flat props,
+e.g. the parity stage) and hand `bgMode` to the core. `WorkHeroSlider.tsx`'s slider effect gained
+`bgMode` as a dep — Color mode removes the slide set from the DOM, and without it the interval
+would keep firing against detached nodes.
+
+**`LandingPagePublishedRenderer.tsx`** — the usesTemplate branch now passes
+`styleTokens={styleTokens?.[sectionId]}` to `LayoutComponent`, placed **after** `{...flattenedData}`
+(N4): the spread is last today, so anything before it can be clobbered by a same-named content key,
+and the design channel must win a collision rather than lose it. Components that don't declare the
+prop ignore it. **`WorkHeader` is deliberately NOT wired** (D5 — the header is denied per-section
+backgrounds entirely; this prop is the correct channel when toolbar-wave-2 wants it, and its dead
+`content[sectionId].styleTokens` read stays untouched).
+
+**`SectionToolbar.tsx`** — `hero` removed from `BACKGROUND_DENIED_SECTION_TYPES` (the phase-2
+tooltip's promise is now delivered); header / workcatalog / workdetail stay denied, and every
+non-skeleton template keeps the verbatim `BACKGROUND_UNSUPPORTED_TITLE`. New dynamic chip label:
+`Slideshow · N` when the section is a hero **and** the layout is the slider **and** `bgMode !==
+'color'` **and** `normalizeSlides` says >=2 — otherwise `Background`. It runs the SAME normalizer
+the panel does, so the chip cannot disagree with the canvas.
+
+**`BackgroundPanel.tsx`** — hero-only tab strip `Color | Image | Video`:
+- Video is greyed with a why (`WorkHeroVideo` is a declared-but-unbuilt slot; nothing behind it).
+- Image is greyed with a why on `workherocenter` ("This hero layout doesn't display a background
+  image.") and `bgMode` is NEVER written there — the D7 no-op.
+- Default tab when `bgMode` is absent = `image` on variants that render media (that IS what the
+  canvas shows) — derived, never persisted.
+- Tab clicks write `{bgMode}` ONLY; chips write `{background}` ONLY. Images are never cleared, so
+  Color <-> Image is lossless with no confirm dialog.
+- Image tab: single-image "Choose/Replace image" slot; on the slider ALSO an always-visible
+  "+ Add image" with the hint "Add more to make a slideshow." (2nd pick promotes) and an
+  "N images" line once it is a slideshow. `MediaPickerModal` is mounted here (edit-only) with
+  caller-owned `open` state + `tokenId` + `initialTab="library"`.
+- **No Accent chip anywhere** (ruling G2 stands); the Auto mode-chip + hint (G1) are untouched.
+
+### Deviations from the plan (all in-scope judgement calls)
+
+1. **Writes go through `setSection({elements})`, not `updateElementContent`** (D8 says the latter).
+   Two hard reasons: (a) N5 requires genuinely DELETING the `slides` key and `updateElementContent`
+   cannot delete — it only assigns; (b) `updateElementContent` pushes its OWN `'content'` history
+   entry, which would sit under the wrapper entry and muddy "one undo restores the pair".
+   `setSection` pushes no history entry of its own, so ONE `executeUndoableAction('sectionSwap', …)`
+   is the only stack entry per gesture. **`'sectionSwap'` is not cosmetic**: it is the only
+   `UndoableAction` whose undo branch restores the whole `content` snapshot
+   (`uiActions.ts:724-735`) — a `'theme'`-mapped type would restore theme ONLY and the undo would
+   silently do nothing. This is the BlockVariantSelector precedent, matched exactly.
+2. **N5 is fully satisfied** — `demoteToSingle` returns `{kind:'single'}`, and the caller writes an
+   elements object without the `slides` key, so the key is genuinely gone. No `[]` is ever written.
+   (The demote CALLER ships with phase 4's tray; phase 3 ships the helper + its test.)
+3. **The e2e does not drive an actual image PICK.** The picker's Library grid depends on this
+   project's uploaded assets and its Stock tab on a live Pexels key — neither is hermetic. The spec
+   proves the Add slot is always visible and that it opens the picker; the promote MUTATION is
+   proved deterministically in `heroSlides.test.ts` (and the `Slideshow · N` chip is asserted in the
+   e2e from a 2-slide seed). Recorded inline at the point of omission.
+4. **The e2e seed's layout names changed to PascalCase** (`WorkHeroSlider`, not `workheroslider`).
+   Found the hard way: the element SCHEMA (`audience/work/elementSchema.ts`) is keyed PascalCase, so
+   with lowercase layouts `getSchemaDefaults` returns `null`, `extractLayoutContent` yields `{}`, and
+   **every block rendered placeholders with zero seeded content**. The phase-2 colour assertions
+   passed anyway (they read computed colours), but the hero-media assertions would have tested
+   nothing. `resolveWorkBlock` lowercases before its own lookup, so component dispatch is unaffected.
+   A comment in the seed now says all this. *Worth flagging beyond this phase: any future e2e that
+   asserts on seeded CONTENT must use PascalCase layouts.*
+5. **The hero e2e picks Paper, not Ink.** The atelier skin's hero default already resolves to
+   `dark`, so an Ink pick would be indistinguishable from the baseline and the "band repainted"
+   assertion would be vacuous.
+6. **`workCollections.test.ts`: three existing cases were adjusted.** Two asserted a length-1 stamp
+   (`drops groups that have no cover`, `respects hidden photos`) — exactly the behaviour the guard
+   now forbids — so each grew a second covered group and asserts 2 slides while keeping its original
+   point (cover-less / hidden-only groups are dropped). The `NEVER overwrites user-edited slides`
+   case also grew a second group, otherwise the new guard — not the no-clobber rule — would be what
+   makes it pass (it would have gone vacuous).
+7. **A single-image pick does not strip a pre-existing orphan `slides` entry.** Conservative choice:
+   touch only the key the gesture is about. The orphan is invisible either way (`normalizeSlides`
+   reports single-image state and the core forks at >=2).
+8. **The hero panel is wider (`w-64` vs `w-56`)** to fit three tabs. Non-hero sections keep the
+   phase-2 panel byte-for-byte.
+
+### Deliberately NOT done
+
+- **`WorkHeroCenter.core.tsx` / `.tsx` / `.published.tsx` are UNTOUCHED** (D7). The no-op is proved
+  by test, not by assertion-free omission.
+- No filmstrip tray, no drag-reorder, no per-slide delete UI, no canvas preview-on-click (phase 4).
+  The helpers those need already exist and are tested.
+- No autoplay / interval / transition / crop / focal-point / per-slide-overlay control anywhere —
+  the e2e asserts none of those words appears in the panel.
+- Nothing behind Video. No Accent chip. `getSurfaceForSection` signature, `src/types/template.ts`,
+  all 8 template `sectionRules.ts`, `tokenContract.ts` (incl. `--wk-header-bg`), `.wk-header`,
+  `WorkHeader.*`, `scripts/`, `public/assets/`: untouched. No git state changes, no commit.
+
+### Tests added
+
+1. **`heroSlides.test.ts`** (new): normalize (slideshow / single / LEGACY length-1 read with a
+   no-mutation assertion / orphan-only / the `{value}` wrapper / junk) · promote (portrait first, a
+   pre-existing single slide carried over id-and-all, tie-break, append, cap) · demote +
+   `removeSlide` (survivor, auto-demote at 2, unknown id) · reorder/replace · and a table-driven
+   **INVARIANT** block running every helper from every direction and asserting no return path ever
+   carries a length-1 `slides` array.
+2. **`heroBackground.test.tsx`** (new, 12 cases): per variant, absent `bgMode` === explicit
+   `'image'` **byte-for-byte in BOTH renderers**; the frozen `work.v1.js` hooks emitted verbatim on
+   a 2-slide hero; `'color'` drops media+scrim (slider/image, both renderers, including the
+   multi-slide case) and drops the media COLUMN + adds the modifier (split, both renderers) with the
+   new CSS rule present and NOT applied by default; the **center no-op proof**; published-side
+   `bgMode` delivery off the per-section `styleTokens` prop, and an unrelated `styleTokens` payload
+   changing nothing.
+3. **`workCollections.test.ts`**: two new cases — a single-cover collection leaves the hero
+   BYTE-IDENTICAL (JSON compare) and a multi-group set with only one cover is skipped too.
+4. **`tokenContract.test.ts`**: `bgMode` is not serialized (both values), and it does not disturb
+   the other coordinates of the same section.
+5. **`e2e/section-background.spec.ts`**: two new hero cases — (a) Color mode repaints the band AND
+   the `<img>`s are GONE (count 0, not `display:none`), scrim gone, copy intact, chip stops saying
+   Slideshow, lossless round trip back to Image with both slides and the colour choice surviving,
+   then a reload; (b) the Image tab's always-visible Add slot + slideshow hint + picker opens + the
+   Scope-OUT word sweep. The phase-2 gate case now asserts the hero is LIVE.
+
+**Mutation check (the new assertions are NOT inert).** Three mutants applied together — slider
+`colorMode = false`, split `colorMode = false`, and the stamp guard reverted to `length === 0` —
+turned **5 tests red** across `heroBackground.test.tsx` and `workCollections.test.ts`. All three
+were reverted and the suites re-run green (`git diff --stat` confirms only the intended edits
+remain).
+
+**Real pre-change byte-identity check (temporary, then deleted).** `git show HEAD:` was used to
+materialise the three PRE-change cores beside the new ones, and a throwaway vitest file rendered
+both with the published primitives: slider (single + 2-slide) and image are identical **including
+the inlined `<style>` block**; split markup is identical and its stylesheet differs only by the one
+sanctioned new rule. The temp files were removed (`git status` clean).
+
+### Verification (actual observed output, this worktree)
+
+- `npx tsc --noEmit` → **clean, zero output**.
+- `npm run test:run` → **312 passed | 1 skipped (313 files); 5056 passed | 15 skipped (5071)**,
+  80.7s. Zero failures. D9 tripwires green **UNMODIFIED**: `kundiusPages.test.tsx`,
+  `oldContentFallback.test.tsx`, `coreParity.test.ts`, `uiFoundationIsolation.test.tsx.snap`
+  (no snapshot content change — the file shows dirty only from a CRLF rewrite; `git diff` is empty).
+- `npx next lint --file …` on the 7 touched source files → **1 PRE-EXISTING warning**
+  (`react-hooks/exhaustive-deps` on SectionToolbar's validation `useMemo`), no errors, nothing new.
+- `npm run build` → **success**. `git status --porcelain public/assets scripts/legacy
+  public/published.css` → **empty**. `work.v1.js` byte-unchanged.
+- **Playwright, actually run** (`E2E_PORT`, `--project=setup --project=authed`):
+  `e2e/section-background.spec.ts` → **6 passed** (all 5 tests + auth setup; both new hero cases
+  executed for real). `e2e/toolbar-dispatch.spec.ts` → **17 passed, unmodified** (its greyed
+  Background assertions on meridian/hearth still hold). `e2e/workWave2.spec.ts --project=public` →
+  **4 passed** (incl. "multi-slide hero emits the exact work.v1.js hooks").
+- `npx playwright test e2e/parity.spec.ts --project=public` → **4 passed, 3 failed, all
+  PRE-EXISTING and identical to the phase-2 record**: `atelier/header 4.94% > 3%` (the
+  known-accepted work-contract-wave2 red — "don't re-flag") and the two `atelier2` dev-only-stage
+  timeouts. meridian (max 1.30%) and hearth (max 0.25%) bands are well under 3%. Both atelier
+  parityBreak negative controls fired (46.8%), so the stage itself is live.
+
+### Risks / open items for the reviewer
+
+1. **The atelier parity run stops at `header`**, so the atelier HERO band is not measured by
+   `parity.spec.ts` today (pre-existing: the first failing section aborts the loop). Hero
+   edit<->published parity for this phase is covered instead by `heroBackground.test.tsx`, which
+   compares the two wrappers' markup directly, per variant, in both modes.
+2. **Undo can leave a second, older entry under the gesture entry** when a user edits a hero image
+   via the CANVAS primitive and then via the panel — different writers, different history shapes.
+   One undo still restores the whole panel gesture (the wrapper entry is on top and restores the
+   full content snapshot); a second undo re-applies an older value that is already current, i.e. a
+   no-op. Worth a glance when phase 4's tray adds rapid multi-gesture sequences.
+3. **Default tab on a hero is Image, not Color.** That is the honest derivation from data (the
+   canvas IS showing media), but it means the colour chips are one click away on heroes. Founder may
+   want the opposite default — a one-line change if so.
+4. **Cap 6 is enforced in the helper, not yet in the UI.** `promoteToSlides` silently returns the
+   unchanged set at 6; the visible cap notice + hidden Add slot are phase 4's. Until then a 7th pick
+   is a silent no-op.
+5. **`styleTokens` is now spread onto every template-backed published block.** Harmless (unknown
+   props are ignored; the only two `{...props}` forwarders in the repo forward to components, not to
+   DOM nodes), but it is a widened prop surface and worth one reviewer glance.
+6. **E2E seed casing** (deviation 4) is a trap that will bite the next spec author; it is now
+   recorded in the spec file itself.
+
+---
+
+## Phase 3 — review fixes
+
+Branch: `feature/section-background` (verified with `git branch --show-current` BEFORE any edit).
+Scope: the reviewer's ONE blocking issue + the three cheap non-blocking ones. Nothing else.
+
+### Files changed
+
+Created:
+- `src/app/edit/[token]/components/toolbars/BackgroundPanel.picker.test.tsx` — the mandated
+  regression test for the blocking fix (the only file outside phase 3's Files-touched list; the
+  task brief authorised "plus the new test file").
+
+Modified:
+- `src/app/edit/[token]/components/toolbars/BackgroundPanel.tsx` (blocking fix + non-blocking #2)
+- `src/modules/skeletons/work/heroSlides.ts` (non-blocking #1)
+- `src/modules/skeletons/work/heroSlides.test.ts` (coverage for #1)
+- `src/modules/generation/workCollections.ts` (non-blocking #3)
+- `docs/task/section-background.audit.md` (this section + the corrected phase-3 `unwrap()` line)
+
+### BLOCKING — the Image picker was dead in the browser
+
+**Fix chosen: guard the dismiss, do NOT hoist the modal.** Hoisting `MediaPickerModal` into
+`SectionToolbar` would have dragged the picking STATE (`picking`), the elements selector, the
+`normalizeSlides`/`promoteToSlides` calls and the `writeElements` gesture up with it — i.e. moved
+the whole image feature out of the panel that owns it — to solve a dismiss problem. The guard keeps
+the panel self-contained and every other dismiss path intact.
+
+The click-outside `useEffect` MOVED down the component (it now reads `picking`, whose `useState` sits
+below where the effect used to be) and gained two early returns, in this order:
+
+```ts
+if (picking !== null) return;                        // a picker is open → never dismiss
+if (target.closest?.('[role="dialog"]')) return;     // belt-and-braces for anything portaled
+```
+
+A comment at the site records the whole mechanism (the portal is outside `panelRef`; mousedown still
+BUBBLES; `DialogContent` stops `click` only; the asset button's `onMouseDown` preventDefault does not
+stop propagation) so the guard cannot be "cleaned up" by a later reader.
+
+Dismiss behaviour is otherwise unchanged and deliberately narrow: with no picker open the listener is
+the phase-2 one line-for-line (pinned by a third test case). Clicking the Radix overlay to close the
+dialog is also unaffected — it hits guard 1, the panel stays open, Radix closes the dialog itself.
+
+### Coverage that survives regression (and PROOF it bites)
+
+`BackgroundPanel.picker.test.tsx` — jsdom, **REAL panel + REAL `MediaPickerModal` + REAL
+`createEditStore`**. Only `useTemplateReady` (async dynamic import) and `componentRegistry`
+(`extractSectionType` alone is used) are stubbed; `fetch` is stubbed to serve one `/api/media` asset
+and to absorb the debounced autosave. The harness reproduces `SectionToolbar`'s mount shape exactly
+(`{open && <BackgroundPanel onClose={() => setOpen(false)}/>}`), so `onClose` genuinely UNMOUNTS the
+panel and, with it, the modal.
+
+Three cases: Replace-image → library asset → `content[hero].elements.portrait_image` is the picked
+URL · Add-image → library asset → `slides` promotes to exactly `['/old.jpg', <picked>]` · a mousedown
+genuinely outside (no picker open) still dismisses.
+
+**Two mechanics are load-bearing and are commented as such in the file:**
+
+1. The press is driven as `mousedown` … then `mouseup` + `click`, in **SEPARATE `act()` calls**. In
+   a browser React flushes discrete-event updates synchronously, so a mousedown handler that
+   unmounts has already detached the button before `click` is dispatched. Batching both into ONE
+   `act()` defers the unmount to the end of the batch — and the test then PASSES against the broken
+   handler. Observed, not theorised: with a single combined `act()` the mutant run failed only on
+   `closedCount` while the store-write assertion went green.
+2. The test asserts a precondition — `panel.contains(dialog) === false` — so the portal premise is
+   pinned rather than assumed.
+
+**Proof it bites** (mutation applied, then reverted — `git diff` confirms the guard is back): with
+the two guard lines deleted, `npx vitest run BackgroundPanel.picker.test.tsx` → **2 failed |
+1 passed**, failing on the real symptom:
+
+- `expected '/old.jpg' to be 'https://blob.test/library-pick.jpg'` (the pick never landed)
+- `expected false to be true` on `Array.isArray(slides)` (the promote never happened)
+
+With the guard restored: **3 passed**.
+
+### Non-blocking #1 — `unwrap()` handled the wrong legacy wrapper key
+
+`heroSlides.ts` `unwrap()` now unwraps `'content' in v` FIRST (the live wrapper — `getStringContent`,
+`storeTypes.ts`; the repo precedent `WorkFooter.tsx` unwraps both), then `'value'`. The comment
+records why it matters: with only the `value` branch, a `{content: url}` portrait made
+`normalizeSlides` report NO image and `promoteToSlides` write an **empty first slide**.
+
+Three new `heroSlides.test.ts` cases: a `{content}` portrait normalizes · promote off a `{content}`
+portrait keeps the first slide non-empty (`['/p.jpg','/new.jpg']`) · a `{content}`-wrapped `slides`
+array. The existing `{value}` case is kept unmodified (that shape is still accepted).
+
+The phase-3 audit line claiming `unwrap()` "handles BOTH element storage shapes" is **corrected in
+place** above, with a pointer to this section.
+
+### Non-blocking #2 — empty panel body on `workherocenter`
+
+`const tab: UBgMode = rendersImage ? storedBgMode ?? 'image' : 'color';` — `rendersImage` now GATES
+the stored value instead of only supplying the default. Reachable exactly as the reviewer described
+(hero variants are user-swappable): slider → Image (persists `bgMode:'image'`) → swap to "Centered
+type" → previously `tab === 'image'` with `rendersImage === false` hid the chips AND gated off the
+image block, leaving three tabs over an empty body. Rationale is in the comment.
+
+No stored data changes: `setTab` still refuses to WRITE `'image'` on a variant that renders no media
+(D7's no-op), and a stored `'image'` from the slider is left untouched — swapping back restores it.
+
+### Non-blocking #3 — duplicated trailing comment
+
+`workCollections.ts:157` — the doubled `// the ≥2 invariant (never stamp a lone slide)` is now
+single. Comment-only.
+
+### Deviations
+
+None beyond the reviewer's brief. The one file outside phase 3's Files-touched list is the new test
+file, which the brief authorised and asked to be noted here.
+
+### Gates (real, observed output in this worktree)
+
+- `npx tsc --noEmit` → **clean, zero output** (exit 0).
+- `npm run test:run` (FULL suite, re-run to settle the b8 question) →
+  **`Test Files 313 passed | 1 skipped (314)`, `Tests 5062 passed | 15 skipped (5077)`, 98.53s.**
+  Zero failures. **`src/hooks/useWizardStore.b8.test.ts` PASSED inside this full-suite run** — the
+  reported flake did not reproduce, and nothing in this phase touches it. D9 tripwires green and
+  UNMODIFIED (`kundiusPages`, `oldContentFallback`, `coreParity`, `uiFoundationIsolation.snap`).
+- **Playwright, actually run** (dev server on `E2E_PORT=3411`;
+  `npx playwright test e2e/section-background.spec.ts --project=setup --project=authed`) →
+  **6 passed (54.3s)** — auth setup + all 5 section-background cases executed, including both hero
+  cases. The spec file was NOT modified this round.
+- `git status --porcelain public/assets scripts/legacy public/published.css` → **empty**.
+  `work.v1.js` byte-unchanged; `scripts/` and `public/assets/` untouched. No git state changes,
+  no commit.
+
+### Residual risks
+
+- The guard keys on `picking !== null` plus a `[role="dialog"]` ancestor check. If a future control
+  in this panel opens a NON-dialog portal (e.g. a popover portaled to body), it needs the same
+  treatment — the `picking` guard covers only the media picker.
+- The regression test stubs `fetch`: it proves the panel↔modal↔store wiring, not the real
+  `/api/media` contract (that is `media-picker.spec.ts`'s job).
+- Untouched and recorded as instructed: `.wk-hero__num` still rendering in Color mode (founder-eyeball
+  item at the gate) and the `useWizardStore.b8` full-suite timeout (did not reproduce here).

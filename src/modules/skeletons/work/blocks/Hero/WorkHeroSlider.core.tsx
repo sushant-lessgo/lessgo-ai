@@ -22,6 +22,11 @@
 // `wk-hero__media`/`wk-hero__media-in` DOM byte-identically, so the JS bails
 // (<2 slides) and existing drafts are unchanged. No hook is renamed/invented — a
 // new hook would force a `work.v2.js` (forbidden this wave).
+//
+// BG MODE (section-background phase 3): optional `bgMode` prop, resolved from
+// `styleTokens[sectionId].bgMode` by BOTH wrappers (edit reads the store with a
+// scalar selector; published receives the per-section styleTokens prop). `'color'`
+// drops the media + scrim layers; absent/`'image'` is today's exact markup.
 
 import React from 'react';
 import type { WorkPrimitives } from '../primitives';
@@ -52,13 +57,21 @@ const MEDIA_PH = (
 );
 
 export function WorkHeroSliderCore({
-  content, E, sectionId,
-}: { content: WorkHeroSliderContent; E: WorkPrimitives; sectionId: string }) {
+  content, E, sectionId, bgMode,
+}: { content: WorkHeroSliderContent; E: WorkPrimitives; sectionId: string; bgMode?: string }) {
   const socials = content.socials || [];
   const slides = (content.slides || []).filter(Boolean);
+  // COLOR MODE (section-background phase 3, D7 matrix): the user chose a surface
+  // COLOUR for this hero, so the media must not merely be hidden — it must not be
+  // in the markup at all (a `display:none` image is still DOWNLOADED). Here the
+  // media (`__slides`/`__media`) and the `__scrim` are `position:absolute;inset:0`
+  // overlays covering the whole band, so dropping those layers is the entire
+  // change: `background:var(--u-bg, …)` on the root then shows through. Absent or
+  // `'image'` bgMode → TODAY'S EXACT markup, byte-identical.
+  const colorMode = bgMode === 'color';
   // FORK: ≥2 slides → the multi-slide slider; else TODAY'S single-media DOM
   // (byte-identical — do NOT rewrap the single portrait in `.wk-hero__slide`).
-  const isSlider = slides.length >= 2;
+  const isSlider = !colorMode && slides.length >= 2;
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: WORK_HERO_STYLES }} />
@@ -69,7 +82,7 @@ export function WorkHeroSliderCore({
         data-wk-hero-slider=""
         {...(isSlider ? { 'data-wk-interval': String(SLIDER_INTERVAL_MS) } : {})}
       >
-        {isSlider ? (
+        {colorMode ? null : isSlider ? (
           <>
             {/* Slide set — the FIRST slide carries `is-active` so it shows with no
                 JS; the JS/editor effect then toggles `is-active` across the set. */}
@@ -92,7 +105,7 @@ export function WorkHeroSliderCore({
               className="wk-hero__media-in" placeholder={MEDIA_PH} eager />
           </div>
         )}
-        <div className="wk-hero__scrim" aria-hidden="true" />
+        {!colorMode && <div className="wk-hero__scrim" aria-hidden="true" />}
         {/* Giant background slide numeral (Atelier "cover" signature). Rendered in
             BOTH renderers identically; CSS-gated OFF by default via
             --wk-hero-num-display (skin.heroNumeral). D1 = static first slide → "01". */}

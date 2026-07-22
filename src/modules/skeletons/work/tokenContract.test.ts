@@ -356,6 +356,19 @@ describe('serializeStyleTokens — user style-token serializer', () => {
     expect(css).toBe('');
   });
 
+  // section-background phase 3 (D1/D8): `bgMode` is a per-block PROP, not a var.
+  // Delivering it as CSS (e.g. `--u-hero-media-display:none`) was considered and
+  // rejected — a `display:none` hero image is still DOWNLOADED by the browser,
+  // whereas the prop path removes the element from the markup entirely.
+  it('does NOT serialize bgMode (a per-block prop, not a var)', () => {
+    expect(serializeStyleTokens({ 'hero-1': { bgMode: 'color' } })).toBe('');
+    expect(serializeStyleTokens({ 'hero-1': { bgMode: 'image' } })).toBe('');
+    // …and it does not disturb the surface declarations of the same section.
+    expect(serializeStyleTokens({ 'hero-1': { bgMode: 'color', corners: 'sharp' } })).toBe(
+      '[data-sid="hero-1"]{--u-radius:0px;}',
+    );
+  });
+
   // section-background D2 — CONTRAST PAIR INVARIANT.
   // Dark-default block roots (`.wk-hero`, `.wk-hero-img`, `.wk-footer`) declare
   // `color:var(--u-fg, var(--wk-on-dark))` AT THE ROOT, which beats any colour

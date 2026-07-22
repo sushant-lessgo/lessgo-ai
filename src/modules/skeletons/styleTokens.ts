@@ -36,10 +36,29 @@ export type UOpacity    = 'default' | 'full' | 'muted' | 'faint';
  *  by `serializeStyleTokens`. */
 export type UHeaderMode = 'default' | 'static' | 'fixed';
 
+/** What sits behind a section: the template's own surface COLOUR, or the section's
+ *  own image/media (section-background phase 3, spec §C).
+ *
+ *  STORED, not derived — switching types is a visual experiment and must be
+ *  lossless. Deriving it would mean "pick Color" destroys the user's images, and
+ *  since generation stamps `portrait_image`/`slides` on every hero, that
+ *  destructive path would be the DEFAULT path, not an edge case.
+ *
+ *  ABSENT → derive from data (today's exact behaviour), so existing drafts and the
+ *  frozen fixtures are untouched. `'video'` is never stored (greyed chip only —
+ *  `WorkHeroVideo` is a declared-but-unbuilt slot).
+ *
+ *  Like `headerMode`, this is a data-attr-style LEVER consumed as a per-block prop,
+ *  NOT a CSS var — deliberately not serialized by `serializeStyleTokens`. (A
+ *  `display:none` hero image is still DOWNLOADED by the browser; the prop path
+ *  removes the element from the markup instead.) */
+export type UBgMode = 'color' | 'image';
+
 /** One section's user style-token selection. Every field optional; an absent field
  *  — or the explicit `'default'` — emits NOTHING (skeleton baseline shows through). */
 export interface SectionStyleTokens {
   background?: UBackground;
+  bgMode?: UBgMode;
   spacingY?: USpacingY;
   corners?: UCorners;
   border?: UBorder;
@@ -226,8 +245,10 @@ export const USER_STYLE_TOKEN_VARS = [
 /**
  * Serialize a project's style-token map into per-section `[data-sid]` CSS blocks.
  * Only non-default coordinates emit declarations; a section with no active
- * coordinate emits no block; empty/absent input → empty string. `headerMode` is
- * intentionally skipped (consumed as a data-attr by the header block).
+ * coordinate emits no block; empty/absent input → empty string. `headerMode` and
+ * `bgMode` are intentionally skipped — both are LEVERS consumed as props/data-attrs
+ * by the blocks themselves (they are absent from `FIELD_ORDER`, which is what makes
+ * a `bgMode`-only section emit nothing at all; pinned in `tokenContract.test.ts`).
  */
 export function serializeStyleTokens(styleTokens?: StyleTokens | null): string {
   if (!styleTokens) return '';

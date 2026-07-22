@@ -17,13 +17,23 @@ const MEDIA_PH = (
 );
 
 export function WorkHeroSplitCore({
-  content, E, sectionId,
-}: { content: WorkHeroSliderContent; E: WorkPrimitives; sectionId: string }) {
+  content, E, sectionId, bgMode,
+}: { content: WorkHeroSliderContent; E: WorkPrimitives; sectionId: string; bgMode?: string }) {
   const socials = content.socials || [];
+  // COLOR MODE (section-background phase 3, D7 matrix). Unlike slider/image, this
+  // variant's media is a GRID COLUMN (`.wk-hero-split__media`, aspect-ratio 4/5),
+  // not an absolute overlay — dropping it ALONE would leave a `1.05fr 0.95fr` grid
+  // with one empty column and the copy squeezed into the left 52%. So the modifier
+  // class collapses the grid to a single column (the ONE new selector in
+  // `styles.ts`). Absent/`'image'` → today's exact markup, byte-identical.
+  const colorMode = bgMode === 'color';
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: WORK_HERO_SPLIT_STYLES }} />
-      <section className="wk-hero-split" data-sid={sectionId} data-section-id={sectionId} data-wk-hero-split="">
+      <section
+        className={`wk-hero-split${colorMode ? ' wk-hero-split--no-media' : ''}`}
+        data-sid={sectionId} data-section-id={sectionId} data-wk-hero-split=""
+      >
         <div className="wk-hero-split__in">
           <div className="wk-hero-split__copy">
             <E.Txt elementKey="role_line" value={content.role_line} as="p"
@@ -57,8 +67,10 @@ export function WorkHeroSplitCore({
             )}
           </div>
 
-          <E.Img elementKey="portrait_image" src={content.portrait_image} alt={content.name}
-            className="wk-hero-split__media" placeholder={MEDIA_PH} eager />
+          {!colorMode && (
+            <E.Img elementKey="portrait_image" src={content.portrait_image} alt={content.name}
+              className="wk-hero-split__media" placeholder={MEDIA_PH} eager />
+          )}
         </div>
       </section>
     </>

@@ -141,13 +141,20 @@ function stampTree(
  * safe / idempotent). No entries with covers ⇒ no-op (single-portrait hero stays
  * byte-identical). Slide id is derived from the group's STABLE slug so it is
  * deterministic across a re-stamp.
+ *
+ * SLIDES INVARIANT (section-background D8 / R4, the WRITE-side door): a `slides`
+ * array is either absent/empty or has ≥2 entries — NEVER exactly 1. The renderer
+ * forks at `>= 2`, so a length-1 stamp renders the stale scalar `portrait_image`
+ * anyway while occupying the `slides` key (which then blocks a later legitimate
+ * stamp and confuses the editor panel). A single-cover collection therefore leaves
+ * the hero BYTE-IDENTICAL. Today's `length === 0` early-return is not enough.
  */
 export function stampHeroSlides(fc: any, entries: readonly CollectionEntry[]): void {
   if (!fc || !entries || entries.length === 0) return;
   const slides = entries
     .map((e) => ({ id: `slide-${e.slug}`, image: pickCover(e.photos) }))
     .filter((s) => !!s.image); // one slide per group that actually has a cover
-  if (slides.length === 0) return;
+  if (slides.length < 2) return; // the ≥2 invariant (never stamp a lone slide)
 
   const stampTree = (content: Record<string, any> | undefined): void => {
     if (!content || typeof content !== 'object') return;

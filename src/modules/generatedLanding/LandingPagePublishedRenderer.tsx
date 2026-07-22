@@ -175,6 +175,17 @@ export function LandingPagePublishedRenderer({
                 content={content}
                 sections={sections}
                 {...flattenedData}
+                // section-background phase 3 (D4 + note N4): THIS section's design
+                // levers, per-block. Deliberately AFTER `{...flattenedData}` — the
+                // spread is last today, so anything placed before it can be
+                // clobbered by a same-named content key. `styleTokens` is not an
+                // element key in any contract, but ordering is load-bearing and the
+                // design channel must win over a content collision, not lose to it.
+                // Components that don't declare the prop ignore it (WorkHeader is
+                // deliberately NOT wired here — the header is denied per-section
+                // backgrounds entirely, plan D5; toolbar-wave-2 owns that surface,
+                // and this prop is the correct channel when it does).
+                styleTokens={styleTokens?.[sectionId]}
               />
             </div>
           );

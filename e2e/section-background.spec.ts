@@ -67,42 +67,57 @@ function seedFinalContent() {
     },
   });
 
+  // ⚠️ Layout names are PascalCase — the SAME casing real drafts store. The element
+  // SCHEMA (`audience/work/elementSchema.ts`) is keyed PascalCase, so a lowercase
+  // layout makes `getSchemaDefaults` return null and every block renders with EMPTY
+  // content (placeholders only). The colour assertions would still pass, but any
+  // assertion about seeded CONTENT — e.g. the hero's slides being on screen — would
+  // silently test nothing. `resolveWorkBlock` lowercases before its own lookup, so
+  // the component dispatch is unaffected either way.
   return {
     layout: {
       sections: [HEADER, HERO, ABOUT, GALLERY, FOOTER],
       sectionLayouts: {
-        [HEADER]: 'workheader',
-        [HERO]: 'workheroslider',
-        [ABOUT]: 'workabout',
-        [GALLERY]: 'workgallerygrid',
-        [FOOTER]: 'workfooter',
+        [HEADER]: 'WorkHeader',
+        [HERO]: 'WorkHeroSlider',
+        [ABOUT]: 'WorkAbout',
+        [GALLERY]: 'WorkGalleryGrid',
+        [FOOTER]: 'WorkFooter',
       },
       theme: {},
       globalSettings: {},
     },
     content: {
-      [HEADER]: section(HEADER, 'header', 'workheader', {
+      [HEADER]: section(HEADER, 'header', 'WorkHeader', {
         logo_text: 'Kundius',
         nav_items: [{ id: 'n1', label: 'Work', href: '#work' }],
       }),
-      [HERO]: section(HERO, 'hero', 'workheroslider', {
+      [HERO]: section(HERO, 'hero', 'WorkHeroSlider', {
         role_line: 'Photographer',
         name: 'Kundius',
         quote: 'Pictures that keep their nerve.',
+        // phase 3: TWO slides so the hero is genuinely in the slideshow state on
+        // load — that is what makes the chip read `Slideshow · 2` and what Color
+        // mode has to suppress. Same-origin assets on purpose: an unreachable
+        // remote host would stall `page.goto`'s load event.
+        slides: [
+          { id: 'hs1', image: '/hero-placeholder.jpg' },
+          { id: 'hs2', image: '/design-editor.jpg' },
+        ],
       }),
-      [ABOUT]: section(ABOUT, 'about', 'workabout', {
+      [ABOUT]: section(ABOUT, 'about', 'WorkAbout', {
         eyebrow: 'About',
         heading: 'The person behind the work',
         bio: 'Fifteen years behind a camera, most of it in other people’s living rooms.',
       }),
-      [GALLERY]: section(GALLERY, 'work', 'workgallerygrid', {
+      [GALLERY]: section(GALLERY, 'work', 'WorkGalleryGrid', {
         eyebrow: 'Selected work',
         heading: 'The work',
         groups: [
           { id: 'g1', name: 'Weddings', cover_image: '', href: '/works/weddings' },
         ],
       }),
-      [FOOTER]: section(FOOTER, 'footer', 'workfooter', {
+      [FOOTER]: section(FOOTER, 'footer', 'WorkFooter', {
         eyebrow: 'Get in touch',
         heading: 'Let’s make yours.',
         // Explicit `note` so `.wk-footer__note` — one of the on-dark-pinned
@@ -354,7 +369,7 @@ test.describe('section background (work skeleton): Colour on body sections', () 
     expect(borderAfter).toBe(await resolveVarAsColor(page, '--wk-line'));
   });
 
-  test('gate: gallery is LIVE, hero is greyed with its own why-tooltip', async ({
+  test('gate: gallery is LIVE, hero is LIVE since phase 3, header dispatches no toolbar', async ({
     page,
   }) => {
     // N2: the gallery's section type is `work`, not `gallery`. An allowlist
@@ -380,14 +395,13 @@ test.describe('section background (work skeleton): Colour on body sections', () 
     expect(await auto.getAttribute('data-auto-surface')).toBe('paper'); // gallery default
     await expect(page.locator('[data-testid="section-bg-auto-hint"]')).toContainText('Paper');
 
-    // HERO — greyed until phase 3 (its band is covered by the media + scrim).
+    // HERO — LIVE since phase 3 (Color | Image | Video-greyed). Its own cases are
+    // in the phase-3 describe below.
     await selectSection(page, HERO, 'Hero');
-    const heroBg = page.locator(BG_ACTION);
-    await expect(heroBg).toHaveAttribute('aria-disabled', 'true');
-    expect(await heroBg.getAttribute('title')).toMatch(/image mode/i);
-    // Inert: forcing the click opens nothing.
-    await heroBg.click({ force: true });
-    await expect(page.locator(BG_PANEL)).toHaveCount(0);
+    await expect(
+      page.locator(BG_ACTION),
+      'the hero must be LIVE now that image mode shipped',
+    ).not.toHaveAttribute('aria-disabled', 'true');
 
     // HEADER — excluded entirely (D5: `--wk-header-bg` is declared on `:root` and
     // cannot be retro-bound per-section; the header's surface belongs to the
@@ -404,7 +418,145 @@ test.describe('section background (work skeleton): Colour on body sections', () 
     // lookup the hero case above exercises. (`toolbar-dispatch.spec.ts` covers the
     // header toolbar on meridian, where it does dispatch.)
   });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // phase 3 (slice 2) — the HERO: Color | Image | Video(greyed) + `bgMode`.
+  // ══════════════════════════════════════════════════════════════════════════
+
+  test('hero: Color mode repaints the band AND removes the media (not just hides it)', async ({
+    page,
+  }) => {
+    // The hero seed is a 2-slide slideshow, so the chip names the state without a
+    // menu entry (spec §A — slideshow is emergent from count, not a 4th type).
+    await selectSection(page, HERO, 'Hero');
+    await expect(page.locator(BG_ACTION)).toContainText('Slideshow · 2');
+
+    const heroBefore = await rootColors(page, HERO);
+    // Media is genuinely on screen first — otherwise "no img after" is vacuous.
+    expect(await heroImgCount(page)).toBeGreaterThan(0);
+
+    await page.locator(BG_ACTION).click();
+    await expect(page.locator(BG_PANEL)).toBeVisible({ timeout: 10_000 });
+
+    // Video ships greyed WITH a why (founder ruling 9) — `WorkHeroVideo` is a
+    // declared-but-unbuilt slot; there is nothing behind it.
+    const video = page.locator('[data-testid="section-bg-tab-video"]');
+    await expect(video).toHaveAttribute('aria-disabled', 'true');
+    expect(await video.getAttribute('title')).toMatch(/video/i);
+    // Image is LIVE on the slider variant.
+    await expect(page.locator('[data-testid="section-bg-tab-image"]')).not.toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+
+    // → Color. The tab write is a `bgMode` write; the chip pick is a `background`
+    // write. Both land through the same autosaved styleTokens channel.
+    await waitForStyleTokensSave(page, async () => {
+      await page.locator('[data-testid="section-bg-tab-color"]').click();
+    });
+    // PAPER, not Ink: the atelier skin's hero default ALREADY resolves to `dark`,
+    // so picking Ink here would be indistinguishable from the baseline and the
+    // "band repainted" assertion would be vacuous. (Chip clicked directly rather
+    // than via `pickSurface`, whose first act is to TOGGLE the panel open — it is
+    // already open here.)
+    await waitForStyleTokensSave(page, async () => {
+      await page.locator('[data-testid="section-bg-chip-paper"]').click();
+    });
+
+    const heroAfter = await rootColors(page, HERO);
+    expect(heroAfter.bg, 'the hero band did not repaint').not.toBe(heroBefore.bg);
+    expect(heroAfter.bg).toBe(await resolveVarAsColorBg(page, '--wk-paper'));
+    expect(heroAfter.color).toBe(await resolveVarAsColor(page, '--wk-ink'));
+
+    // THE point of `bgMode` (and why it is a prop, not a CSS var): the images are
+    // GONE FROM THE MARKUP, so the browser never downloads them. A `display:none`
+    // rule would still fetch them and this assertion would fail.
+    expect(await heroImgCount(page), 'hero media survived Color mode').toBe(0);
+    await expect(page.locator(`[data-sid="${HERO}"] .wk-hero__scrim`)).toHaveCount(0);
+    // The copy is untouched.
+    await expect(page.locator(`[data-sid="${HERO}"] .wk-hero__name`)).toContainText('Kundius');
+    // Color mode is not a slideshow, so the chip stops claiming one.
+    await expect(page.locator(BG_ACTION)).not.toContainText('Slideshow');
+
+    // ── LOSSLESS ROUND TRIP (spec AC): back to Image and the slides return, with
+    //    no confirm dialog and nothing cleared.
+    // (The panel stays open across chip/tab clicks — re-clicking the toolbar
+    // button here would TOGGLE it shut.)
+    await expect(page.locator(BG_PANEL)).toBeVisible();
+    await waitForStyleTokensSave(page, async () => {
+      await page.locator('[data-testid="section-bg-tab-image"]').click();
+    });
+    expect(await heroImgCount(page), 'Color → Image was lossy').toBe(2);
+    await expect(page.locator(BG_ACTION)).toContainText('Slideshow · 2');
+    // The colour choice survived the mode switch (the two axes are independent).
+    await expect(page.locator(`[data-section-root="${HERO}"]`)).toHaveAttribute(
+      'data-surface',
+      'paper',
+    );
+
+    // ── PERSISTS: reload, and the hero is still in image mode with both slides.
+    await page.goto('about:blank');
+    await page.goto(`/edit/${token}`);
+    await expect(page.locator(`[data-sid="${HERO}"]`)).toBeVisible({ timeout: 60_000 });
+    expect(await heroImgCount(page)).toBe(2);
+  });
+
+  test('hero: the Image tab exposes an always-visible Add slot with the slideshow hint', async ({
+    page,
+  }) => {
+    await selectSection(page, HERO, 'Hero');
+    await page.locator(BG_ACTION).click();
+    await expect(page.locator(BG_PANEL)).toBeVisible({ timeout: 10_000 });
+
+    // Image is the default tab for a hero variant that renders media (absent
+    // `bgMode` → derive from data = today's behaviour; nothing is written).
+    await expect(page.locator('[data-testid="section-bg-tab-image"]')).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    // Standing discoverability rule: the Add slot is ALWAYS visible, never
+    // hover-revealed — a control that appears later is a capability the user never
+    // learns they have.
+    const add = page.locator('[data-testid="section-bg-add-image"]');
+    await expect(add).toBeVisible();
+    await expect(page.locator('[data-testid="section-bg-slides-count"]')).toContainText('2 images');
+    // No autoplay / interval / transition / crop control anywhere (spec Scope OUT).
+    // Read BEFORE opening the picker: the modal takes focus and closes the docked
+    // panel behind it, so this must not run after the dialog hop.
+    const panelText = (await page.locator(BG_PANEL).innerText()).toLowerCase();
+    for (const forbidden of ['autoplay', 'interval', 'transition', 'crop', 'focal']) {
+      expect(panelText, `"${forbidden}" must not appear in the panel`).not.toContain(forbidden);
+    }
+
+    // It opens the shared media picker — the promote path's entry point. (The pick
+    // itself is not driven here: the picker's Library grid depends on this
+    // project's uploaded assets and its Stock tab on a live Pexels key, neither of
+    // which a hermetic run can rely on. The promote MUTATION is proven
+    // deterministically in `heroSlides.test.ts` instead.)
+    await add.click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 15_000 });
+  });
 });
+
+/** How many hero media images are in the DOM right now. Presence, not visibility —
+ *  Color mode must REMOVE them (a hidden `<img>` is still downloaded). */
+async function heroImgCount(page: Page) {
+  return page.locator(`[data-sid="${HERO}"] img`).count();
+}
+
+/** Run a panel gesture and wait for the styleTokens autosave commit it triggers. */
+async function waitForStyleTokensSave(page: Page, gesture: () => Promise<void>) {
+  const saved = page.waitForResponse(
+    (r) =>
+      r.url().includes('/api/saveDraft') &&
+      r.request().method() === 'POST' &&
+      (r.request().postData() || '').includes('"styleTokens"'),
+    { timeout: 60_000 },
+  );
+  await gesture();
+  const res = await saved;
+  expect(res.status(), 'saveDraft did not accept the bgMode write').toBe(200);
+}
 
 /** Computed `border-bottom-color` of `.wk-footer__top` inside a section wrapper
  *  (`null` when the element is absent). Used for the before/after hairline pair. */

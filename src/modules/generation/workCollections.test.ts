@@ -335,28 +335,61 @@ describe('stampHeroSlides — auto-derive from works covers', () => {
     const entries = deriveWorksEntries(
       facts([
         { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos: [photo(1)] },
+        { name: 'Portraits', kind: 'category', price: { mode: 'on-request' }, photos: [photo(3)] },
         { name: 'Bare', kind: 'category', price: { mode: 'on-request' } }, // no photos
       ] as any)
     );
     const fc = fcWithHero();
     stampHeroSlides(fc, entries);
-    expect(fc.content['hero-xyz'].elements.slides).toHaveLength(1);
+    // 3 groups in, 2 slides out — the cover-less group is dropped.
+    expect(fc.content['hero-xyz'].elements.slides).toHaveLength(2);
     expect(fc.content['hero-xyz'].elements.slides[0].image).toBe('https://cdn/1.jpg');
+    expect(JSON.stringify(fc.content['hero-xyz'].elements.slides)).not.toContain('slide-bare');
   });
 
   it('respects hidden photos (hidden cover falls back; hidden-only group → no slide)', () => {
     const entries = deriveWorksEntries(
       facts([
         { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos: [{ id: 'p1', url: 'https://cdn/1.jpg', cover: true, hidden: true }, photo(2)] },
+        { name: 'Portraits', kind: 'category', price: { mode: 'on-request' }, photos: [photo(3)] },
         { name: 'Secret', kind: 'category', price: { mode: 'on-request' }, photos: [{ id: 'h', url: 'https://cdn/secret.jpg', hidden: true }] },
       ] as any)
     );
     const fc = fcWithHero();
     stampHeroSlides(fc, entries);
     const slides = fc.content['hero-xyz'].elements.slides;
-    expect(slides).toHaveLength(1); // hidden-only group yields no cover → no slide
+    expect(slides).toHaveLength(2); // hidden-only group yields no cover → no slide
     expect(slides[0].image).toBe('https://cdn/2.jpg'); // hidden cover fell back to first visible
     expect(JSON.stringify(slides)).not.toContain('secret');
+  });
+
+  // ── section-background phase 3 (D8 / R4) — the WRITE-side door on the slides
+  //    invariant: a `slides` array is never exactly 1.
+  it('a SINGLE-cover collection leaves the hero BYTE-IDENTICAL (no length-1 stamp)', () => {
+    const entries = deriveWorksEntries(
+      facts([
+        { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos: [photo(1)] },
+      ] as any)
+    );
+    expect(entries).toHaveLength(1); // the guard's precondition is real
+    const fc = fcWithHero();
+    const before = JSON.stringify(fc);
+    stampHeroSlides(fc, entries);
+    expect(JSON.stringify(fc), 'a lone cover was stamped as a length-1 slides array').toBe(before);
+    expect(fc.content['hero-xyz'].elements.slides).toBeUndefined();
+  });
+
+  it('a multi-group set where only ONE group has a cover is also skipped', () => {
+    const entries = deriveWorksEntries(
+      facts([
+        { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos: [photo(1)] },
+        { name: 'Bare', kind: 'category', price: { mode: 'on-request' } },
+        { name: 'AlsoBare', kind: 'category', price: { mode: 'on-request' } },
+      ] as any)
+    );
+    const fc = fcWithHero();
+    stampHeroSlides(fc, entries);
+    expect(fc.content['hero-xyz'].elements.slides).toBeUndefined();
   });
 
   it('no-op when no entries, and when entries carry no covers', () => {
@@ -373,8 +406,14 @@ describe('stampHeroSlides — auto-derive from works covers', () => {
   });
 
   it('NEVER overwrites user-edited slides (hero already has slides → no-op)', () => {
+    // TWO covered groups so the ≥2 stamp guard is NOT what makes this pass — the
+    // no-clobber rule is (with one group the derive would be skipped anyway and
+    // this case would go vacuous).
     const entries = deriveWorksEntries(
-      facts([{ name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos: [photo(1)] }] as any)
+      facts([
+        { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos: [photo(1)] },
+        { name: 'Portraits', kind: 'category', price: { mode: 'on-request' }, photos: [photo(3)] },
+      ] as any)
     );
     const userSlides = [{ id: 'u1', image: 'https://cdn/mine.jpg' }];
     const fc = fcWithHero(userSlides);

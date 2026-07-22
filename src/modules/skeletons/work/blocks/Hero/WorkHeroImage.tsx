@@ -5,6 +5,7 @@
 // runtime behavior (still-image cover — the slider effect is WorkHeroSlider-only).
 
 import React from 'react';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useWorkBlock } from '../../hooks/useWorkBlock';
 import { WorkEditProvider, editPrimitives, useWorkEditCtx } from '../editPrimitives';
 import { WorkHeroImageCore } from './WorkHeroImage.core';
@@ -14,9 +15,13 @@ export default function WorkHeroImage({ sectionId }: { sectionId: string }) {
   const { blockContent, handleContentUpdate, handleCollectionUpdate } =
     useWorkBlock<WorkHeroSliderContent>({ sectionId });
   const ctx = useWorkEditCtx(sectionId, blockContent, handleContentUpdate, handleCollectionUpdate);
+  // Design state (Background layer) — SCALAR selector (D4), absent → today's markup.
+  const bgMode = useEditStore(
+    (s) => (s as any).themeValues?.styleTokens?.[sectionId]?.bgMode,
+  ) as string | undefined;
   return (
     <WorkEditProvider ctx={ctx}>
-      <WorkHeroImageCore content={blockContent} E={editPrimitives} sectionId={sectionId} />
+      <WorkHeroImageCore content={blockContent} E={editPrimitives} sectionId={sectionId} bgMode={bgMode} />
     </WorkEditProvider>
   );
 }
