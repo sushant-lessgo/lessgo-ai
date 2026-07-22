@@ -571,6 +571,28 @@ value under test), so it can never detect a bleed *of `dark`*. Resolver- and edi
 tests ARE non-vacuous, so this is cosmetic — strengthen it in one line by also rendering with
 `{[ABOUT]: {background:'paper'}}` and asserting the hero wrapper still reads `data-surface="dark"`.
 
+## Founder rulings at the slice-1 gate (2026-07-22) — CLOSED
+
+**Gate PASSED.** Three rulings, all now binding:
+
+- **G1 — Auto and Paper read too close.** Auto renders a solid swatch of whatever it resolves to,
+  which for most body sections IS paper → the two chips look identical. **Fix:** make Auto read as a
+  MODE, not a colour (distinct swatch treatment — not a solid fill duplicating Paper — plus a hint of
+  which surface it currently resolves to). Subtle and Ink are distinct enough as-is. Landed in
+  phase 2b.
+- **G2 — DROP the Accent chip for now.** Founder ruling supersedes the greyed-placeholder default
+  (R3) and closes the "fund a contrast pass vs drop" question: **drop**. Live chips = Auto · Paper ·
+  Subtle · Ink. No greyed Accent chip. Accent bands + their contrast pass are a later spec. Landed
+  in phase 2b.
+- **G3 — Dark-band nested cards losing separation: ACCEPTABLE for now.** No card treatment. Do not
+  spend on it.
+
+Also ruled at the gate: the two known-but-unfixed items stay unfixed on this branch — the live
+Kundius `proof`-on-dark contrast bug (needs its own ticket; fixing it means editing shared
+`[data-surface]` rules and would break the untouched-draft-identical contract) and the absent
+automated coverage for "header is greyed on atelier" (a work-skeleton header dispatches no toolbar
+to click).
+
 ## Unresolved questions
 
 - Chip labels OK: Auto / Paper / Subtle / Ink (+ greyed Accent)?

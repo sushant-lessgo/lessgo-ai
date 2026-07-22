@@ -367,10 +367,18 @@ test.describe('section background (work skeleton): Colour on body sections', () 
     ).not.toHaveAttribute('aria-disabled', 'true');
     await page.locator(BG_ACTION).click();
     await expect(page.locator(BG_PANEL)).toBeVisible({ timeout: 10_000 });
-    // The Accent chip ships greyed with a WHY (founder ruling 9 / R3).
-    const accent = page.locator('[data-testid="section-bg-chip-accent-disabled"]');
-    await expect(accent).toHaveAttribute('aria-disabled', 'true');
-    expect((await accent.getAttribute('title'))?.length ?? 0).toBeGreaterThan(0);
+    // Accent is GONE (founder ruling G2 at the slice-1 gate supersedes R3's greyed
+    // placeholder): live chips are exactly Auto · Paper · Subtle · Ink, and no
+    // Accent chip ships in either state. UI-only — `accent` is still a valid stored
+    // value, which is why this asserts on the chip, not on the type.
+    await expect(page.locator('[data-testid="section-bg-chip-accent-disabled"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="section-bg-chip-accent"]')).toHaveCount(0);
+    // Auto reads as a MODE, not a colour (ruling G1): no solid swatch, and the panel
+    // says which surface it resolves to here.
+    const auto = page.locator('[data-testid="section-bg-chip-auto"]');
+    await expect(auto).toBeVisible();
+    expect(await auto.getAttribute('data-auto-surface')).toBe('paper'); // gallery default
+    await expect(page.locator('[data-testid="section-bg-auto-hint"]')).toContainText('Paper');
 
     // HERO — greyed until phase 3 (its band is covered by the media + scrim).
     await selectSection(page, HERO, 'Hero');

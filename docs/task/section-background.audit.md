@@ -507,3 +507,67 @@ Untouched: `work.v1.js`, `public/assets`, `scripts/legacy`. No serializer output
 `styleTokens.ts` edit is a comment), so absent-override DOM stays byte-identical.
 `kundiusPages` / `oldContentFallback` / `coreParity` / `uiFoundationIsolation.snap` /
 `toolbar-dispatch.spec.ts` all green and unmodified within the full `test:run`.
+
+## Phase 2b — founder-gate fixes (G1 + G2)
+
+**Files changed**
+- `src/app/edit/[token]/components/toolbars/BackgroundPanel.tsx`
+- `e2e/section-background.spec.ts`
+
+### BackgroundPanel.tsx
+- **G1 — Auto now reads as a MODE, not a colour.** The Auto entry was pulled out of
+  `COLOR_CHIPS` and rendered on its own, because its swatch is deliberately not a fill: a
+  3.5×3.5 square with a **dashed grey ring, transparent interior, and a centred "A" glyph**
+  (same grey/dashed idiom the app chrome already uses for "not set"). It can no longer be
+  confused with Paper's solid swatch. Active/hover/pressed states are byte-identical to the
+  other chips, so it still reads as one of the four.
+- **G1 (second half) — Auto surfaces what it resolves to.** The panel now resolves the skin's
+  TYPE-keyed default via `useTemplateModule(audienceType, templateId)` +
+  `tmpl.getSurfaceForSection(extractSectionType(sectionId))` — the SAME call
+  `EditablePageRenderer` feeds `resolveSectionSurface` as its fallback, so the hint cannot
+  drift from what the canvas paints. Shown two ways: a new visible line
+  (`data-testid="section-bg-auto-hint"`) — "Auto here = **Subtle**, your template's choice for
+  this section." — and in the chip's `title`. The chip also exposes
+  `data-auto-surface="<surface>"` for assertions. The hook resolves from the registry cache
+  (the renderer already loaded the module), so no extra fetch.
+- **G2 — Accent chip DROPPED.** Removed the greyed `section-bg-chip-accent-disabled` button,
+  `ACCENT_WHY`, and `ACCENT_UNKNOWN_SWATCH`. Also removed the phase-2-polish
+  `getComputedStyle`-off-`[data-palette]` accent resolution (`accentSwatch` state + effect,
+  and the now-unused `useState` import) — it existed only to fill that chip's swatch and
+  nothing else read it. Live chips are exactly **Auto · Paper · Subtle · Ink**. The live
+  swatches are untouched (`--wk-paper`/`--wk-paper-2`/`--wk-dark` are on `:root`).
+- **UI-ONLY.** `accent` remains valid in `UBackground` / `WorkSurface` / `BACKGROUND_CSS` and
+  `[data-surface="accent"]` CSS is untouched; a stored `accent` still paints. Nothing in
+  `styleTokens.ts` or the skeleton was edited.
+
+### e2e/section-background.spec.ts
+- In the gate test, replaced the "Accent ships greyed with a WHY" assertions with the inverse:
+  neither `section-bg-chip-accent-disabled` nor `section-bg-chip-accent` exists. Added G1
+  coverage: the Auto chip is visible, `data-auto-surface` is `paper` for the gallery (section
+  type `work` → not in `defaultWorkSectionSurfaces`, and the atelier skin overrides only
+  hero/proof/packages → `paper`), and the hint line names "Paper".
+- The Auto chip kept its original `section-bg-chip-auto` testid, so the `pickChip()` helper
+  (line 192) is unaffected.
+
+### Deviations from the plan
+None. Scope was exactly G1 + G2; no third file needed.
+
+### Gates (real output)
+- `npx tsc --noEmit` → clean (no output).
+- `npm run test:run` → `Test Files 310 passed | 1 skipped (311)`, `Tests 5016 passed | 15 skipped (5031)`, 60.35s.
+- Playwright: **NOT executed** (needs a live authed session/server). Compile proven only:
+  `npx playwright test e2e/section-background.spec.ts --list` → `Total: 4 tests in 2 files`.
+  The three G1/G2 assertions above are therefore unverified at runtime — they should be
+  confirmed on the next preview run.
+
+### D9 ledger
+Untouched: `work.v1.js`, `public/assets`, `scripts/legacy`. No serializer/DOM output changed —
+this phase edits one editor-chrome panel and one e2e spec. `kundiusPages` /
+`oldContentFallback` / `coreParity` / `uiFoundationIsolation.snap` / `toolbar-dispatch.spec.ts`
+all green and unmodified within the full `test:run`.
+
+### Open risks
+- The `data-auto-surface`/hint values are only as good as `getSurfaceForSection`; if a skin
+  later overrides a section type, the hint follows automatically (same source as the canvas).
+- The e2e `'paper'` expectation for the gallery is skin-data-dependent — if the atelier skin
+  ever adds a `work`/`gallery` surface override, that one assertion needs updating.

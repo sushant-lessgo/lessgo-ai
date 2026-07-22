@@ -21,9 +21,12 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from '@/hooks/useEditStore';
 import type { StyleTokens, UBackground } from '@/modules/skeletons/styleTokens';
+import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
+import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 
 interface ColorChip {
   value: UBackground;
@@ -37,35 +40,29 @@ interface ColorChip {
   title: string;
 }
 
-// Labels are the spec's generic v1 vocabulary ("Paper / Subtle / Ink / Accent") —
+// Labels are the spec's generic v1 vocabulary ("Paper / Subtle / Ink") —
 // per-template naming + real swatches are a designer round-trip that deliberately
 // does not block this build.
+//
+// ACCENT (founder ruling G2, slice-1 gate): there is NO Accent chip — not even a
+// greyed one. The ruling supersedes the greyed-placeholder default (R3). This is a
+// UI-ONLY removal: `accent` is still a valid `UBackground`/`WorkSurface`, still
+// painted by `BACKGROUND_CSS` + `[data-surface="accent"]`, so any stored value keeps
+// working. Accent bands (and the contrast pass they need) are a later spec.
 const COLOR_CHIPS: ColorChip[] = [
-  {
-    value: 'default',
-    label: 'Auto',
-    testid: 'auto',
-    // Half-and-half so "Auto" never looks like a colour of its own.
-    swatch: 'linear-gradient(135deg, #ffffff 0 50%, #d4d4d8 50% 100%)',
-    title: 'Use the template’s own choice for this section',
-  },
   { value: 'paper', label: 'Paper', testid: 'paper', swatch: 'var(--wk-paper, #faf9f7)', title: 'Light page surface' },
   { value: 'paper-2', label: 'Subtle', testid: 'paper-2', swatch: 'var(--wk-paper-2, #f1efea)', title: 'A slightly tinted band' },
   { value: 'dark', label: 'Ink', testid: 'dark', swatch: 'var(--wk-dark, #16151a)', title: 'Dark band with light text' },
 ];
 
-// Greyed-placeholder rule (founder ruling 9 / orchestrator R3): ship it disabled
-// with a WHY, never silently omit it. "Audit accent bands vs drop the chip" is an
-// explicit ASK at the slice-1 founder gate.
-const ACCENT_WHY =
-  'Accent bands need a contrast pass first — accent-coloured buttons and marks inside a section would vanish on an accent background.';
-
-/** Non-committal swatch: a neutral hatch, used when the project's real accent can't
- *  be resolved. Deliberately NOT a plausible-looking colour — the founder gate asks
- *  whether Accent bands are worth funding a contrast pass, and a hardcoded literal
- *  would have them judging a colour their site does not use. */
-const ACCENT_UNKNOWN_SWATCH =
-  'repeating-linear-gradient(45deg, #d4d4d8 0 3px, #f4f4f5 3px 6px)';
+/** Chip vocabulary → the surface names the skin actually returns. Used to say what
+ *  Auto resolves to right now (founder ruling G1). Unknown values render verbatim. */
+const SURFACE_LABELS: Record<string, string> = {
+  'paper': 'Paper',
+  'paper-2': 'Subtle',
+  'dark': 'Ink',
+  'accent': 'Accent',
+};
 
 interface BackgroundPanelProps {
   sectionId: string;
@@ -87,6 +84,19 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
   // sibling themeValues keys and other sections' tokens survive the write.
   const setSectionStyleTokens = useEditStore((s) => s.setSectionStyleTokens);
 
+  // ── What does "Auto" mean HERE? (founder ruling G1) ──────────────────────────
+  // Auto = "no override; the skin decides", so the honest answer is the skin's own
+  // TYPE-keyed default — exactly what EditablePageRenderer feeds `resolveSectionSurface`
+  // as its fallback. Read it from the SAME source (`tmpl.getSurfaceForSection`) so the
+  // hint can never drift from what the canvas paints. The template module is already
+  // loaded by the renderer, so this hook resolves from cache with no extra fetch.
+  const { audienceType, templateId } = useEditStore(
+    useShallow((s) => ({ audienceType: s.audienceType, templateId: s.templateId })),
+  );
+  const { tmpl } = useTemplateModule(audienceType, templateId);
+  const autoSurface = tmpl?.getSurfaceForSection(extractSectionType(sectionId));
+  const autoLabel = autoSurface ? SURFACE_LABELS[autoSurface] ?? autoSurface : null;
+
   // Click-outside → close (TextToolbarMVP.tsx:449-470 precedent). The Background
   // BUTTON is excluded on purpose: it toggles, and closing on its mousedown would
   // make the subsequent click re-open the panel (a button that never closes).
@@ -102,22 +112,10 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
     return () => document.removeEventListener('mousedown', handlePointerDown);
   }, [onClose]);
 
-  // ── Accent swatch: resolve the REAL accent, never a literal ──────────────────
-  // Unlike `--wk-paper`/`--wk-paper-2`/`--wk-dark` (declared on `:root`, so they
-  // resolve anywhere in the document), `--wk-accent` is declared on
-  // `[data-palette]{…}` (work/stylesheet.ts:72). `var()` substitutes at the element
-  // that DECLARES it, so a literal fallback in this panel's own CSS silently wins
-  // wherever the toolbar chrome sits outside the palette scope. Read the computed
-  // value off the element that actually carries `data-palette` instead, and fall
-  // back to a neutral hatch (not a colour) when there is none.
-  const [accentSwatch, setAccentSwatch] = useState<string | null>(null);
-  useEffect(() => {
-    const host =
-      (panelRef.current?.closest('[data-palette]') as HTMLElement | null) ??
-      document.querySelector<HTMLElement>('[data-palette]');
-    const value = host ? getComputedStyle(host).getPropertyValue('--wk-accent').trim() : '';
-    setAccentSwatch(value || null);
-  }, []);
+  // (The phase-2-polish `getComputedStyle` accent resolution lived here. It existed
+  // ONLY to fill the greyed Accent chip's swatch; ruling G2 dropped that chip, so it
+  // went with it. The live chips read `--wk-paper`/`--wk-paper-2`/`--wk-dark`, which
+  // are declared on `:root` and resolve inside the toolbar chrome without help.)
 
   const active: UBackground = current ?? 'default';
 
@@ -137,6 +135,44 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
       </div>
 
       <div className="flex flex-wrap gap-1.5">
+        {/* AUTO — a MODE, not a colour (ruling G1). It is rendered on its own rather
+            than as a COLOR_CHIPS row entry because its swatch is deliberately NOT a
+            fill: a dashed ring around an "A" glyph, so it can never be mistaken for
+            Paper the way a solid swatch of its resolved value was. */}
+        {(() => {
+          const isActive = active === 'default';
+          return (
+            <button
+              type="button"
+              data-testid="section-bg-chip-auto"
+              data-active={isActive ? 'true' : undefined}
+              data-auto-surface={autoSurface ?? undefined}
+              aria-pressed={isActive}
+              title={
+                autoLabel
+                  ? `Use the template’s own choice for this section (currently ${autoLabel})`
+                  : 'Use the template’s own choice for this section'
+              }
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setSectionStyleTokens(sectionId, { background: 'default' })}
+              className={[
+                'inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors',
+                isActive
+                  ? 'border-[#006CFF] bg-blue-50 text-[#006CFF] font-medium'
+                  : 'border-gray-200 text-gray-700 hover:bg-gray-50',
+              ].join(' ')}
+            >
+              <span
+                aria-hidden
+                className="flex h-3.5 w-3.5 flex-none items-center justify-center rounded-[3px] border border-dashed border-gray-400 bg-transparent text-[7px] font-bold leading-none text-gray-500"
+              >
+                A
+              </span>
+              <span>Auto</span>
+            </button>
+          );
+        })()}
+
         {COLOR_CHIPS.map((chip) => {
           const isActive = active === chip.value;
           return (
@@ -168,28 +204,19 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
             </button>
           );
         })}
-
-        {/* Accent — greyed placeholder + why-tooltip (R3). Inert on force-click. */}
-        <button
-          type="button"
-          data-testid="section-bg-chip-accent-disabled"
-          aria-disabled="true"
-          title={ACCENT_WHY}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-400"
-        >
-          <span
-            aria-hidden
-            className="h-3.5 w-3.5 flex-none rounded-[3px] border border-black/15 opacity-50"
-            style={{ background: accentSwatch ?? ACCENT_UNKNOWN_SWATCH }}
-          />
-          <span>Accent</span>
-        </button>
       </div>
+
+      {/* Ruling G1's second half: say WHICH surface Auto lands on here, visibly —
+          a tooltip alone would not tell the user what Auto means before hovering. */}
+      {autoLabel && (
+        <p
+          data-testid="section-bg-auto-hint"
+          className="mt-2 text-[11px] leading-snug text-gray-500"
+        >
+          Auto here = <span className="font-medium text-gray-700">{autoLabel}</span>, your
+          template’s choice for this section.
+        </p>
+      )}
 
       <p className="mt-2.5 text-[11px] leading-snug text-gray-500">
         These are your template’s own surfaces, so the text stays readable whichever you pick.
