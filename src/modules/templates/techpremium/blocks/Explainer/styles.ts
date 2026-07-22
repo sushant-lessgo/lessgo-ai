@@ -13,7 +13,7 @@ export const EXPLAINER_STYLES = `
 .tp-explain-media-edit{ display:flex; flex-direction:column; gap:6px; margin-top:8px; }
 .tp-explain-media-edit input{ width:100%; font-family:var(--font-mono); font-size:11px; padding:6px 8px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--paper); color:var(--ink); }
 .tp-explain-up{ display:inline-flex; align-items:center; justify-content:center; gap:6px; font-family:var(--font-mono); font-size:11px; letter-spacing:0.03em; color:var(--forest-d); background:var(--lime); border-radius:var(--r); padding:7px 10px; cursor:pointer; }
-.tp-explain-up:hover{ background:oklch(0.815 0.185 128); }
+.tp-explain-up:hover{ background:color-mix(in oklch, var(--lime) 95%, black); }
 .tp-explain-copy h3.tp-explain-h3{ font-family:var(--font-display); font-weight:600; font-size:clamp(24px,3vw,34px); letter-spacing:-0.018em; line-height:1.15; color:var(--ink); margin:14px 0 14px; }
 .tp-explain-copy p.tp-explain-p{ color:var(--ink-2); font-size:16px; line-height:1.65; margin:0 0 18px; max-width:46ch; }
 .tp-explain-list{ list-style:none; padding:0; margin:0 0 22px; display:flex; flex-direction:column; gap:12px; }

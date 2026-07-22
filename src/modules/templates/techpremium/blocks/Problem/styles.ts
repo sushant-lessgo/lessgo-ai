@@ -14,7 +14,7 @@ export const PROBLEM_STYLES = SEC_HEAD_STYLES + `
 .tp-pain-row:last-child{ border-bottom:0; padding-bottom:0; }
 .tp-pain-row .tp-n{ font-family:var(--font-mono); font-size:12px; font-weight:600; letter-spacing:0.1em; color:var(--lime); padding-top:5px; }
 .tp-pain-row__h3{ font-family:var(--font-display); font-weight:600; font-size:21px; margin-bottom:7px; color:var(--paper); }
-.tp-pain-row__p{ margin:0; color:oklch(0.84 0.025 140 / 0.78); font-size:15.5px; line-height:1.65; max-width:52ch; }
+.tp-pain-row__p{ margin:0; color:color-mix(in oklch, var(--on-dark) 78%, transparent); font-size:15.5px; line-height:1.65; max-width:52ch; }
 .tp-pain-row__remove{ position:absolute; top:0; right:0; width:22px; height:22px; background:transparent; border:1px solid var(--line-dk); border-radius:50%; color:var(--paper); font-size:13px; line-height:1; cursor:pointer; }
 .tp-pain-add{ margin-top:24px; align-self:flex-start; background:transparent; border:1px dashed var(--line-dk); color:var(--paper); font-family:var(--font-body); font-size:14px; padding:10px 16px; border-radius:var(--r); cursor:pointer; }
 .tp-pain-add:hover{ border-color:var(--lime); color:var(--lime); }

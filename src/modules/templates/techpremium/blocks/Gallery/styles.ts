@@ -14,7 +14,7 @@ const GALLERY_OWN = `
 .tp-gitem{ cursor:zoom-in; position:relative; }
 .tp-ghover{ position:absolute; inset:0; display:grid; place-items:center; opacity:0; transition:opacity .16s ease; }
 .tp-ghover svg{ width:26px; height:26px; stroke:#fff; stroke-width:2; fill:none; }
-.tp-gitem:hover .tp-ghover{ opacity:1; background:oklch(0.255 0.038 159 / 0.4); border-radius:var(--r-lg); }
+.tp-gitem:hover .tp-ghover{ opacity:1; background:color-mix(in oklch, var(--forest-d) 40%, transparent); border-radius:var(--r-lg); }
 @media (max-width:1040px){ .tp-ggrid{ grid-template-columns:repeat(3,1fr); } }
 @media (max-width:760px){ .tp-ggrid{ grid-template-columns:repeat(2,1fr); } }
 .tp-gctl{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:-16px 0 28px; justify-content:center; }

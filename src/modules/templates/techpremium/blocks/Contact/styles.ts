@@ -20,7 +20,7 @@ const CONTACT_OWN = `
 .tp-cwa { display:block; margin-top:8px; }
 .tp-cwa-btn { margin-top:0; }
 .tp-cwa-href { display:block; width:100%; margin-top:6px; font-family:var(--font-mono); font-size:11px; border:1px solid var(--line-2); border-radius:var(--r); padding:5px 9px; color:var(--ink-2); }
-.tp-lead-form { border:1px solid var(--line-2); border-radius:var(--r-lg); background:var(--paper); padding:clamp(24px,3vw,36px); box-shadow:0 18px 48px -34px oklch(0.30 0.04 158 / 0.5); }
+.tp-lead-form { border:1px solid var(--line-2); border-radius:var(--r-lg); background:var(--paper); padding:clamp(24px,3vw,36px); box-shadow:0 18px 48px -34px color-mix(in oklch, var(--forest) 50%, transparent); }
 .tp-form-heading { font-family:var(--font-display); font-weight:600; font-size:24px; color:var(--ink); margin:0 0 6px; }
 .tp-form-note { color:var(--ink-2); font-size:14.5px; margin:0 0 24px; }
 .tp-fgrid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }

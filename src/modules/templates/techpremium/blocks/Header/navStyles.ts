@@ -16,7 +16,7 @@ export const NAV_STYLES = `
 .tp-nav-links > a.is-active { color:var(--forest); font-weight:600; }
 .tp-nav-drop-t .chev { width:14px; height:14px; transition:transform .18s ease; }
 .tp-nav-drop { position:relative; }
-.tp-nav-drop-menu { position:absolute; top:calc(100% + 8px); left:0; min-width:268px; padding:8px; background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r-lg); box-shadow:0 24px 56px -28px oklch(0.30 0.04 158 / 0.55); z-index:5; opacity:0; visibility:hidden; transform:translateY(-6px); transition:opacity .16s ease, transform .16s ease, visibility .16s; }
+.tp-nav-drop-menu { position:absolute; top:calc(100% + 8px); left:0; min-width:268px; padding:8px; background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r-lg); box-shadow:0 24px 56px -28px color-mix(in oklch, var(--forest) 55%, transparent); z-index:5; opacity:0; visibility:hidden; transform:translateY(-6px); transition:opacity .16s ease, transform .16s ease, visibility .16s; }
 .tp-nav:not([data-edit="1"]) .tp-nav-drop:hover .tp-nav-drop-menu, .tp-nav-drop.is-open .tp-nav-drop-menu { opacity:1; visibility:visible; transform:translateY(0); }
 .tp-nav:not([data-edit="1"]) .tp-nav-drop:hover .tp-nav-drop-t .chev, .tp-nav-drop.is-open .tp-nav-drop-t .chev, .tp-nav-drop.is-open .tp-nav-drop-caret .chev { transform:rotate(180deg); }
 .tp-nav-drop-menu a { display:flex; flex-direction:column; gap:2px; padding:9px 12px; border-radius:var(--r); text-decoration:none; }

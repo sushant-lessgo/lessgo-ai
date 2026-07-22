@@ -790,3 +790,303 @@ outstanding for the founder/human gate:
   a state-changing git command I am not permitted to run. Safe to discard.
 - The four remaining hue-158/159/140/128 clusters (15 literals) still render stale-green under
   harbor until phase 5 lands. Expected.
+
+---
+
+## Phase 5 (slice 2 — B4+B5: remaining single-source modules + literal census test)
+
+Branch verified FIRST, before any edit: `git -C <WORKDIR> branch --show-current` →
+`feature/techpremium-harbor-palette`. Match.
+
+### Files changed
+
+1. `src/modules/templates/techpremium/blocks/ProductDetail/styles.ts`
+2. `src/modules/templates/techpremium/blocks/Readout/TechPremiumReadout.tsx`
+3. `src/modules/templates/techpremium/blocks/Header/navStyles.ts`
+4. `src/modules/templates/techpremium/blocks/GalleryPreview/styles.ts`
+5. `src/modules/templates/techpremium/blocks/Catalog/styles.ts`
+6. `src/modules/templates/techpremium/blocks/Contact/styles.ts`
+7. `src/modules/templates/techpremium/blocks/Gallery/styles.ts`
+8. `src/modules/templates/techpremium/blocks/Problem/styles.ts`
+9. `src/modules/templates/techpremium/blocks/Explainer/styles.ts`
+10. `src/modules/templates/techpremium/blocks/literalCensus.test.ts` (NEW)
+11. `docs/task/techpremium-harbor-palette.audit.md` (this append)
+
+Exactly the phase's 10 Files-touched. `git status --porcelain` shows those 9 modified sources +
+the 1 new untracked test (plus the same incidental non-authored snapshot entry — see "Open
+risks"). **No `.published.tsx` was created for `Readout`** — it has none by design (server-safe
+component imported by BOTH `Compatibility` renderers, `.tsx:11` / `.published.tsx:7`);
+single-source, so a published half would be an architectural error, not parity work.
+
+### The 15 in-scope replacements (before → after)
+
+`git diff --stat` = `9 files changed, 14 insertions(+), 14 deletions(-)` — 14 lines for 15
+occurrences because `Readout/TechPremiumReadout.tsx:67` carries TWO literals on one line
+(count occurrences, not lines).
+
+| # | file:line | selector / role | before | after | source of the string |
+|---|---|---|---|---|---|
+| 1 | `ProductDetail/styles.ts:67` | `.tp-pcard:hover` box-shadow | `oklch(0.30 0.04 158 / 0.5)` | `color-mix(in oklch, var(--forest) 50%, transparent)` | scout §G row 3; byte-identical to phase 2 `sharedStyles.ts:56` |
+| 2 | `ProductDetail/styles.ts:80` | `.tp-lightbox` scrim | `oklch(0.20 0.03 159 / 0.92)` | `color-mix(in oklch, color-mix(in oklch, var(--forest-d) 78%, black) 92%, transparent)` | canonical "lightbox scrim … 0.92"; byte-identical to phase 2 `sharedStyles.ts:74` |
+| 3 | `ProductDetail/styles.ts:85` | `.tp-lb-cap` lightbox caption | `oklch(0.85 0.025 140 / 0.8)` | `color-mix(in oklch, var(--on-dark) 80%, transparent)` | canonical hue-140 form @ ORIGINAL α 0.8; byte-identical to phase 2 `sharedStyles.ts:79` |
+| 4 | `ProductDetail/styles.ts:87` | `.tp-lb-nav` scrim | `oklch(0.20 0.03 159 / 0.6)` | `color-mix(in oklch, color-mix(in oklch, var(--forest-d) 78%, black) 60%, transparent)` | canonical "scrim … 0.6"; byte-identical to phase 2 `sharedStyles.ts:81` |
+| 5 | `Readout/TechPremiumReadout.tsx:67` (1st of 2) | `.tp-rd` box-shadow, outer | `oklch(0.30 0.04 158 / 0.5)` | `color-mix(in oklch, var(--forest) 50%, transparent)` | scout §G row 3 |
+| 6 | `Readout/TechPremiumReadout.tsx:67` (2nd of 2) | `.tp-rd` box-shadow, inner | `oklch(0.30 0.04 158 / 0.25)` | `color-mix(in oklch, var(--forest) 25%, transparent)` | scout §G row 4 (same form @ 25%); byte-identical to phase 4 Hero `:316` |
+| 7 | `Header/navStyles.ts:19` | `.tp-nav-drop-menu` box-shadow | `oklch(0.30 0.04 158 / 0.55)` | `color-mix(in oklch, var(--forest) 55%, transparent)` | scout §G row 5 (the named navStyles scrim, same form @ 55%) |
+| 8 | `GalleryPreview/styles.ts:14` | `.tp-gitem:hover .tp-ghover` | `oklch(0.255 0.038 159 / 0.4)` | `color-mix(in oklch, var(--forest-d) 40%, transparent)` | scout §G row 2 (EXACT `--forest-d` + α) |
+| 9 | `GalleryPreview/styles.ts:17` | `.tp-gx` tag text (OPAQUE) | `oklch(0.78 0.03 140)` | `var(--on-dark-2)` | canonical hue-140 rule, "opaque tag cluster" branch; byte-identical to phase 2 `sharedStyles.ts:12` |
+| 10 | `GalleryPreview/styles.ts:18` | `.tp-managed-hint` (OPAQUE) | `oklch(0.78 0.03 140)` | `var(--on-dark-2)` | same |
+| 11 | `Catalog/styles.ts:24` | `.tp-pcard:hover` box-shadow | `oklch(0.30 0.04 158 / 0.5)` | `color-mix(in oklch, var(--forest) 50%, transparent)` | scout §G row 3 |
+| 12 | `Contact/styles.ts:23` | `.tp-lead-form` box-shadow | `oklch(0.30 0.04 158 / 0.5)` | `color-mix(in oklch, var(--forest) 50%, transparent)` | scout §G row 3 |
+| 13 | `Gallery/styles.ts:17` | `.tp-gitem:hover .tp-ghover` | `oklch(0.255 0.038 159 / 0.4)` | `color-mix(in oklch, var(--forest-d) 40%, transparent)` | scout §G row 2 |
+| 14 | `Problem/styles.ts:17` | `.tp-pain-row__p` | `oklch(0.84 0.025 140 / 0.78)` | `color-mix(in oklch, var(--on-dark) 78%, transparent)` | canonical hue-140 form @ ORIGINAL α 0.78; byte-identical to phase 3 `footerStyles.ts:12` + phase 4 CTA `:118` |
+| 15 | `Explainer/styles.ts:16` | `.tp-explain-up:hover` fill | `oklch(0.815 0.185 128)` | `color-mix(in oklch, var(--lime) 95%, black)` | canonical hue-128 hover fill — the 6th and last of the 6 hover sites. **The superseded `88% var(--forest-d)` form was NOT used** (0 hits repo-wide) |
+
+Colour values only across all nine files. No selector, declaration, markup, JSX, import or
+structural change; no dedupe, no refactor, no helper extracted. Substitutions were applied as
+in-line string replacements with a per-pattern expected-occurrence assertion (a mismatch aborted
+the run), so no fuzzy matching was involved. CRLF preserved in all nine files (verified
+programmatically: `\r\n` count identical before/after per file; 93/86/59/25/47/49/50/22/30).
+
+### The silent-duplicate trap — handled exactly as ruled (no dedupe)
+
+`ProductDetail/styles.ts:80`, `:85`, `:87` duplicate `sharedStyles.ts:74`, `:79`, `:81`. Per the
+ruling I did **not** dedupe, did **not** extract a shared constant, and did **not** import
+anything new — I pasted the byte-identical canonical strings phase 2 already used.
+Fixed-string (`grep -F`) verification, character for character:
+
+```
+shared=1 productDetail=1 :: color-mix(in oklch, color-mix(in oklch, var(--forest-d) 78%, black) 92%, transparent)
+shared=1 productDetail=1 :: color-mix(in oklch, color-mix(in oklch, var(--forest-d) 78%, black) 60%, transparent)
+shared=1 productDetail=1 :: color-mix(in oklch, var(--on-dark) 80%, transparent)
+```
+
+### Scope-outs — verified untouched, at their original line numbers
+
+```
+ProductDetail/styles.ts:21   oklch(0.978 0.005 95 / 0.9)     .tp-pd-nav     (hue 95)
+ProductDetail/styles.ts:24   oklch(0.978 0.005 95 / 0.9)     .tp-pd-zoom    (hue 95)
+ProductDetail/styles.ts:25   oklch(0.978 0.005 95 / 0.9)     .tp-pd-count   (hue 95)
+Readout/TechPremiumReadout.tsx:71  oklch(0.66 0.15 150 / 0.30)   .tp-rd-pill        (hue 150)
+Readout/TechPremiumReadout.tsx:73  oklch(0.70 0.095 192 / 0.30)  .tp-rd-pill.teal   (hue 192)
+Header/navStyles.ts:5        oklch(0.978 0.005 95 / 0.88)    .tp-nav        (hue 95)
+```
+
+All 6 appear verbatim in the post-edit `grep` and none appears in `git diff`. Post-edit raw-`oklch(`
+counts in the nine touched files: ProductDetail 3, Readout 2, navStyles 1, GalleryPreview 0,
+Catalog 0, Contact 0, Gallery 0, Problem 0, Explainer 0 — i.e. the six scope-outs and nothing else.
+
+### Byte-identity across phases 2-5
+
+Repo-wide over `blocks/` after this phase, one spelling per distinct value — every phase-5 string
+is a byte-exact paste of the plan's canonical text or of the spelling phases 2-4 landed:
+
+```
+color-mix(in oklch, var(--forest) 5.5%, transparent)
+color-mix(in oklch, var(--forest) 25%, transparent)
+color-mix(in oklch, var(--forest) 50%, transparent)
+color-mix(in oklch, var(--forest) 55%, transparent)
+color-mix(in oklch, var(--forest) 50%, var(--forest-d))
+color-mix(in oklch, var(--forest-d) 40%, transparent)
+color-mix(in oklch, color-mix(in oklch, var(--forest-d) 78%, black) 92%, transparent)
+color-mix(in oklch, color-mix(in oklch, var(--forest-d) 78%, black) 60%, transparent)
+color-mix(in oklch, var(--lime) 7%, transparent)
+color-mix(in oklch, var(--lime) 95%, black)                 <- now 6 (all 6 hover sites landed)
+color-mix(in oklch, var(--on-dark) 50/55/60/70/78/80/82%, transparent)
+var(--on-dark-2)                                            <- 3 opaque tag sites
+```
+
+`grep -rn "88%, var(--forest-d)"` → **0**. The banned/superseded hover form appears nowhere.
+
+Note: the `var(--forest) 55%, transparent` string previously existed ONLY as a negative-case
+fixture inside `renderParity.test.ts` (flagged in phase 4's note). It now also has a real
+production site (`navStyles.ts:19`). That is expected — scout §G row 5 assigns exactly this form
+to the navStyles scrim — and it does not affect either test: the parity test compares Hero/CTA/
+Pricing/Results pairs only (navStyles is not in any pair), and the census test excludes `*.test.ts`.
+
+### The census test — `blocks/literalCensus.test.ts` (10 tests)
+
+Walks `blocks/` recursively via `fs`, collects `.ts`/`.tsx`, **excludes `*.test.ts` / `*.test.tsx`**,
+extracts raw `oklch(...)` literals with `/\boklch\(([^)]*)\)/g`, parses the hue (3rd whitespace
+token before any `/`), then asserts:
+
+- **ZERO** raw literals for hues **158, 159, 140, 128** (one `it.each` case per hue, so a
+  regression names the hue and the file + literal).
+- Scope-out anchors **exactly**: hue **150 = 11**, **192 = 2**, **95 = 4**, each with the offending
+  site list attached to the assertion message.
+- **No unexpected hue buckets** — any literal whose hue is not in `{150,192,95}` (including a
+  hue that fails to parse, i.e. `null`) fails with its file + raw text. This is the catch-all that
+  makes a NEW rogue hue visible too, not just the four migrated ones.
+
+Two inert-assertion guards on the census itself:
+- the walker found `> 20` source files and `> 0` literals, and every extracted string starts with
+  `oklch(` (a broken extractor cannot pass green by returning `[]`);
+- **the exclusion is asserted to be real**: a second walker proves `*.test.ts(x)` files DO exist
+  under `blocks/`, and that none of them is in the scanned set. Without this, silently scanning
+  zero test files and silently scanning all of them look the same from inside the test.
+
+**Why `color-mix(in oklch, …)` is not double-counted:** the regex requires `oklch(` with an open
+paren; the mix form reads `oklch,`.
+
+**Why the exclusion is load-bearing (re-confirmed empirically, not taken on trust):** with test
+files INCLUDED the hue-150 anchor reads **13** (the 11 real sites + 2 fixtures in
+`renderParity.test.ts`), and that file's doc-comment `oklch(…)` tokens parse to hue `null`, which
+the catch-all assertion would report as stray. Excluded: **11 / 2 / 4**, green.
+
+### Census mutation proofs — real output (both made, both RED, both reverted)
+
+**(a) Tokenise-style change to a remaining scope-out.** `Readout/TechPremiumReadout.tsx:71`
+`oklch(0.66 0.15 150 / 0.30)` → `var(--ok-bg)` — i.e. exactly the "helpful" edit the anchor exists
+to forbid.
+
+```
+Footer/footerStyles.ts :: oklch(0.55 0.16 150 / 0.7)
+Hero/TechPremiumHero.published.tsx :: oklch(0.66 0.15 150 / 0.30)
+Hero/TechPremiumHero.tsx :: oklch(0.66 0.15 150 / 0.30)
+Testimonials/TechPremiumResults.published.tsx :: oklch(0.66 0.15 150 / 0.30)
+Testimonials/TechPremiumResults.tsx :: oklch(0.66 0.15 150 / 0.30)
+shared/sharedStyles.ts :: oklch(0.55 0.16 150)
+shared/sharedStyles.ts :: oklch(0.66 0.15 150 / 0.30): expected 10 to be 11 // Object.is equality
+
+- Expected  + Received
+- 11        + 10
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+```
+
+Reverted from a byte-copy (`cmp` → identical); re-run → **10 passed**.
+
+**(b) Re-introduce a band literal.** `Catalog/styles.ts:24`
+`color-mix(in oklch, var(--forest) 50%, transparent)` → `oklch(0.30 0.04 158 / 0.5)`.
+
+```
+     x hue 158 (band family) has ZERO raw oklch literals left 5ms
+     x no unexpected hue buckets exist under blocks/ 1ms
+
+ FAIL  … > hue 158 (band family) has ZERO raw oklch literals left
+AssertionError: expected [ Array(1) ] to deeply equal []
+- Expected  + Received
+- []
++ [ "Catalog/styles.ts :: oklch(0.30 0.04 158 / 0.5)" ]
+
+ FAIL  … > no unexpected hue buckets exist under blocks/
+AssertionError: expected [ Array(1) ] to deeply equal []
++ [ "Catalog/styles.ts :: oklch(0.30 0.04 158 / 0.5)" ]
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 8 passed (10)
+```
+
+Both the targeted zero-assertion AND the catch-all fired. Reverted from a byte-copy (`cmp` →
+identical); re-run → **10 passed**. Final `git diff --stat` is back to `9 files changed,
+14 insertions(+), 14 deletions(-)`, so neither mutation survives in the tree.
+
+### Commands run and their real results
+
+| command | result |
+|---|---|
+| `git branch --show-current` (FIRST action) | `feature/techpremium-harbor-palette` — match |
+| `npx vitest run …/literalCensus.test.ts` (post-edit) | **10 passed** |
+| `npx vitest run …/literalCensus.test.ts` (mutation a) | **1 failed \| 9 passed** — output quoted above |
+| `npx vitest run …/literalCensus.test.ts` (after revert a) | **10 passed** |
+| `npx vitest run …/literalCensus.test.ts` (mutation b) | **2 failed \| 8 passed** — output quoted above |
+| `npx vitest run …/literalCensus.test.ts` (after revert b) | **10 passed** |
+| `npx tsc --noEmit` | exit **0**, no output |
+| `npm run test:run` | **318 passed \| 1 skipped (319 files); 5107 passed \| 15 skipped (5122 tests)** — 79.46s |
+| `npx vitest run …/palettes.test.ts …/renderParity.test.ts` | **2 files, 13 passed** (forest guard 8 + parity 5) |
+| `git diff --stat` | `9 files changed, 14 insertions(+), 14 deletions(-)` |
+| `git status --porcelain` | 9 modified sources + 1 untracked test (+ 1 incidental, see Open risks) |
+| `grep -F` byte-identity, ProductDetail vs sharedStyles x3 | 1/1 each — character-for-character match |
+| `grep -rn "88%, var(--forest-d)"` | **0** |
+
+**Delta vs phase 4 (318 files / 5112 tests):** `+1 file / +10 tests` — exactly
+`literalCensus.test.ts` and nothing else. No pre-existing test dropped or newly skipped; the
+phase-1 forest cascade guard (8) and the phase-4 parity test (5) both still pass. As in every
+prior phase: the forest guard covers the TOKEN layer only, so it is evidence phase 5 broke nothing
+upstream, **not** evidence that these 15 replacements render correctly.
+
+### Final in-scope tally — phases 2-5 sum to 58
+
+| phase | file(s) | in-scope |
+|---|---|---|
+| 2 | `shared/sharedStyles.ts` | 10 |
+| 3 | `Footer/footerStyles.ts` 7 + `Footer/TechPremiumFooter.tsx` 10 | 17 |
+| 4 | Hero 4+4, CTA 3+3, Pricing 1+1 | 16 |
+| 5 | ProductDetail 4, Readout 2, navStyles 1, GalleryPreview 3, Catalog/Contact/Gallery/Problem/Explainer 1 each | 15 |
+| | **total** | **58** |
+
+= the plan's 51 band-family + 7 `--lime`-derived. Matches the plan's per-file arithmetic
+(10+7+10+8+6+2+4+2+1+3+5 = 58) and the phase-4 carry-forward (158x6 + 159x4 + 140x4 + 128x1 = 15).
+
+### Deviations from the plan
+
+**None.** No value invented; every replacement traces to a canonical string or a named scout §G
+row (table column 6). No scope-out touched, no dedupe, no refactor, no published half created for
+`Readout`, no file outside the 10 Files-touched modified.
+
+Three in-scope judgment calls, all resolved conservatively:
+
+1. **`GalleryPreview:17`/`:18` use bare `var(--on-dark-2)`, not a `color-mix(… 100%, transparent)`
+   wrapper.** Both literals are OPAQUE (`oklch(0.78 0.03 140)`, no alpha) and byte-equal to
+   forest's `onDark2` (`oklch(0.780 0.030 140)`), so this is the canonical opaque-tag-cluster
+   branch and forest's rendered value at both sites is *exactly* unchanged — not even a JND
+   collapse. Identical resolution to phase 2's `sharedStyles.ts:12`.
+2. **`Problem:17` `oklch(0.84 0.025 140 / 0.78)` → `--on-dark` (not `--on-dark-2`).** It carries
+   an explicit alpha and its base is the `0.84 …140` family, so it takes the alpha-mix `--on-dark`
+   form — the same resolution phases 3 and 4 recorded for their alpha'd hue-140 sites. Chroma
+   moves 0.025 → 0.022 under forest; inside the ruled hue-140 collapse.
+3. **`navStyles:19` 55% is a literal alpha transcription** (`/ 0.55` → `55%`), as with every other
+   alpha in slice 2 (`/ 0.5`→`50%`, `/ 0.25`→`25%`, `/ 0.4`→`40%`, `/ 0.8`→`80%`,
+   `/ 0.78`→`78%`, `/ 0.92`→`92%`, `/ 0.6`→`60%`). Nothing rounded or harmonised.
+
+### Known-and-accepted forest deltas from this phase
+
+All pre-ruled in the plan's AC #4 scope:
+- six shadow tints move `0.30 0.04 158` → `--forest` `0.325 0.045 158` (ProductDetail `:67`,
+  Readout `:67` x2, navStyles `:19`, Catalog `:24`, Contact `:23`);
+- the Explainer hover drops chroma 0.185 → 0.176 (the 6th and last lime-hover site);
+- two hue-140 sites collapse onto `--on-dark` (ProductDetail `:85` `0.85 0.025 140` →
+  `0.840 0.022 140`; Problem `:17` `0.84 0.025 140` → `0.840 0.022 140`);
+- `GalleryPreview:17`/`:18` (opaque tags) and the two `--forest-d 40%` hovers
+  (`GalleryPreview:14`, `Gallery:17`) are **value-exact** under forest.
+
+### What is NOT verified — outstanding, and it matters
+
+**I have no browser, ran no dev server, and make NO visual claim whatsoever.** Neither the census
+nor the parity test nor the forest guard can see a rendered pixel; all three are source-text
+assertions that stay green while a colour renders wrong.
+
+Specifically outstanding for the founder gate — **the full manual pass across ALL touched sections
+under BOTH palettes is entirely undone**:
+- every section under harbor with no green stragglers (Hero, CTA, Pricing, Footer, Explainer,
+  Contact, Catalog, Problem, Gallery, GalleryPreview, ProductDetail, Compatibility/Readout, nav);
+- **ProductDetail's lightbox opened** — scrim (`:80`), caption (`:85`), nav scrim (`:87`) — the
+  three sites that duplicate sharedStyles and were deliberately left duplicated;
+- **the Compatibility readout** (`Readout` renders through BOTH Compatibility renderers; its
+  editor-vs-published equality is structural by single-source, but unconfirmed on screen);
+- the nav dropdown shadow (`navStyles:19`) and the GalleryPreview editor chrome
+  (`.tp-gx`, `.tp-managed-hint`) staying legible on the navy band;
+- the devtools flip back to `forest` → today's look end-to-end;
+- **still unverified since phase 2, and load-bearing for 13 of this phase's 15 sites:** the
+  `color-mix(…, transparent)` premultiplied-alpha engine behaviour, and the
+  `color-mix(…, black)` powerless-hue carry at the Explainer hover (`:16`) — a wrong engine result
+  renders pink/grey while type-checking and unit-testing green.
+- `npm run build` not run (plan: orchestrator, end of pipeline). No `/dev/seed-techpremium` hit,
+  no DB touched, no published render inspected.
+
+### Open risks
+
+- **Incidental working-tree entry (third recurrence; phases 1 and 4 recorded the same):**
+  `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` shows as
+  modified after `npm run test:run`. `git diff --numstat` reports **zero changed lines** (git only
+  warns "LF will be replaced by CRLF") — vitest rewrote it with LF endings. Not authored by me and
+  not revertible without `git checkout --`, a state-changing git command I am not permitted to run.
+  Safe to discard.
+- The census enforces the ABSENCE of raw band literals; it cannot enforce that the replacements are
+  the *right* derivations. Byte-identity across phases is verified by `grep -F`, but the semantic
+  correctness of each canonical string rests on the plan's derivation work, not on any test here.
+- Founder-gate OBSERVATIONS from the plan stand unchanged and are not decisions for me: the 11
+  hue-150 pill borders vs harbor's `--ok`; harbor's `--ok` ≈ `--lime` proximity (RULED not ours —
+  verbatim from the designer's brand-palette block); the 6 lime hovers' 0.185 → 0.176 chroma dip.
+- Delivery reach is unchanged: techpremium is retired, no row write, no picker entry, no backfill.

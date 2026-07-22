@@ -64,7 +64,7 @@ export function TechPremiumReadout({ data }: { data?: ReadoutData }) {
 
 // Included by every block that renders a readout (append to the block's STYLES).
 export const READOUT_STYLES = `
-.tp-rd { background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r-lg); box-shadow:0 18px 48px -28px oklch(0.30 0.04 158 / 0.5), 0 2px 8px -4px oklch(0.30 0.04 158 / 0.25); overflow:hidden; width:100%; color:var(--ink); }
+.tp-rd { background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r-lg); box-shadow:0 18px 48px -28px color-mix(in oklch, var(--forest) 50%, transparent), 0 2px 8px -4px color-mix(in oklch, var(--forest) 25%, transparent); overflow:hidden; width:100%; color:var(--ink); }
 .tp-rd-top { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 16px; border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:11px; font-weight:500; letter-spacing:0.10em; text-transform:uppercase; color:var(--ink-2); }
 .tp-rd-loc { display:inline-flex; align-items:center; gap:9px; }
 .tp-rd-loc b { color:var(--ink); font-weight:600; }
