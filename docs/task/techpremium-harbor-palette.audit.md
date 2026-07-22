@@ -287,3 +287,118 @@ type-checks against the Prisma `ProjectCreateInput`.
 
 No visual pass, no `npm run dev`, the seed route has still never been executed, no DB touched.
 The slice-1 founder decision gate remains fully outstanding.
+
+---
+
+## Phase 2 (slice 2 — B1: shared foundation)
+
+Branch verified FIRST, before any edit: `git -C <WORKDIR> branch --show-current` →
+`feature/techpremium-harbor-palette`. Match.
+
+### Files changed
+
+1. `src/modules/templates/techpremium/blocks/shared/sharedStyles.ts`
+2. `docs/task/techpremium-harbor-palette.audit.md` (this append)
+
+Exactly the phase's 1 Files-touched source file. No other file was read-modified; phase 3's
+Footer files, the phase-4 renderer pairs and the phase-5 modules are untouched.
+
+### The 10 in-scope replacements (before → after)
+
+`sharedStyles.ts` carries **13** `oklch(` literals: 10 in-scope + 3 scope-out. All 10 replaced,
+all 3 scope-outs untouched. Diff is `9 insertions(+), 9 deletions(-)` — 9 lines because `:11`
+carries two in-scope literals on one line (count occurrences, not lines).
+
+| # | line | before | after | source of the string |
+|---|---|---|---|---|
+| 1 | `:8` `.tp-ph` hatch | `oklch(0.325 0.045 158 / 0.055)` | `color-mix(in oklch, var(--forest) 5.5%, transparent)` | canonical "base `.tp-ph` hatch" |
+| 2 | `:11` `.tp-ph.on-dark` bg | `oklch(0.285 0.040 159)` | `color-mix(in oklch, var(--forest) 50%, var(--forest-d))` | plan phase-2 step 1 / §G midpoint row |
+| 3 | `:11` `.tp-ph.on-dark` stripe | `oklch(0.855 0.185 128 / 0.07)` | `color-mix(in oklch, var(--lime) 7%, transparent)` | canonical "hue-128 stripe" (the ONLY lime-stripe site) |
+| 4 | `:12` `.tp-ph.on-dark .tp-tag` color | `oklch(0.78 0.03 140)` | `var(--on-dark-2)` | canonical hue-140 rule, "opaque tag cluster" branch |
+| 5 | `:35` `.tp-lede` on dark surfaces | `oklch(0.85 0.025 140 / 0.82)` | `color-mix(in oklch, var(--on-dark) 82%, transparent)` | canonical hue-140 form @ ORIGINAL alpha 0.82 |
+| 6 | `:43` `.tp-btn2.lime:hover` | `oklch(0.815 0.185 128)` | `color-mix(in oklch, var(--lime) 95%, black)` | canonical hue-128 hover fill (scout §G's `88% --forest-d` row is SUPERSEDED and was NOT used) |
+| 7 | `:56` `.tp-pcard:hover` box-shadow | `oklch(0.30 0.04 158 / 0.5)` | `color-mix(in oklch, var(--forest) 50%, transparent)` | scout §G row 3 (shadow-tint collapse) |
+| 8 | `:74` `.tp-lightbox` scrim | `oklch(0.20 0.03 159 / 0.92)` | `color-mix(in oklch, color-mix(in oklch, var(--forest-d) 78%, black) 92%, transparent)` | canonical "lightbox scrim … 0.92" |
+| 9 | `:79` `.tp-lb-cap` | `oklch(0.85 0.025 140 / 0.8)` | `color-mix(in oklch, var(--on-dark) 80%, transparent)` | canonical hue-140 form @ ORIGINAL alpha 0.8 |
+| 10 | `:81` `.tp-lb-nav` scrim | `oklch(0.20 0.03 159 / 0.6)` | `color-mix(in oklch, color-mix(in oklch, var(--forest-d) 78%, black) 60%, transparent)` | canonical "scrim … 0.6" |
+
+Strings 1, 3, 6, 8, 9, 10 are the plan's canonical strings pasted **byte-identically** (phases 4
+and 5 must paste the same bytes — notably #1 at `Hero.tsx:308`/`.published.tsx:128`, #6 at 5 more
+sites, #8/#9/#10 at `ProductDetail/styles.ts:80`/`:85`/`:87`).
+
+### Scope-outs — verified untouched
+
+`grep -o "oklch([^)]*)"` after the edit returns exactly three hits, all originals:
+
+```
+17:oklch(0.66 0.15 150 / 0.30)   # .tp-pill border      (hue 150)
+19:oklch(0.70 0.095 192 / 0.30)  # .tp-pill.teal border (hue 192)
+45:oklch(0.55 0.16 150)          # .tp-btn2.wa:hover    (hue 150)
+```
+
+So this file still contributes 2 to the phase-5 hue-150 census and 1 to hue-192, and contributes
+0 to hues 158/159/140/128 — which is what the phase-5 census test will require.
+
+Colour values only. No selector changed, no declaration added or removed, no markup, no
+refactor, no dedupe.
+
+### Deviations from the plan
+
+**None.** No value was invented; every replacement traces to a canonical string or a named
+scout §G row (table column 5 above).
+
+Two in-scope judgment calls, both resolved conservatively and worth naming:
+
+1. **`:12` uses bare `var(--on-dark-2)`, not a `color-mix(… 100%, transparent)` wrapper.** The
+   canonical hue-140 rule says `var(--on-dark-2)` "for the opaque tag cluster"; the literal was
+   opaque, and forest's `onDark2` is `oklch(0.780 0.030 140)` — byte-equal to the replaced
+   literal, so forest's rendered value here is *exactly* unchanged (not even a JND collapse).
+2. **Alpha → percentage is a literal transcription** (`/ 0.82` → `82%`, `/ 0.8` → `80%`,
+   `/ 0.055` → `5.5%`, `/ 0.5` → `50%`), per the canonical "at each site's ORIGINAL alpha".
+   No alpha was rounded or harmonised.
+
+### Commands run and their real results
+
+| command | result |
+|---|---|
+| `git branch --show-current` (FIRST action) | `feature/techpremium-harbor-palette` — match |
+| `npx tsc --noEmit` | **0 errors**, clean |
+| `npm run test:run` | **316 passed \| 1 skipped (317 files); 5092 passed \| 15 skipped (5107 tests)** — 73.15s |
+| `git diff --stat` | `1 file changed, 9 insertions(+), 9 deletions(-)` |
+| `grep -o "oklch([^)]*)"` post-edit | 3 hits — the 3 scope-outs only |
+
+Test totals are **identical** to phase 1's (5092/15), so nothing was dropped or newly skipped,
+and the phase-1 forest cascade guard (`palettes.test.ts`, 8 tests) still holds. That guard covers
+the token layer only — it does not and cannot see block literals, so it is evidence that phase 2
+broke nothing upstream, NOT evidence that these 10 replacements render correctly.
+
+Note on `tsc`: unlike phase 1, no `src/app/page.tsx TS2307` appeared — `next-env.d.ts` is now
+present in the worktree (gitignored, left behind by earlier work). I neither created nor deleted
+it. `git status` shows exactly one modified file (the source file above).
+
+### What is NOT verified — outstanding, and it matters
+
+**Both of this phase's required empirical dev checks are OUTSTANDING. I did not perform them and
+make no claim about them.** They need a browser; they belong to the founder:
+
+1. **`.tp-ph` stripe reads GREEN under forest** — `color-mix(…, transparent)` relies on
+   premultiplied alpha. If an engine mixed non-premultiplied, the 5.5%/7% stripes would not merely
+   be a shade off, they would render as a washed/pink band tint. This lands at replacements 1, 3,
+   5, 7, 9, 10 — six of the ten.
+2. **`.tp-btn2.lime:hover` fill reads GREEN, not grey/olive, under forest** — `color-mix(…, black)`
+   relies on black being achromatic ⇒ powerless hue ⇒ `--lime`'s hue carried through. If an engine
+   treated the missing hue as 0 instead, the hover goes grey/olive. This is the riskier of the two
+   forms and it appears at 6 sites across the slice; `:43` is the first and cheapest place to
+   catch it.
+
+No test in this repo catches either failure — they are string substitutions that type-check and
+unit-test green while rendering wrong. Also unverified: any visual result at all (I did not run
+`npm run dev`, did not hit `/dev/seed-techpremium`, did not devtools-toggle `data-palette`), the
+harbor appearance of these 10 sites, the plan's manual eyeball of
+Explainer/Contact/Gallery/GalleryPreview under both palettes, and the `/preview`/published-render
+glance. `npm run build` not run (orchestrator, after phase 5).
+
+Known-and-accepted forest deltas introduced by this phase, all pre-ruled in the plan's AC #4
+scope: `:56`'s shadow tint 0.30→0.325 L; `:35`/`:79`'s hue-140 values collapse onto `--on-dark`
+(`0.840 0.022 140`); `:43`'s hover chroma 0.185→0.176. `:11`'s midpoint and `:12`'s tag colour are
+value-exact. Phase 3 not started.
