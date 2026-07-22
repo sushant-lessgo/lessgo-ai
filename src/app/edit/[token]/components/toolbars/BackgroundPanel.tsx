@@ -5,7 +5,10 @@
 // phase 2 (slice 1b) shipped the COLOR row. phase 3 (slice 2) adds the HERO's
 // Color | Image | Video(greyed) tabs plus the `bgMode` lever. Non-hero sections
 // still see the colour row alone (spec §A: "every other section gets Color only"),
-// and `bgMode` is written ONLY from the hero tabs.
+// and `bgMode` is written ONLY from the hero tabs. phase 4 (slice 3) grows the
+// Image tab's ≥2 state into the docked filmstrip (`HeroSlidesTray`) — the same
+// panel, not a second surface — and makes this component the single place a
+// `HeroSlidesPatch` turns into an elements write (`applyPatch`).
 //
 // ANATOMY: an `absolute top-full left-0` sibling of the Background ToolbarButton,
 // rendered INSIDE the shell's chrome box. That box is deliberately `relative` with
@@ -30,7 +33,13 @@ import { extractSectionType } from '@/modules/generatedLanding/componentRegistry
 import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 // The slides invariant lives in ONE pure module (plan D8) — the panel never
 // hand-rolls a slides mutation, so "never exactly 1" cannot be violated from here.
-import { normalizeSlides, promoteToSlides } from '@/modules/skeletons/work/heroSlides';
+import {
+  normalizeSlides,
+  promoteToSlides,
+  replaceSlide,
+  type HeroSlidesPatch,
+} from '@/modules/skeletons/work/heroSlides';
+import { HeroSlidesTray } from './HeroSlidesTray';
 // `'use client'` modal — edit side ONLY. It is imported here and NOWHERE near a
 // `.published.tsx` / core path (the `editPrimitives.tsx:213-215` guard discipline).
 import { MediaPickerModal } from '../ui/MediaPickerModal';
@@ -166,8 +175,25 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
   const executeUndoableAction = useEditStore((s) => s.executeUndoableAction);
   const tokenId = useEditStore((s) => s.tokenId);
 
-  // Which picker is open: the single-image slot, or the "add another" slot.
-  const [picking, setPicking] = useState<null | 'single' | 'add'>(null);
+  // Which picker is open: the single-image slot, the "add another" slot, or one
+  // tray card's replace (phase 4 — hence the object shape, it carries the target).
+  const [picking, setPicking] = useState<
+    null | { mode: 'single' } | { mode: 'add' } | { mode: 'replace'; slideId: string }
+  >(null);
+
+  // ── `picking` SILENT-UNMOUNT RESET (phase-3 review carry-forward). ──────────
+  // `MediaPickerModal` is mounted inside `{isHero && rendersImage && tab ===
+  // 'image' && …}`. If any of those flip while a picker is open — the user swaps
+  // the hero variant to "Centered type", or clicks Color — the modal unmounts
+  // WITHOUT `onOpenChange` ever firing, so `picking` would stay set forever and
+  // the click-outside guard above (`if (picking !== null) return`) would leave the
+  // panel permanently undismissable. Unreachable in phase 3 (nothing could flip
+  // those while the modal held focus); phase 4 adds per-card replace, i.e. more
+  // entry points, so the reset lands now rather than after the bug.
+  const imageTabMounted = isHero && rendersImage && tab === 'image';
+  useEffect(() => {
+    if (!imageTabMounted) setPicking(null);
+  }, [imageTabMounted]);
 
   // Click-outside → close (TextToolbarMVP.tsx:449-470 precedent). The Background
   // BUTTON is excluded on purpose: it toggles, and closing on its mousedown would
@@ -215,20 +241,39 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
     });
   };
 
+  /**
+   * The ONE place a `HeroSlidesPatch` becomes an elements write (phase 4). The
+   * two patch shapes are NOT symmetrical: `'single'` means "set the scalar and
+   * DELETE the `slides` key" (note N5 — writing `slides: []` would be re-stamped
+   * by `stampHeroSlides`, silently undoing the user's demote).
+   */
+  const applyPatch = (label: string, patch: HeroSlidesPatch) => {
+    const next: Record<string, any> = { ...(heroElements || {}) };
+    if (patch.kind === 'slides') {
+      next.slides = patch.slides;
+    } else {
+      delete next.slides;
+      next.portrait_image = patch.portraitImage;
+    }
+    writeElements(label, next);
+  };
+
   const pickSingle = (url: string) => {
     writeElements('Set hero background image', { ...(heroElements || {}), portrait_image: url });
   };
 
   const pickAdditional = (url: string) => {
-    const patch = promoteToSlides(heroElements as any, url);
-    if (patch.kind !== 'slides') return; // unreachable: promote always yields ≥2
-    writeElements('Added a hero slide', { ...(heroElements || {}), slides: patch.slides });
+    applyPatch('Added a hero slide', promoteToSlides(heroElements as any, url));
   };
 
   const setTab = (next: UBgMode) => {
-    // Center never gets `bgMode` written (D7: it is a no-op there — the variant
-    // renders no media, so there is nothing to suppress).
-    if (next === 'image' && !rendersImage) return;
+    // Center never gets `bgMode` written AT ALL (D7: it is a no-op there — the
+    // variant renders no media, so there is nothing to suppress). Phase 3 only
+    // blocked the `'image'` write, which let a Color click persist
+    // `bgMode: 'color'` on `workherocenter`: harmless while the user stays there
+    // (center ignores the prop) but it turns into a colour hero the moment they
+    // swap back to a variant that DOES render media — a mode they never chose.
+    if (!rendersImage) return;
     setSectionStyleTokens(sectionId, { bgMode: next });
   };
 
@@ -381,16 +426,29 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
           </div>
 
           {norm.isSlideshow ? (
-            <p data-testid="section-bg-slides-count" className="mb-2 text-[11px] leading-snug text-gray-600">
-              <span className="font-medium text-gray-800">{norm.slides.length} images</span> — your
-              hero plays them as a slideshow.
-            </p>
+            <>
+              <p data-testid="section-bg-slides-count" className="mb-2 text-[11px] leading-snug text-gray-600">
+                <span className="font-medium text-gray-800">{norm.slides.length} images</span> — your
+                hero plays them as a slideshow.
+              </p>
+              {/* STATE B (spec §B): the same panel, GROWN into the filmstrip — not a
+                  modal, not a separate surface. It owns add/replace/remove/reorder
+                  from here on, which is why the single-image Add slot below is
+                  rendered only in state A (one add control, never two). */}
+              <HeroSlidesTray
+                sectionId={sectionId}
+                slides={norm.slides}
+                onApplyPatch={applyPatch}
+                onRequestReplace={(slideId) => setPicking({ mode: 'replace', slideId })}
+                onRequestAdd={() => setPicking({ mode: 'add' })}
+              />
+            </>
           ) : (
             <button
               type="button"
               data-testid="section-bg-replace-image"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => setPicking('single')}
+              onClick={() => setPicking({ mode: 'single' })}
               className="flex w-full items-center gap-2 rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700 transition-colors hover:bg-gray-50"
             >
               <span
@@ -405,22 +463,23 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
           {/* ALWAYS-VISIBLE add slot, slider layout only (R6 + the standing
               discoverability rule: a control that only appears later is a capability
               the user never learns they have). Slideshow is EMERGENT from count —
-              there is no "make a slideshow" mode to pick. */}
-          {isSlider && (
+              there is no "make a slideshow" mode to pick.
+              STATE A ONLY: once there are ≥2 images the tray's trailing "+" card is
+              the add control (and it is what hides at the cap), so rendering this
+              one too would be two buttons doing one job. */}
+          {isSlider && !norm.isSlideshow && (
             <>
               <button
                 type="button"
                 data-testid="section-bg-add-image"
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => setPicking('add')}
+                onClick={() => setPicking({ mode: 'add' })}
                 className="mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-gray-300 px-2 py-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-50"
               >
                 + Add image
               </button>
               <p className="mt-1.5 text-[11px] leading-snug text-gray-500">
-                {norm.isSlideshow
-                  ? 'Drop another in — order is play order.'
-                  : 'Add more to make a slideshow.'}
+                Add more to make a slideshow.
               </p>
             </>
           )}
@@ -434,8 +493,10 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
             tokenId={tokenId}
             initialTab="library"
             onPick={(url) => {
-              if (picking === 'add') pickAdditional(url);
-              else pickSingle(url);
+              if (picking?.mode === 'add') pickAdditional(url);
+              else if (picking?.mode === 'replace') {
+                applyPatch('Replaced a hero slide', replaceSlide(norm.slides, picking.slideId, url));
+              } else pickSingle(url);
               setPicking(null);
             }}
           />

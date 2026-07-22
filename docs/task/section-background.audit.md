@@ -955,3 +955,202 @@ file, which the brief authorised and asked to be noted here.
   `/api/media` contract (that is `media-picker.spec.ts`'s job).
 - Untouched and recorded as instructed: `.wk-hero__num` still rendering in Color mode (founder-eyeball
   item at the gate) and the `useWizardStore.b8` full-suite timeout (did not reproduce here).
+
+---
+
+## Phase 4 — Filmstrip tray (Slice 3)
+
+Branch: `feature/section-background` (verified with `git branch --show-current` BEFORE any edit).
+
+### Files changed
+
+Created:
+- `src/app/edit/[token]/components/toolbars/HeroSlidesTray.tsx`
+- `src/app/edit/[token]/components/toolbars/HeroSlidesTray.test.tsx`
+
+Modified:
+- `src/app/edit/[token]/components/toolbars/BackgroundPanel.tsx`
+- `src/modules/skeletons/work/blocks/Hero/WorkHeroSlider.tsx`
+- `e2e/section-background.spec.ts`
+- `docs/task/section-background.audit.md` (this section)
+
+**Nothing outside phase 4's Files-touched list was edited.** `docs/task/section-background.plan.md`
+shows dirty in `git status` — it was already dirty before this phase (the orchestrator's progress-log
+line for phase 3); `git diff` confirms the only hunk is that line, none of it mine.
+
+### Per-file
+
+**`HeroSlidesTray.tsx` (new)** — the filmstrip. Docked inside the same `BackgroundPanel`, horizontal
+`flex` strip, one card per slide, numbered `01/02/03` **derived from index** (position IS the number,
+so it is never stored). Per card: a thumbnail button (preview), a dedicated drag HANDLE, replace, and
+remove. dnd-kit setup copied from `EditableImageCollection.tsx`: `PointerSensor
+{activationConstraint:{distance:6}}` + `KeyboardSensor`/`sortableKeyboardCoordinates`,
+`SortableContext` with ids taken from the slide ids, `closestCenter`, `rectSortingStrategy`, plus
+`restrictToHorizontalAxis` from `@dnd-kit/modifiers` (already installed) — `onDragEnd` resolves
+from/to and emits ONE write carrying the FULL new order.
+- **Zero store access.** Every mutation is computed by the phase-3 helpers and handed to a single
+  injected `onApplyPatch(label, patch)` — the "one writer, fully contained" law from
+  `EditableImageCollection.tsx:16-23`. Phase 4 adds **no helper** (D8).
+- Delete has **no confirm dialog**; `removeSlide` auto-demotes at 2, and the strip says
+  "Removing is instant; Undo puts it back."
+- **Cap 6:** the trailing "+" card is HIDDEN at `MAX_HERO_SLIDES` and replaced by
+  `hero-slides-cap-notice` (the `SocialItemsEditor` pattern). Before this phase the 7th pick was a
+  silent no-op inside `promoteToSlides`.
+- Chrome uses the app-chrome tokens (`bg-app-surface`, `border-app-border`, `rounded-app-ctl`,
+  `text-app-muted/faint/ink`, `hover:text-app-danger`), every control carries an `aria-label` naming
+  its slide (`Replace slide 02`), and the testids are the plan's kebab nouns: `hero-slides-tray`,
+  `hero-slide` (+`data-slide-id`), `hero-slide-replace`, `hero-slide-remove`, `hero-slide-add`,
+  `hero-slides-cap-notice` (+ two the plan did not name but the tests/e2e need: `hero-slide-preview`,
+  `hero-slide-drag`).
+- Canvas preview is a `window` CustomEvent, `lessgo:wk-hero-preview-slide`
+  (`lessgo:manage-collections` precedent), exported as `HERO_PREVIEW_SLIDE_EVENT` +
+  `dispatchHeroSlidePreview`. Clicking the same thumbnail again — or the tray unmounting — dispatches
+  `slideId: null`, which RELEASES the preview; without that, autoplay would stay paused forever on a
+  slide whose control is gone.
+
+**`BackgroundPanel.tsx`** — four changes:
+1. Renders `HeroSlidesTray` inside the Image tab whenever `normalizeSlides` reports slideshow state
+   (spec §B "the same panel, grown"). The single-image `+ Add image` slot is now **state-A only**, so
+   there is exactly one add control at any time (the tray's "+" card is the 2+ one, and it is the one
+   that hides at the cap).
+2. New `applyPatch(label, patch)` — the ONE place a `HeroSlidesPatch` becomes an elements write. The
+   two shapes are asymmetric on purpose: `'single'` DELETES the `slides` key (note N5) rather than
+   writing `[]`. It routes through the existing `writeElements`, so every tray gesture is still ONE
+   `executeUndoableAction('sectionSwap', …)` — the only action type whose undo restores the whole
+   `content` snapshot. `pickAdditional` was refactored onto it (same output).
+3. **Carry-forward #1 (setTab on a no-media variant).** `if (next === 'image' && !rendersImage)` ->
+   `if (!rendersImage) return;`. Phase 3 blocked only the `'image'` write, so a Color click on
+   `workherocenter` persisted `bgMode:'color'` — inert there, but it becomes a colour hero the moment
+   the user swaps back to the slider. Now `bgMode` is never written on a variant that renders no media
+   (D7's no-op, honoured on both tabs). Colour chips are unaffected.
+4. **Carry-forward #2 (`picking` silent-unmount).** New `useEffect` resets `picking` whenever the
+   `isHero && rendersImage && tab === 'image'` mount condition goes false. Without it, a flip while the
+   picker is open unmounts `MediaPickerModal` without `onOpenChange` firing, leaving `picking` set —
+   and the phase-3 dismiss guard (`if (picking !== null) return`) would then make that panel instance
+   permanently undismissable. Phase 4 makes it reachable (per-card replace = a second entry point).
+   `picking` also changed shape (`'single' | 'add'` -> an object, so replace can carry its `slideId`).
+
+**`WorkHeroSlider.tsx`** — the existing slider effect gained a `lessgo:wk-hero-preview-slide`
+listener: matching `sectionId` + a known `slideId` -> `paused = true; stop(); go(i)`; `slideId: null`
+-> resume. Edit-only, DOM-only, zero published impact and zero markup change.
+- The DOM `.wk-hero__slide` nodes deliberately carry **no id attribute** — adding one would change
+  published markup for untouched drafts (D9) — so the id->index map is resolved in the wrapper from
+  the same array the core renders in order, threaded into the effect as a STABLE STRING dep
+  (`slideIdsKey`); an array literal dep would re-run the effect every render.
+
+**`e2e/section-background.spec.ts`** — one new case + one adjusted assertion (see Tests).
+
+### Deviations from the plan (in-scope judgement calls)
+
+1. **`horizontalListSortingStrategy` -> `rectSortingStrategy`.** The plan named the former; the task
+   brief explicitly says `rectSortingStrategy` works for a horizontal strip and is the repo
+   precedent. Took the precedent. `restrictToHorizontalAxis` IS used, as the plan asked.
+2. **`arrayMove` is not called.** The brief's sketch was "onDragEnd -> arrayMove -> one onChange", but
+   D8 is binding that phase 4 reuses the phase-3 helpers, and `reorderSlides(slides, from, to)` IS
+   that splice move with the invariant + cap enforced inside it. Calling both would have meant either
+   a duplicated order computation or a mutation of the helper's result. One writer, one computation.
+3. **The tray renders whenever `normalizeSlides` says slideshow — not only on `workheroslider`.**
+   Only the slider RENDERS a slide set, so this is the same set of drafts in practice; but if slides
+   data ever exists on the image/split variants, the old code showed an "N images" line with no
+   control at all. The tray is the correct editor for that data and its delete auto-demotes back to a
+   renderable single image. Conservative in the sense that matters: it never creates slides where
+   there were none.
+4. **Two testids beyond the plan's list** (`hero-slide-preview`, `hero-slide-drag`) — the preview and
+   drag affordances are separate controls (a card-wide drag would fight the thumbnail's click), and
+   both the tests and the e2e need to address them.
+5. **The two carry-forward regression tests live in `HeroSlidesTray.test.tsx`**, not in
+   `BackgroundPanel.picker.test.tsx` (which is not in this phase's Files-touched list). They are in
+   their own `describe` with a note saying why.
+
+### Tests added
+
+**`HeroSlidesTray.test.tsx` (new, 9 cases)** — real `BackgroundPanel`, real `createEditStore`, real
+`MediaPickerModal`; only `useTemplateReady`, `componentRegistry.extractSectionType` and **dnd-kit**
+are stubbed. The dnd-kit stub is narrow and justified in the file header: jsdom reports every rect as
+0x0, so the library's own drop resolution cannot run there; the mock captures the `onDragEnd` WE pass
+and invokes it with real slide ids, which exercises the part this phase owns (id lookup -> helper ->
+single write). The real drag is covered in Playwright instead.
+1. one numbered card per slide, in play order, `Slide 01/02/03` aria-labels, and the state-A add slot
+   is NOT also rendered;
+2. **reorder -> the FULL new order persists once, and the PUBLISHED play order matches** — the phase's
+   acceptance criterion, asserted by rendering the real published hero wrapper off the resulting store
+   state and reading `.wk-hero__slide img` in DOCUMENT order (which is what `work.v1.js` iterates).
+   Also: a self-drop / null-over writes nothing;
+3. delete down to one **demotes**: `portrait_image` is the survivor, `'slides' in elements === false`
+   (not `[]`), tray gone, state-A controls back;
+4. delete at 3 keeps a slideshow and **ONE `undo()` restores** the deleted slide;
+5. **cap 6**: add card hidden + `hero-slides-cap-notice` present, and both revert below the cap;
+6. thumbnail click dispatches the preview event for that slide, writes NOTHING, and a second click
+   dispatches `slideId: null`;
+7. the Scope-OUT word sweep (autoplay/interval/transition/crop/focal) over the whole panel;
+8. **carry-forward #1**: a Color click on `WorkHeroCenter` writes no `bgMode` at all (while the colour
+   chip still works);
+9. **carry-forward #2**: open a picker from a tray card -> flip to the Color tab -> the panel is still
+   dismissable by an outside mousedown.
+
+Per the phase-3 lesson, every simulated press dispatches `mousedown` and `mouseup`/`click` in
+**separate `act()` calls** (batching them lets an unmount-on-mousedown bug pass green).
+
+**Mutation check — the new assertions BITE (observed, then reverted; `git diff` confirms).**
+- Round 1, three mutants at once (`reorderSlides(slides, to, from)`; `slides.length > MAX_HERO_SLIDES`;
+  `delete next.slides` -> `next.slides = []`) -> **3 failed | 4 passed**, failing exactly on the reorder
+  order, the demote key, and the still-visible add card.
+- Round 2, the two carry-forward fixes reverted to their phase-3 form -> **2 failed | 7 passed**:
+  `expected 'color' to be undefined` and `the panel was left undismissable by a stale picking:
+  expected +0 to be 1`.
+
+**`e2e/section-background.spec.ts`** — new case *"the tray reorders the live slides and a thumbnail
+previews one"*: opens the panel on the 2-slide hero, asserts the tray + `01/02` numbering, performs a
+**REAL pointer drag** (mouse down -> intermediate moves past the 6px activation distance -> up), waits
+for the `saveDraft`, then asserts BOTH that the strip re-ordered AND that the CANVAS did (the first
+`.wk-hero__slide img` is now the src that was second) — an attribute-only check would have been inert.
+Then it clicks a thumbnail, asserts that DOM slide gets `is-active`, and asserts it is STILL active 6s
+later (the autoplay interval is 5s, so this fails if the preview did not pause it). One existing
+assertion was adjusted: at 2+ the always-visible add control is now `hero-slide-add` and
+`section-bg-add-image` is asserted ABSENT (one add control, never two).
+
+### Verification (actual observed output, this worktree)
+
+- `npx tsc --noEmit` -> **clean, zero output** (exit 0).
+- `npm run test:run` -> **Test Files 314 passed | 1 skipped (315); Tests 5071 passed | 15 skipped
+  (5086)**, 80.8s. Zero failures. D9 tripwires green and **UNMODIFIED**: `kundiusPages.test.tsx`,
+  `oldContentFallback.test.tsx`, `coreParity.test.ts`, `uiFoundationIsolation.test.tsx.snap`.
+- `npx next lint --file` on the three touched source files -> **"No ESLint warnings or errors"**.
+- `npm run build` -> **success**; `git status --porcelain public/assets scripts/legacy
+  public/published.css` -> **empty**. `work.v1.js` byte-unchanged; `scripts/` untouched.
+- **Playwright, actually run** (dev server on `E2E_PORT=3412`):
+  `e2e/section-background.spec.ts --project=setup --project=authed` -> **7 passed (1.8m)** — auth setup
+  + all 6 cases including the new phase-4 drag/preview case.
+  `e2e/workWave2.spec.ts --project=public` (`E2E_PORT=3413`) -> **4 passed**, including "multi-slide
+  hero emits the exact work.v1.js hooks".
+- No git state changes; nothing committed.
+
+### D9 ledger
+
+`work.v1.js` byte-unchanged and the frozen hooks (`.wk-hero__slide`/`.is-active`,
+`[data-wk-prev]`/`[data-wk-next]`, `[data-wk-dots]`, `[data-wk-interval]`) still emitted verbatim
+(`workWave2.spec.ts` + `heroBackground.test.tsx` both green, unmodified). `public/assets` and
+`scripts/legacy` untouched. No core, no `.published.tsx`, no `styles.ts` was touched this phase — the
+published markup is bit-for-bit what phase 3 shipped, so untouched drafts are unchanged. No slide id
+attribute was added to the DOM. `MediaPickerModal` stays behind the edit-only panel; `HeroSlidesTray`
+is `'use client'` and is imported by nothing but `BackgroundPanel`.
+
+### Risks / open items for the reviewer
+
+1. **The jsdom reorder test mocks dnd-kit.** It proves our handler + the write + the published order;
+   it does NOT prove dnd-kit's own drop resolution. The Playwright case does that with a real drag —
+   if that e2e is ever quarantined, the drag wiring loses its only real-browser proof.
+2. **Preview is DOM state, not store state.** Re-rendering the hero (any content edit, an autosave
+   round trip, a variant swap) re-runs the slider effect, which calls `go(0)` — the preview snaps back
+   to slide 01 and autoplay resumes. Acceptable for a preview affordance, but it is why the tray's
+   `previewing` highlight can briefly disagree with the canvas after an unrelated edit.
+3. **The preview event is global (`window`), keyed by `sectionId`.** Two hero sliders on one page are
+   fine (the id filter); a future second listener on the same event name is not.
+4. **Cap 6 is now enforced in the UI for the tray path only.** Reaching 7 is impossible through this
+   panel, but the helper's silent no-op is still the last line of defence for any other future caller.
+5. **The e2e preview case spends 6 real seconds** waiting out the autoplay interval — that is the only
+   way to prove "paused", but it makes that spec ~6s slower.
+6. **Deferred deliberately** (plan/founder-ruled, not oversights): no autoplay/interval/transition
+   control, no crop/focal point, no per-slide overlay text, nothing behind Video, no Accent chip. Drag
+   FEEL against `npm run dev` remains the phase's declared manual check, as does the founder's
+   publish -> live-slideshow gate.

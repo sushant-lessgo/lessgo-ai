@@ -517,8 +517,12 @@ test.describe('section background (work skeleton): Colour on body sections', () 
     // Standing discoverability rule: the Add slot is ALWAYS visible, never
     // hover-revealed — a control that appears later is a capability the user never
     // learns they have.
-    const add = page.locator('[data-testid="section-bg-add-image"]');
+    // phase 4: at ≥2 the ADD control is the filmstrip's trailing "+" card — the
+    // single-image `section-bg-add-image` slot belongs to state A only (one add
+    // control, never two). It is still ALWAYS visible, which is what the rule asks.
+    const add = page.locator('[data-testid="hero-slide-add"]');
     await expect(add).toBeVisible();
+    await expect(page.locator('[data-testid="section-bg-add-image"]')).toHaveCount(0);
     await expect(page.locator('[data-testid="section-bg-slides-count"]')).toContainText('2 images');
     // No autoplay / interval / transition / crop control anywhere (spec Scope OUT).
     // Read BEFORE opening the picker: the modal takes focus and closes the docked
@@ -535,6 +539,65 @@ test.describe('section background (work skeleton): Colour on body sections', () 
     // deterministically in `heroSlides.test.ts` instead.)
     await add.click();
     await expect(page.getByRole('dialog')).toBeVisible({ timeout: 15_000 });
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // phase 4 (slice 3) — the FILMSTRIP TRAY. Drag feel is the manual check; what
+  // is automated here is that a REAL drag repaints the canvas in the new order,
+  // and that a thumbnail click previews that slide.
+  // ══════════════════════════════════════════════════════════════════════════
+
+  test('hero: the tray reorders the live slides and a thumbnail previews one', async ({ page }) => {
+    await selectSection(page, HERO, 'Hero');
+    await page.locator(BG_ACTION).click();
+    await expect(page.locator(BG_PANEL)).toBeVisible({ timeout: 10_000 });
+
+    const tray = page.locator('[data-testid="hero-slides-tray"]');
+    await expect(tray, 'the 2+ state must grow the same panel into the filmstrip').toBeVisible();
+    const cards = page.locator('[data-testid="hero-slide"]');
+    await expect(cards).toHaveCount(2);
+
+    // Numbered 01/02 — the number IS the play position.
+    await expect(cards.nth(0)).toHaveAttribute('aria-label', 'Slide 01');
+    await expect(cards.nth(1)).toHaveAttribute('aria-label', 'Slide 02');
+
+    const idBefore = await cards.nth(0).getAttribute('data-slide-id');
+    const slideImgs = page.locator(`[data-sid="${HERO}"] .wk-hero__slide img`);
+    const firstSrcBefore = await slideImgs.nth(0).getAttribute('src');
+    const secondSrcBefore = await slideImgs.nth(1).getAttribute('src');
+    expect(firstSrcBefore).not.toBe(secondSrcBefore);
+
+    // A REAL pointer drag: the PointerSensor has a 6px activation distance, so the
+    // intermediate moves are load-bearing — a single jump would never start a drag.
+    const handle = page.locator('[data-testid="hero-slide-drag"]').nth(1);
+    const from = (await handle.boundingBox())!;
+    const target = (await cards.nth(0).boundingBox())!;
+    const saved = page.waitForResponse(
+      (r) => r.url().includes('/api/saveDraft') && r.request().method() === 'POST',
+      { timeout: 60_000 },
+    );
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(from.x + from.width / 2 - 10, from.y + from.height / 2, { steps: 3 });
+    await page.mouse.move(target.x + 4, target.y + target.height / 2, { steps: 8 });
+    await page.mouse.up();
+    expect((await saved).status(), 'the reorder never reached the server').toBe(200);
+
+    // The strip re-ordered…
+    await expect(cards.nth(1)).toHaveAttribute('data-slide-id', idBefore!);
+    // …and so did the CANVAS: play order IS document order (what `work.v1.js`
+    // iterates), so the first slide in the DOM is now the one that was second.
+    await expect(slideImgs.nth(0)).toHaveAttribute('src', secondSrcBefore!);
+
+    // ── PREVIEW: clicking a thumbnail shows that slide and pauses autoplay, so
+    //    it STAYS shown (a running interval would flip it back within 5s).
+    await page.locator('[data-testid="hero-slide-preview"]').nth(1).click();
+    const domSlides = page.locator(`[data-sid="${HERO}"] .wk-hero__slide`);
+    await expect(domSlides.nth(1)).toHaveClass(/is-active/);
+    await page.waitForTimeout(6_000);
+    await expect(domSlides.nth(1), 'autoplay was not paused by the preview').toHaveClass(
+      /is-active/,
+    );
   });
 });
 

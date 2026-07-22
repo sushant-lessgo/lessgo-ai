@@ -19,7 +19,7 @@ editor gaps: `worksRow` in `CmsPanel` and rail tab "CMS"→"Content".
 
 - phase 1 surface-override plumbing + contrast pair (slice 1a): **done** (commit 2393cee4, review loops 1, verdict `ship`)
 - phase 2 background toolbar UI, colour on body sections (slice 1b): **done** (commits a335464d + eec08890 polish, review loops 1, verdict `ship`) — **AT SLICE-1 HUMAN GATE**
-- phase 3 hero — Color + Image mode + bgMode + slides invariant (slice 2): pending
+- phase 3 hero — Color + Image mode + bgMode + slides invariant (slice 2): **done** (commit f55dfca4, review loops 2, verdict `ship`)
 - phase 4 filmstrip tray (slice 3): pending
 - phase 5 editor gaps — worksRow + Content label (slice 4, independent): pending
 
