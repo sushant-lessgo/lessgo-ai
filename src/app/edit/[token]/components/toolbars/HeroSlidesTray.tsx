@@ -80,20 +80,34 @@ export interface HeroSlidesTrayProps {
   onRequestReplace: (slideId: string) => void;
   /** Open the media picker in "append" mode (promote/append lives in the panel). */
   onRequestAdd: () => void;
+  /** R6: slideshow is a SLIDER-layout capability. On a non-slider hero variant the
+   *  extra slides are stored but never rendered, so adding one changes nothing the
+   *  user can see — the "+" card stays visible but goes inert with a why (the
+   *  greyed-placeholder rule), instead of silently doing nothing. */
+  allowAdd?: boolean;
+  /** Same gate for the thumbnail preview: the canvas listener lives only in
+   *  `WorkHeroSlider`, so on any other variant a preview click is a DEAD click. */
+  allowPreview?: boolean;
 }
+
+/** Why add/preview are inert off the slider layout — shown as a `title`, never a
+ *  silent omission. */
+const NOT_SLIDER_WHY =
+  'Slideshows only play on the slider hero layout — switch this hero to the slider to use this.';
 
 interface SlideCardProps {
   id: string;
   index: number;
   image?: string;
   previewing: boolean;
+  canPreview: boolean;
   onPreview: () => void;
   onReplace: () => void;
   onRemove: () => void;
 }
 
 function SlideCard({
-  id, index, image, previewing, onPreview, onReplace, onRemove,
+  id, index, image, previewing, canPreview, onPreview, onReplace, onRemove,
 }: SlideCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style: React.CSSProperties = {
@@ -123,10 +137,14 @@ function SlideCard({
         type="button"
         data-testid="hero-slide-preview"
         aria-label={`Preview slide ${n}`}
-        title="Show this slide on the page"
+        aria-disabled={canPreview ? undefined : true}
+        title={canPreview ? 'Show this slide on the page' : NOT_SLIDER_WHY}
         onMouseDown={(e) => e.preventDefault()}
-        onClick={onPreview}
-        className="block h-11 w-full overflow-hidden rounded-[3px] border border-black/10 bg-app-hover bg-cover bg-center"
+        onClick={() => { if (canPreview) onPreview(); }}
+        className={[
+          'block h-11 w-full overflow-hidden rounded-[3px] border border-black/10 bg-app-hover bg-cover bg-center',
+          canPreview ? '' : 'cursor-not-allowed opacity-60',
+        ].join(' ')}
         style={image ? { backgroundImage: `url(${image})` } : undefined}
       />
 
@@ -176,8 +194,16 @@ function SlideCard({
 
 export function HeroSlidesTray({
   sectionId, slides, onApplyPatch, onRequestReplace, onRequestAdd,
+  allowAdd = true, allowPreview = true,
 }: HeroSlidesTrayProps) {
   const [previewId, setPreviewId] = React.useState<string | null>(null);
+  // Mirrored in a ref so the unmount cleanup (dep `[sectionId]`, so its closure
+  // never re-forms) can read the CURRENT preview instead of the mount-time value.
+  const previewIdRef = React.useRef<string | null>(null);
+  const setPreview = React.useCallback((next: string | null) => {
+    previewIdRef.current = next;
+    setPreviewId(next);
+  }, []);
 
   // Same sensor set as `EditableImageCollection` (the repo's one dnd-kit
   // precedent): a 6px activation distance so a click still reads as a click, plus
@@ -192,9 +218,29 @@ export function HeroSlidesTray({
   // Release the canvas preview when the tray goes away (panel closed, demoted back
   // to a single image, section deselected) — otherwise autoplay would stay paused
   // on a slide the user can no longer see a control for.
+  //
+  // ONLY when something was actually previewing. The release event clears the SAME
+  // `paused` flag the hero's `focusin` sets while the user types, so an
+  // unconditional dispatch on every unmount restarted the slideshow mid-edit
+  // (caret in hero copy → open this panel → Escape → slides rotate). Nothing
+  // previewed = nothing to release.
   React.useEffect(() => {
-    return () => dispatchHeroSlidePreview(sectionId, null);
+    return () => {
+      if (previewIdRef.current === null) return;
+      previewIdRef.current = null;
+      dispatchHeroSlidePreview(sectionId, null);
+    };
   }, [sectionId]);
+
+  // The canvas slider re-runs its effect (→ `go(0)` + autoplay restart) whenever the
+  // slide id set/order changes, which silently drops its preview state. Clear the
+  // tray highlight on the same signal so the card marked `data-previewing` can't
+  // disagree with what the page is showing.
+  const idsKey = ids.join('|');
+  React.useEffect(() => {
+    previewIdRef.current = null;
+    setPreviewId(null);
+  }, [idsKey]);
 
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
@@ -214,7 +260,7 @@ export function HeroSlidesTray({
     // survivor becomes `portrait_image` and the `slides` key is deleted — so the
     // "never exactly 1" invariant cannot be broken from here.
     if (previewId === slideId) {
-      setPreviewId(null);
+      setPreview(null);
       dispatchHeroSlidePreview(sectionId, null);
     }
     onApplyPatch('Removed a hero slide', removeSlide(slides, slideId));
@@ -222,7 +268,7 @@ export function HeroSlidesTray({
 
   const handlePreview = (slideId: string) => {
     const next = previewId === slideId ? null : slideId;
-    setPreviewId(next);
+    setPreview(next);
     dispatchHeroSlidePreview(sectionId, next);
   };
 
@@ -245,6 +291,7 @@ export function HeroSlidesTray({
                 index={i}
                 image={slide.image}
                 previewing={previewId === slide.id}
+                canPreview={allowPreview}
                 onPreview={() => handlePreview(slide.id)}
                 onReplace={() => onRequestReplace(slide.id)}
                 onRemove={() => handleRemove(slide.id)}
@@ -259,10 +306,16 @@ export function HeroSlidesTray({
                 type="button"
                 data-testid="hero-slide-add"
                 aria-label="Add a slide"
-                title="Add another image"
+                aria-disabled={allowAdd ? undefined : true}
+                title={allowAdd ? 'Add another image' : NOT_SLIDER_WHY}
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={onRequestAdd}
-                className="h-[68px] w-[68px] flex-none rounded-app-ctl border border-dashed border-app-border-strong text-app-muted transition-colors hover:border-app-border-soft hover:text-app-body"
+                onClick={() => { if (allowAdd) onRequestAdd(); }}
+                className={[
+                  'h-[68px] w-[68px] flex-none rounded-app-ctl border border-dashed',
+                  allowAdd
+                    ? 'border-app-border-strong text-app-muted transition-colors hover:border-app-border-soft hover:text-app-body'
+                    : 'cursor-not-allowed border-app-border text-app-faint opacity-60',
+                ].join(' ')}
               >
                 +
               </button>
@@ -277,9 +330,16 @@ export function HeroSlidesTray({
         </p>
       )}
 
+      {!allowPreview && (
+        <p data-testid="hero-slides-not-slider-notice" className="mt-1 text-[11px] leading-snug text-app-muted">
+          This hero layout shows one image, so these extra images aren’t playing right now.
+          Switch the hero to the slider layout to use them.
+        </p>
+      )}
+
       <p className="mt-1 text-[11px] leading-snug text-app-muted">
-        Drag to reorder — left to right is the order they play. Click one to see it on the page.
-        Removing is instant; Undo puts it back.
+        Drag to reorder — left to right is the order they play.
+        {allowPreview ? ' Click one to see it on the page.' : ''} Removing is instant; Undo puts it back.
       </p>
     </div>
   );

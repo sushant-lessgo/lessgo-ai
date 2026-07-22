@@ -328,6 +328,127 @@ describe('HeroSlidesTray — the filmstrip', () => {
   });
 });
 
+// ── Phase 4b regressions ────────────────────────────────────────────────────
+describe('HeroSlidesTray — phase 4b fixes', () => {
+  /** Mount the panel behind a toggle so it can be unmounted the way Escape / a
+   *  click-outside unmounts it (the tray's cleanup is what bug 1 lived in). */
+  function mountToggleable() {
+    let close: () => void = () => {};
+    function Harness() {
+      const [open, setOpen] = React.useState(true);
+      close = () => setOpen(false);
+      return open ? <BackgroundPanel sectionId={HERO} onClose={() => {}} /> : null;
+    }
+    return { render: () => root.render(<Harness />), close: () => close() };
+  }
+
+  it('BUG 1: unmounting with NOTHING previewed dispatches no release (the edit pause survives)', async () => {
+    const h = mountToggleable();
+    await act(async () => { h.render(); });
+    await flush();
+    expect(byTestId('hero-slides-tray')).toBeTruthy();
+
+    const seen: any[] = [];
+    const listener = (e: Event) => seen.push((e as CustomEvent).detail);
+    window.addEventListener(HERO_PREVIEW_SLIDE_EVENT, listener);
+
+    // Escape / click-outside path: the panel goes away without any preview click.
+    await act(async () => { h.close(); });
+    await flush();
+    expect(byTestId('hero-slides-tray')).toBeFalsy();
+
+    // The release event clears the SAME autoplay pause `focusin` sets while the
+    // user types, so firing it here restarted the slideshow under the caret.
+    expect(seen, 'an unpreviewed tray must not touch the canvas pause').toEqual([]);
+
+    window.removeEventListener(HERO_PREVIEW_SLIDE_EVENT, listener);
+  });
+
+  it('BUG 1: unmounting WHILE previewing still releases (exactly once)', async () => {
+    const h = mountToggleable();
+    await act(async () => { h.render(); });
+    await flush();
+
+    await pressReal(allByTestId('hero-slide-preview')[1]);
+
+    const seen: any[] = [];
+    const listener = (e: Event) => seen.push((e as CustomEvent).detail);
+    window.addEventListener(HERO_PREVIEW_SLIDE_EVENT, listener);
+
+    await act(async () => { h.close(); });
+    await flush();
+    expect(seen, 'a live preview must be released when the tray goes away').toEqual([
+      { sectionId: HERO, slideId: null },
+    ]);
+
+    window.removeEventListener(HERO_PREVIEW_SLIDE_EVENT, listener);
+  });
+
+  it('BUG 2: on a NON-slider hero, add + preview are inert with a why (R6)', async () => {
+    seed(THREE);
+    act(() => {
+      store.setState((s: any) => {
+        // Reachable today: slides are stamped on any hero, and the layout can be
+        // swapped afterwards — the extra slides come along but never render.
+        s.sectionLayouts = { [HERO]: 'WorkHeroImage' };
+        s.content[HERO].layout = 'WorkHeroImage';
+      });
+    });
+    await mountPanel();
+    expect(byTestId('hero-slides-tray'), 'the tray still lists the stored slides').toBeTruthy();
+
+    // The "+" card is present but DISABLED with a reason (greyed-placeholder rule),
+    // not silently omitted…
+    const add = byTestId('hero-slide-add')!;
+    expect(add).toBeTruthy();
+    expect(add.getAttribute('aria-disabled')).toBe('true');
+    expect(add.getAttribute('title')).toMatch(/slider/i);
+    // …and pressing it opens NO picker (it used to add a slide nothing renders).
+    await pressReal(add);
+    expect(document.querySelector('[role="dialog"]'), 'add must be inert off the slider').toBeFalsy();
+
+    // Thumbnail preview is a dead click here (the canvas listener lives only in
+    // WorkHeroSlider), so it must not pretend otherwise.
+    const seen: any[] = [];
+    const listener = (e: Event) => seen.push((e as CustomEvent).detail);
+    window.addEventListener(HERO_PREVIEW_SLIDE_EVENT, listener);
+    const thumb = allByTestId('hero-slide-preview')[0];
+    expect(thumb.getAttribute('aria-disabled')).toBe('true');
+    expect(thumb.getAttribute('title')).toMatch(/slider/i);
+    await pressReal(thumb);
+    expect(seen, 'no preview event may be dispatched off the slider').toEqual([]);
+    expect(allByTestId('hero-slide')[0].dataset.previewing, 'no phantom highlight').toBeUndefined();
+    window.removeEventListener(HERO_PREVIEW_SLIDE_EVENT, listener);
+
+    // And the why is stated in the panel body too, not just in a tooltip.
+    expect(byTestId('hero-slides-not-slider-notice')).toBeTruthy();
+  });
+
+  it('BUG 2: on the slider layout both stay LIVE', async () => {
+    await mountPanel();
+    const add = byTestId('hero-slide-add')!;
+    expect(add.getAttribute('aria-disabled')).toBeNull();
+    await pressReal(add);
+    expect(document.querySelector('[role="dialog"]'), 'add must still open the picker').toBeTruthy();
+    expect(byTestId('hero-slides-not-slider-notice')).toBeFalsy();
+  });
+
+  it('BUG 3: the preview highlight clears when the slide set changes (canvas resets)', async () => {
+    await mountPanel();
+    await pressReal(allByTestId('hero-slide-preview')[1]);
+    expect(allByTestId('hero-slide')[1].dataset.previewing, 'preview did not mark its card').toBe('true');
+
+    // Removing a DIFFERENT slide re-runs the canvas slider effect → go(0) + autoplay
+    // restart. The tray must not keep claiming s2 is on screen.
+    await pressReal(allByTestId('hero-slide-remove')[0]);
+    expect(slidesNow()!.map((s) => s.id)).toEqual(['s2', 's3']);
+    expect(
+      allByTestId('hero-slide').some((c) => c.dataset.previewing === 'true'),
+      'a stale highlight disagreed with the canvas',
+    ).toBe(false);
+  });
+});
+
 // ── The two phase-3-review carry-forwards this phase was asked to fix. They live
 //    in BackgroundPanel, but both are only reachable through this surface, and
 //    phase 4 is what makes the second one reachable at all (per-card replace = a

@@ -441,6 +441,13 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
                 onApplyPatch={applyPatch}
                 onRequestReplace={(slideId) => setPicking({ mode: 'replace', slideId })}
                 onRequestAdd={() => setPicking({ mode: 'add' })}
+                // R6: slideshow is SLIDER-layout only. A hero can still be carrying
+                // ≥2 slides on another variant (they are stamped regardless of
+                // layout, and swapping layouts keeps them), and there add/preview do
+                // nothing visible — the canvas preview listener only exists in
+                // `WorkHeroSlider`. Inert-with-a-why beats a dead click.
+                allowAdd={isSlider}
+                allowPreview={isSlider}
               />
             </>
           ) : (

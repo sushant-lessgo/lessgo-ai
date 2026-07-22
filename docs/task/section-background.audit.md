@@ -1154,3 +1154,96 @@ is `'use client'` and is imported by nothing but `BackgroundPanel`.
    control, no crop/focal point, no per-slide overlay text, nothing behind Video, no Accent chip. Drag
    FEEL against `npm run dev` remains the phase's declared manual check, as does the founder's
    publish -> live-slideshow gate.
+
+---
+
+## Phase 4b — two user-visible bugs from the phase-4 review
+
+**Files changed**
+
+- `src/app/edit/[token]/components/toolbars/HeroSlidesTray.tsx` (modified)
+- `src/app/edit/[token]/components/toolbars/BackgroundPanel.tsx` (modified)
+- `src/modules/skeletons/work/blocks/Hero/WorkHeroSlider.tsx` (modified)
+- `src/app/edit/[token]/components/toolbars/HeroSlidesTray.test.tsx` (modified — 5 new cases)
+- `src/modules/skeletons/work/blocks/__tests__/heroSliderPause.test.tsx` (NEW)
+- `docs/task/section-background.audit.md` (this section)
+
+### BUG 1 — tray unmount clobbered the EDIT pause
+
+Two-sided fix, because either side alone leaves a hole:
+
+- `HeroSlidesTray.tsx` — the unmount cleanup now dispatches the release **only when something was
+  actually previewing**. `previewId` is mirrored into `previewIdRef` (the cleanup's dep is
+  `[sectionId]`, so its closure never re-forms and the state value would be the mount-time one).
+  `setPreview()` is the single writer of both.
+- `WorkHeroSlider.tsx` — pause **provenance**: the single `paused` flag is split into `focusPaused`
+  (set by `focusin`/`focusout`) and `previewPaused` (set by the filmstrip), with
+  `isPaused() = focusPaused || previewPaused` read by `restart()`. A preview release now clears only
+  `previewPaused`, so a focus pause survives it. Needed on top of the tray guard: previewing a slide
+  and *then* clicking into hero copy would still have released the focus pause on unmount.
+
+No markup change, no new DOM attribute, no dep-array change — the effect's deps and the frozen
+`work.v1.js` hooks are untouched.
+
+### BUG 2 — add/preview live on non-slider hero variants (R6)
+
+`HeroSlidesTray` takes `allowAdd` / `allowPreview` (default `true`); `BackgroundPanel` passes
+`isSlider` for both. Per the greyed-placeholder rule the controls stay **visible but inert**: the `+`
+card and each thumbnail get `aria-disabled`, a `cursor-not-allowed opacity-60` treatment and a `title`
+explaining that slideshows only play on the slider layout, plus an in-panel notice
+(`hero-slides-not-slider-notice`) so the why is not tooltip-only. Reorder / replace / remove stay live
+— they change stored content that becomes visible again the moment the hero is swapped back to the
+slider. The tray's trailing help sentence drops "Click one to see it on the page" when preview is off.
+
+### BUG 3 — stale preview highlight (was cheap, done)
+
+One effect keyed on `ids.join('|')` clears `previewId`. That string is the exact signal
+(`slideIdsKey`) the canvas slider re-runs on (`go(0)` + `restart()`), so tray highlight and canvas
+cannot disagree after an add/remove/reorder. Note the review's framing ("after an unrelated content
+edit") is slightly off: an unrelated edit recomputes `slideIdsKey` to the *same string*, so the slider
+effect does **not** re-run; the real divergence path is a slide-set change, which is what this covers.
+
+### Deviations
+
+- Added one **new test file** (`heroSliderPause.test.tsx`) rather than editing
+  `heroBackground.test.tsx`, which is a markup tripwire and had to stay unmodified. Counts as "their
+  tests"; flagged here because it is a file the phase brief did not name explicitly.
+- Bug 1 fixed on **both** sides rather than picking one, per the brief's "the focus/edit pause must
+  survive a tray unmount" requirement (tray-only leaves the preview-then-focus hole).
+- Bug 2 uses inert-with-a-why rather than hiding the controls (project greyed-placeholder rule).
+
+### Tests — proven by mutation, not just green
+
+| Mutation | Expected biter | Result |
+|---|---|---|
+| `previewPaused = false` → also `focusPaused = false` (old shared flag) | slider pause tests | 2 failed |
+| unmount cleanup guard removed (always release) | "unmount with NOTHING previewed" | 1 failed |
+| unmount cleanup never releases | "unmount WHILE previewing still releases" | 1 failed |
+| panel stops passing `allowAdd`/`allowPreview` | "on a NON-slider hero … inert" | 1 failed |
+| `[idsKey]` clear effect removed | "preview highlight clears" | 1 failed |
+
+First draft of the slider tests was **inert**: `tick(15000)` with 3 slides at a 5000ms interval lands
+back on the starting index, so a running slideshow read as "held" — the mutant passed. Replaced with
+`expectHeldAt()`, which asserts after **each** interval.
+
+### Gates (real output)
+
+- `npx tsc --noEmit` — clean, no output.
+- `npm run test:run` — `Test Files 315 passed | 1 skipped (316)`, `Tests 5081 passed | 15 skipped (5096)`, 74.91s.
+- `npx playwright test e2e/section-background.spec.ts` — `7 passed (1.4m)` (ran, not skipped).
+
+### D9 ledger
+
+`work.v1.js` / `public/assets` / `scripts/legacy` untouched; no new DOM attribute on published markup
+(all changes are edit-only chrome or in-effect JS state); frozen slider hooks verbatim; the
+`heroBackground` byte-identity tripwire and every other tripwire ran **unmodified** and green.
+
+### Open risks
+
+1. **Pause provenance is closure-local.** A third future pause reason must add its own flag, not reuse
+   one of these two — the same trap in a new coat.
+2. **Reorder/replace/remove stay live off the slider layout.** Intentional (the content is real and
+   becomes visible again after a layout swap), but a user can still reorder slides they cannot see;
+   the in-panel notice is the only thing telling them so.
+3. `allowAdd`/`allowPreview` default to `true`, so a future second caller that forgets them
+   re-inherits bug 2. The panel is the only caller today.

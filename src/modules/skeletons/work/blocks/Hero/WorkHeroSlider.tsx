@@ -65,7 +65,13 @@ export default function WorkHeroSlider({ sectionId }: { sectionId: string }) {
 
     let idx = 0;
     let timer: ReturnType<typeof setInterval> | null = null;
-    let paused = false;
+    // Pause PROVENANCE, not one shared flag: editing (focus) and filmstrip preview
+    // pause for different reasons and end at different times. With a single flag a
+    // preview RELEASE (dispatched when the Background panel closes) also cleared the
+    // focus pause and restarted the slideshow while the user was still typing.
+    let focusPaused = false;
+    let previewPaused = false;
+    const isPaused = () => focusPaused || previewPaused;
 
     // Inject dots into the EMPTY [data-wk-dots] container (mirrors work.v1.js).
     const dotsWrap = slider.querySelector<HTMLElement>('[data-wk-dots]');
@@ -94,7 +100,7 @@ export default function WorkHeroSlider({ sectionId }: { sectionId: string }) {
     }
     function restart() {
       stop();
-      if (reduce || paused) return;
+      if (reduce || isPaused()) return;
       timer = setInterval(() => go(idx + 1), interval);
     }
 
@@ -106,8 +112,8 @@ export default function WorkHeroSlider({ sectionId }: { sectionId: string }) {
     next?.addEventListener('click', onNext);
 
     // Pause autoplay while editing content inside the hero.
-    const onFocusIn = () => { paused = true; stop(); };
-    const onFocusOut = () => { paused = false; restart(); };
+    const onFocusIn = () => { focusPaused = true; stop(); };
+    const onFocusOut = () => { focusPaused = false; restart(); };
     slider.addEventListener('focusin', onFocusIn);
     slider.addEventListener('focusout', onFocusOut);
 
@@ -124,13 +130,14 @@ export default function WorkHeroSlider({ sectionId }: { sectionId: string }) {
         | undefined;
       if (!detail || detail.sectionId !== sectionId) return;
       if (!detail.slideId) {
-        paused = false;
+        // Release the PREVIEW pause only — a focus/edit pause outlives the tray.
+        previewPaused = false;
         restart();
         return;
       }
       const i = slideIds.indexOf(detail.slideId);
       if (i < 0) return;
-      paused = true;
+      previewPaused = true;
       stop();
       go(i);
     };
