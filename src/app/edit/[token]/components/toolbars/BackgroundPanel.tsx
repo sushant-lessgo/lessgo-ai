@@ -21,7 +21,7 @@
 
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 import type { StyleTokens, UBackground } from '@/modules/skeletons/styleTokens';
 
@@ -60,6 +60,13 @@ const COLOR_CHIPS: ColorChip[] = [
 const ACCENT_WHY =
   'Accent bands need a contrast pass first — accent-coloured buttons and marks inside a section would vanish on an accent background.';
 
+/** Non-committal swatch: a neutral hatch, used when the project's real accent can't
+ *  be resolved. Deliberately NOT a plausible-looking colour — the founder gate asks
+ *  whether Accent bands are worth funding a contrast pass, and a hardcoded literal
+ *  would have them judging a colour their site does not use. */
+const ACCENT_UNKNOWN_SWATCH =
+  'repeating-linear-gradient(45deg, #d4d4d8 0 3px, #f4f4f5 3px 6px)';
+
 interface BackgroundPanelProps {
   sectionId: string;
   onClose: () => void;
@@ -94,6 +101,23 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
     document.addEventListener('mousedown', handlePointerDown);
     return () => document.removeEventListener('mousedown', handlePointerDown);
   }, [onClose]);
+
+  // ── Accent swatch: resolve the REAL accent, never a literal ──────────────────
+  // Unlike `--wk-paper`/`--wk-paper-2`/`--wk-dark` (declared on `:root`, so they
+  // resolve anywhere in the document), `--wk-accent` is declared on
+  // `[data-palette]{…}` (work/stylesheet.ts:72). `var()` substitutes at the element
+  // that DECLARES it, so a literal fallback in this panel's own CSS silently wins
+  // wherever the toolbar chrome sits outside the palette scope. Read the computed
+  // value off the element that actually carries `data-palette` instead, and fall
+  // back to a neutral hatch (not a colour) when there is none.
+  const [accentSwatch, setAccentSwatch] = useState<string | null>(null);
+  useEffect(() => {
+    const host =
+      (panelRef.current?.closest('[data-palette]') as HTMLElement | null) ??
+      document.querySelector<HTMLElement>('[data-palette]');
+    const value = host ? getComputedStyle(host).getPropertyValue('--wk-accent').trim() : '';
+    setAccentSwatch(value || null);
+  }, []);
 
   const active: UBackground = current ?? 'default';
 
@@ -161,7 +185,7 @@ export function BackgroundPanel({ sectionId, onClose }: BackgroundPanelProps) {
           <span
             aria-hidden
             className="h-3.5 w-3.5 flex-none rounded-[3px] border border-black/15 opacity-50"
-            style={{ background: 'var(--wk-accent, #b45309)' }}
+            style={{ background: accentSwatch ?? ACCENT_UNKNOWN_SWATCH }}
           />
           <span>Accent</span>
         </button>

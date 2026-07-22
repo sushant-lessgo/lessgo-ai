@@ -417,3 +417,93 @@ suite re-run green (`git diff --stat` confirms only the intended edit remains).
    debounced autosave. The e2e waits for the `saveDraft` POST carrying `"styleTokens"`, so the
    round-trip is genuinely proven, but a user who closes the tab within 2s of a chip click relies on
    the same dirty-guard every other editor write does.
+
+---
+
+## Phase 2 polish (non-blocking review findings)
+
+**Files changed**
+- `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx`
+- `src/app/edit/[token]/components/toolbars/BackgroundPanel.tsx`
+- `e2e/section-background.spec.ts`
+- `src/modules/skeletons/styleTokens.ts`
+- `src/modules/skeletons/work/tokenContract.test.ts`
+- `docs/task/section-background.audit.md` (this section)
+
+### 1. Panel survived a section switch (real bug) — `SectionToolbar.tsx`
+The toolbar shell RE-RENDERS this component on selection change (it does not remount), so
+`showBackgroundPanel` outlived the switch: About → open panel → select gallery left the panel open,
+now writing to the new section. Split the single effect in two:
+- new `useEffect(() => setShowBackgroundPanel(false), [sectionId])` — closes unconditionally on any
+  section switch (firing on mount is a no-op; initial state is already closed);
+- the existing gate-flip effect keeps its `if (backgroundDisabledTitle)` guard, deps narrowed to
+  `[backgroundDisabledTitle]` (the `sectionId` dep it carried was doing the new effect's job
+  conditionally, which was the bug).
+
+### 2. Accent chip swatch — `BackgroundPanel.tsx`
+Replaced the literal `var(--wk-accent, #b45309)` with a runtime resolve: on mount the panel reads
+`getComputedStyle(host).getPropertyValue('--wk-accent')` from the nearest ancestor `[data-palette]`,
+falling back to `document.querySelector('[data-palette]')`. Unresolvable → a neutral 45° hatch
+(`ACCENT_UNKNOWN_SWATCH`), deliberately not a plausible colour, so the founder is never asked to
+judge Accent bands against a colour the site does not use. The three live chips
+(`--wk-paper`/`--wk-paper-2`/`--wk-dark`, all on `:root`) are untouched.
+
+Worth recording: the review's premise is only conditionally true. Edit-side, `makeWorkThemeInjector`
+sets `data-palette` on `document.documentElement` (`work/ThemeInjector.tsx:59`), so `[data-palette]`
+matches the ROOT element and the literal would in fact have resolved on `/edit`. The resolve-then-
+hatch implementation is correct either way and does not depend on which is true, which is why it was
+preferred over simply deleting the literal.
+
+### 3. Stale comment — `SectionToolbar.tsx` (`FOOTER_ONLY_ACTIONS` filter)
+Rewritten. It now says `background` is a whole-Section action (live on skeleton-backed body sections,
+greyed elsewhere) rather than a "placeholder", and that **nothing** pins the header's behaviour in
+e2e — the header case was dropped because an atelier header dispatches no toolbar at all today.
+
+### 4. Footer hairline changed-from-baseline companion — `e2e/section-background.spec.ts`
+Added `footerTopBorderColor(page, sectionId)` helper, captured `borderBefore` alongside `noteBefore`,
+and added `expect(borderAfter).not.toBe(borderBefore)` before the existing equals-`--wk-line`
+assertion. Comment states why both halves are needed (a skin with `line === lineDark` would make the
+equals-half pass vacuously). The old inline `page.evaluate` is now the shared helper.
+
+### 5. `:root`-derived-var hole documented + ratcheted
+- `styleTokens.ts`: a **KNOWN HOLE** block next to the N8 contrast invariant, explaining that
+  `var()` substitutes at the DECLARING element, so a `:root`-level derived colour that embeds a
+  polarity-bound token (`--wk-ink*` / `--wk-on-dark*` / `--wk-line*` / `--wk-paper*`) can never
+  follow a section-level re-point; states the constraint for skin authors and names the one inert
+  offender (`--wk-about-eyebrow-color` under `aboutLayout:'stack'`).
+- `tokenContract.test.ts`: new `describe` that parses the `:root{…}` block out of
+  `serializeSkinTokens` and asserts no declaration outside a documented `KNOWN` set embeds a
+  polarity-bound token, run over both a neutral and an atelier-shaped skin; plus a second case
+  pinning both eyebrow values (`stack` → `var(--wk-ink-mute)`, `split-portrait` →
+  `var(--wk-accent-ink,#fff)`).
+
+### Deviations
+- **The ratchet is an allowlist, not a clean assertion.** A strict "no `:root` derived colour embeds
+  a polarity-bound token" test is RED today: `--wk-about-eyebrow-color` violates it under `stack`,
+  and the three `--wk-header-*` vars violate it by design (the header is denied per-section
+  backgrounds, plan D5). Fixing the emission means editing `work/tokenContract.ts`, which is **not**
+  on this phase's Files-touched list, so the conservative option was taken: encode today's offenders
+  in a documented `KNOWN` set so any NEW one fails. The test comment says to shrink `KNOWN` if the
+  emission is ever fixed.
+- **Non-vacuity checked by mutation**, not by inspection: removing `--wk-about-eyebrow-color` from
+  `KNOWN` turns the suite red with
+  `expected [ '--wk-about-eyebrow-color' ] to deeply equal []`. The file was restored afterwards
+  (`git diff --stat` confirms additions only).
+
+### Gates
+- `npx tsc --noEmit` → **clean, zero output**. (Note: `tsconfig.json` excludes `**/*.test.ts` and
+  `e2e`, so neither edited test file is covered by tsc — the vitest run and a Playwright compile
+  cover them instead.)
+- `npm run test:run` → **310 passed | 1 skipped (311 files); 5016 passed | 15 skipped (5031 tests)**,
+  66.30s.
+- `npx playwright test e2e/section-background.spec.ts --list` → compiles and lists all 3 cases
+  (+ auth setup). **The Playwright suite itself was NOT re-run** — it needs a dev server, a Clerk
+  session and a seeded work-skeleton project. The hairline companion assertion is therefore
+  compile-verified only; it should go green on the founder-gate run (atelier's `line` is
+  `rgba(0,0,0,…)` and `lineDark` is `rgba(255,255,255,…)`, so the before/after values differ).
+
+### D9 ledger
+Untouched: `work.v1.js`, `public/assets`, `scripts/legacy`. No serializer output changed (the only
+`styleTokens.ts` edit is a comment), so absent-override DOM stays byte-identical.
+`kundiusPages` / `oldContentFallback` / `coreParity` / `uiFoundationIsolation.snap` /
+`toolbar-dispatch.spec.ts` all green and unmodified within the full `test:run`.

@@ -323,6 +323,7 @@ test.describe('section background (work skeleton): Colour on body sections', () 
     // pair leaves near-white secondary text on a light band — spec AC: "No
     // surface choice can produce an unreadable text/background pairing."
     const noteBefore = await childColor(page, FOOTER, '.wk-footer__note');
+    const borderBefore = await footerTopBorderColor(page, FOOTER);
 
     await selectSection(page, FOOTER, 'Footer');
     await pickSurface(page, 'paper');
@@ -341,12 +342,16 @@ test.describe('section background (work skeleton): Colour on body sections', () 
     expect(noteAfter).toBe(await resolveVarAsColor(page, '--wk-ink-soft'));
 
     // HAIRLINE (N8): the `--wk-line-dark` border re-points to the light hairline.
-    const borderColor = await page.evaluate((s) => {
-      const el = document.querySelector(`[data-sid="${s}"] .wk-footer__top`);
-      return el ? getComputedStyle(el).borderBottomColor : null;
-    }, FOOTER);
-    expect(borderColor, 'no .wk-footer__top in the footer').not.toBeNull();
-    expect(borderColor).toBe(await resolveVarAsColor(page, '--wk-line'));
+    // BOTH halves matter. The equals-`--wk-line` half alone would pass vacuously on
+    // any skin whose `line` and `lineDark` resolve to the same colour (nothing in the
+    // token contract forbids that) — the changed-from-baseline half is what proves the
+    // re-point actually fired, exactly as `noteBefore`/`noteAfter` does above.
+    const borderAfter = await footerTopBorderColor(page, FOOTER);
+    expect(borderBefore, 'no .wk-footer__top in the footer').not.toBeNull();
+    expect(borderAfter, 'the footer hairline stayed on-dark over a light band').not.toBe(
+      borderBefore,
+    );
+    expect(borderAfter).toBe(await resolveVarAsColor(page, '--wk-line'));
   });
 
   test('gate: gallery is LIVE, hero is greyed with its own why-tooltip', async ({
@@ -392,6 +397,15 @@ test.describe('section background (work skeleton): Colour on body sections', () 
     // header toolbar on meridian, where it does dispatch.)
   });
 });
+
+/** Computed `border-bottom-color` of `.wk-footer__top` inside a section wrapper
+ *  (`null` when the element is absent). Used for the before/after hairline pair. */
+async function footerTopBorderColor(page: Page, sectionId: string) {
+  return page.evaluate((s) => {
+    const el = document.querySelector(`[data-sid="${s}"] .wk-footer__top`);
+    return el ? getComputedStyle(el).borderBottomColor : null;
+  }, sectionId);
+}
 
 /** Same probe as `resolveVarAsColor`, for BACKGROUND colours. */
 async function resolveVarAsColorBg(page: Page, varName: string) {

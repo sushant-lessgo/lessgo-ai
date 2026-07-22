@@ -232,6 +232,88 @@ describe('serializeSkinTokens — Wave 2B derived vars', () => {
   });
 });
 
+// ── section-background phase 2 review — the `:root`-derived-var hole (N8) ───────
+// The N8 re-point works by INHERITANCE: a child reading `var(--wk-ink-mute)`
+// resolves it AT ITSELF, inside the overridden `[data-sid]` block. A child reading
+// a DERIVED var (`var(--wk-about-eyebrow-color)`) does not — custom properties
+// substitute their `var()`s at the element that DECLARES them, and these are
+// declared on `:root`, so a section-level re-point can never reach them.
+//
+// This is a RATCHET, not a green field: the two entries below are the offenders
+// that exist today. Adding a NEW `:root` derived colour that embeds a
+// polarity-bound token fails this test. See the KNOWN HOLE note in
+// `src/modules/skeletons/styleTokens.ts`.
+describe('serializeSkinTokens — :root derived colours vs the N8 re-point', () => {
+  /** The skin tokens `BACKGROUND_CSS` re-points inside a `[data-sid]` block. */
+  const POLARITY_BOUND =
+    /var\(\s*--wk-(?:ink|ink-soft|ink-mute|on-dark|on-dark-soft|line|line-soft|line-dark|paper|paper-2)\b/;
+
+  /** Documented, deliberate exceptions. */
+  const KNOWN = new Set([
+    // `aboutLayout:'stack'` only. Inert for atelier (`'split-portrait'` →
+    // `var(--wk-accent-ink,#fff)`), but a future stack skin would render a
+    // dark-grey eyebrow on a user-chosen Ink band.
+    '--wk-about-eyebrow-color',
+    // Header vars: exempt BY DESIGN — the header is denied per-section backgrounds
+    // entirely (plan D5), so nothing ever re-points tokens under it.
+    '--wk-header-bg',
+    '--wk-header-fg',
+    '--wk-header-line',
+  ]);
+
+  function rootDeclarations(css: string): Array<[string, string]> {
+    const start = css.indexOf(':root{');
+    const end = css.indexOf('\n}', start);
+    expect(start, 'no :root block in the serialized skin').toBeGreaterThanOrEqual(0);
+    return css
+      .slice(start + ':root{'.length, end)
+      .split(';')
+      .map((d) => d.trim())
+      .filter(Boolean)
+      .map((d) => {
+        const colon = d.indexOf(':');
+        return [d.slice(0, colon).trim(), d.slice(colon + 1).trim()] as [string, string];
+      });
+  }
+
+  it.each([
+    ['neutral skin (stack / list / below / header off)', validTokens],
+    [
+      'atelier-shaped skin (split-portrait / card / overlay / rule)',
+      {
+        ...validTokens,
+        aboutLayout: 'split-portrait',
+        packagesStyle: 'card',
+        galleryCaption: 'overlay',
+        headerOverlay: true,
+        sectionHeaderStyle: 'rule',
+        footerWordmark: true,
+      } as WorkSkinTokens,
+    ],
+  ])('%s: no NEW :root derived colour embeds a polarity-bound token', (_label, tokens) => {
+    const offenders = rootDeclarations(serializeSkinTokens(tokens))
+      .filter(([, value]) => POLARITY_BOUND.test(value))
+      .map(([name]) => name)
+      .filter((name) => !KNOWN.has(name));
+    expect(
+      offenders,
+      'a :root-level derived colour embeds a polarity-bound token — it can never ' +
+        'follow a per-section background override (see styleTokens.ts KNOWN HOLE)',
+    ).toEqual([]);
+  });
+
+  it('pins the known offender: stack aboutLayout derives the eyebrow from --wk-ink-mute', () => {
+    // If this ever goes green (the emission is fixed), drop `--wk-about-eyebrow-color`
+    // from KNOWN above so the ratchet tightens.
+    expect(serializeSkinTokens(validTokens)).toContain(
+      '--wk-about-eyebrow-color:var(--wk-ink-mute);',
+    );
+    expect(serializeSkinTokens({ ...validTokens, aboutLayout: 'split-portrait' })).toContain(
+      '--wk-about-eyebrow-color:var(--wk-accent-ink,#fff);',
+    );
+  });
+});
+
 describe('serializeStyleTokens — user style-token serializer', () => {
   it('returns empty string for empty / null input', () => {
     expect(serializeStyleTokens(undefined)).toBe('');

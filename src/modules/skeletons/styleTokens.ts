@@ -90,6 +90,29 @@ type Decls = ReadonlyArray<readonly [string, string]>;
 // the user has EXPLICITLY overridden. With no override nothing is emitted at all,
 // so every existing draft (Kundius included) is untouched — this cannot change any
 // skin-default surface, including atelier's own `dark` proof/contact/footer bands.
+//
+// ⚠️ KNOWN HOLE — `:root`-level DERIVED vars (section-background phase 2 review).
+// The re-point mechanism above works by INHERITANCE: a child that writes
+// `color:var(--wk-ink-mute)` resolves that reference at ITSELF, inside the
+// `[data-sid]` block, so it picks up the override. A child that instead writes
+// `color:var(--wk-about-eyebrow-color)` does NOT — custom properties substitute
+// their `var()`s at the element that DECLARES them, and that derived var is
+// declared on `:root` (`work/tokenContract.ts` `serializeSkinTokens`), far outside
+// the overridden section. Its embedded `var(--wk-ink-mute)` is therefore resolved
+// against the ROOT value and a section-level re-point can never reach it.
+//
+// CONSTRAINT for skin authors: a `:root`-level derived COLOUR var must not embed a
+// polarity-bound token (`--wk-ink*`, `--wk-on-dark*`, `--wk-line*`, `--wk-paper*`).
+// Derive from a polarity-NEUTRAL value (e.g. `--wk-accent-ink`), or let the block
+// child read the polarity token directly instead of via a derived var.
+//
+// Inert TODAY: the one offender is `--wk-about-eyebrow-color`, which is
+// `var(--wk-ink-mute)` only for `aboutLayout:'stack'`; atelier — the sole shipped
+// work skin — sets `'split-portrait'` (`atelier/skin.ts`), where the value is
+// `var(--wk-accent-ink,#fff)`. A future `'stack'` skin would render a dark-grey
+// eyebrow on a user-chosen Ink band. The header's derived vars have the same shape
+// and are exempt by design: the header is denied per-section backgrounds entirely
+// (plan D5). `tokenContract.test.ts` ratchets this — new offenders fail.
 const INK_FAMILY: Decls = [
   ['--wk-ink', 'var(--wk-on-dark)'],
   ['--wk-ink-soft', 'var(--wk-on-dark-soft)'],

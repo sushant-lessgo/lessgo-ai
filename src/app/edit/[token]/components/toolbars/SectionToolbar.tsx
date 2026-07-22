@@ -205,11 +205,21 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
     ? BACKGROUND_UNSUPPORTED_TITLE
     : backgroundDeniedReason;
 
-  // Close the panel if the gate flips underneath it (template switch / selection
-  // change) — otherwise a dropdown could outlive the button that owns it.
+  // Close the panel on ANY section switch. This component is RE-RENDERED, not
+  // remounted, when the user selects a different section while the toolbar shell
+  // stays mounted — so `showBackgroundPanel` survives the switch. Without this the
+  // panel stays open and silently re-points at the newly selected section (with a
+  // chip row still reading as the previous one's until it re-renders). Firing on
+  // mount too is harmless: the initial state is already closed.
+  useEffect(() => {
+    setShowBackgroundPanel(false);
+  }, [sectionId]);
+
+  // Close the panel if the gate flips underneath it (e.g. a template switch) —
+  // otherwise a dropdown could outlive the button that owns it.
   useEffect(() => {
     if (backgroundDisabledTitle) setShowBackgroundPanel(false);
-  }, [backgroundDisabledTitle, sectionId]);
+  }, [backgroundDisabledTitle]);
 
   const {
     duplicateSection,
@@ -422,8 +432,14 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
     // load-bearing for the header.
     //
     // phase 4: `manage-social` + `social-orientation` join the same footer-only gate.
-    // Note `background` is deliberately NOT in this list — it is a whole-Section
-    // placeholder, so the header legitimately keeps it (pinned by the header e2e case).
+    //
+    // section-background phase 2: `background` is deliberately NOT in this list. It is
+    // a whole-Section action (LIVE on skeleton-backed body sections, greyed elsewhere),
+    // not a footer-only one, so every section type keeps the button and the two gates
+    // above decide whether it is enabled — the header included, where it renders greyed
+    // with the D5 "comes with the header toolbar" reason. Nothing pins that in e2e: on
+    // the work skeleton an atelier header dispatches no toolbar at all today (see
+    // `e2e/section-background.spec.ts`, gate test), so the header case was dropped.
     .filter((action) => !FOOTER_ONLY_ACTIONS.includes(action.id) || isFooterId(sectionId));
 
   // Check if this specific section is being regenerated
