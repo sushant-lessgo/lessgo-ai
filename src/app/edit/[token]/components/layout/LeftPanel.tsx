@@ -137,7 +137,10 @@ function GettingStartedChecklist() {
 const RAIL_TABS = [
   { value: 'sections', label: 'Sections' },
   { value: 'pages', label: <Coming what="the pages panel">Pages</Coming> },
-  { value: 'cms', label: 'CMS' },
+  // LABEL ONLY reads "Content" (matches the dashboard's Content tab). The VALUE
+  // stays 'cms' — `RailTab`, `LIVE_RAIL_TABS` and the `lessgo:manage-collections`
+  // switch all key off it; renaming the value breaks that plumbing silently.
+  { value: 'cms', label: 'Content' },
   { value: 'theme', label: <Coming what="the rail theme panel">Theme</Coming> },
 ];
 

@@ -21,10 +21,21 @@
 //    per editor load — the property the phase-6 test pinned, preserved through a
 //    different mechanism.
 //
-// ── NO CAPABILITY GATING ─────────────────────────────────────────────────────
+// ── NO CAPABILITY GATING (for the COLLECTION LIST) ───────────────────────────
 // The collection block is a SHARED block — it renders on every template — so there
 // is no `CapabilityId` for it and `templateMeta.ts` is not consulted. The entry is
 // available on every project, deliberately (plan Deviations #2).
+//
+// The works deep-link row below is the ONE exception, and it is gated: it points
+// at a board that only works-CAPABLE templates have.
+//
+// ── WORKS DEEP-LINK ROW (section-background phase 5 / D1) ────────────────────
+// Ported from the dashboard board (`CmsBoardClient.tsx`) so the works library and
+// the collections list read as ONE system on the rail too — the dashboard shipped
+// this row and the editor rail silently omitted it. Same `data-testid`, same href,
+// same gate: `templateHasCapability(templateId, 'works')` (the dashboard page
+// computes the identical predicate server-side into `hasWorkLibrary`).
+// `templateMeta` is pure data (no template import) → client-safe.
 //
 // ── STORE ACCESS: `useEditStore` ONLY, never `useEditStoreApi()` ─────────────
 // Deliberate, matching this file's host. GlobalAppHeader reads the store through
@@ -49,6 +60,7 @@ import React from 'react';
 
 import { useEditStore } from '@/hooks/useEditStore';
 import type { CmsCollection, CmsCollectionBundle } from '@/modules/cms/types';
+import { templateHasCapability } from '@/modules/templates/templateMeta';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import { AppIcon } from '@/components/ui/icon';
 import { AddCollectionModal } from './AddCollectionModal';
@@ -77,6 +89,11 @@ export function CmsPanel({ tokenId, initialCollectionId }: CmsPanelProps) {
   const [browsingId, setBrowsingId] = React.useState<string | null>(
     initialCollectionId ?? null
   );
+
+  // Optional-chained like every other read here (the store may not carry meta in
+  // every host — see the store-access note above).
+  const templateId = useEditStore((s) => s?.templateId) as string | null | undefined;
+  const hasWorkLibrary = templateHasCapability(templateId, 'works');
 
   const bundles = useEditStore(
     (s) => s.cmsData?.bundles as Record<string, CmsCollectionBundle> | undefined
@@ -258,6 +275,20 @@ export function CmsPanel({ tokenId, initialCollectionId }: CmsPanelProps) {
           <AppIcon name="add" size={16} />
           New collection
         </button>
+
+        {/* The works deep-link — navigation only, gated on the works capability
+            (see the header note). Same testid/href as the dashboard board's row;
+            type sizes follow the rail's scale rather than the board's. */}
+        {hasWorkLibrary ? (
+          <a
+            href={`/dashboard/${encodeURIComponent(tokenId)}/work`}
+            data-testid="cms-works-link"
+            className="mt-2 flex items-center justify-between rounded-app-ctl border border-app-hairline px-3 py-2 text-[12.5px] text-app-label transition-colors hover:bg-app-hover"
+          >
+            <span>Works library</span>
+            <span className="text-[11px] text-app-muted">Your work →</span>
+          </a>
+        ) : null}
       </div>
 
       <AddCollectionModal

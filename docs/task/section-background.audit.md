@@ -1247,3 +1247,92 @@ back on the starting index, so a running slideshow read as "held" — the mutant
    the in-panel notice is the only thing telling them so.
 3. `allowAdd`/`allowPreview` default to `true`, so a future second caller that forgets them
    re-inherits bug 2. The panel is the only caller today.
+
+---
+
+# Phase 5 — Editor gaps: `worksRow` + "Content" label (Slice 4)
+
+## Files changed
+
+- `src/app/edit/[token]/components/cms/CmsPanel.tsx`
+- `src/app/edit/[token]/components/cms/CmsPanel.test.tsx`
+- `src/app/edit/[token]/components/layout/LeftPanel.tsx`
+
+No other file touched (verified via `git diff --stat`; the two unrelated pre-existing working-tree
+edits — `docs/Design/.../Lessgo Editor Redesign.dc.html`, `docs/temp/message.md` — predate this phase
+and were NOT made here).
+
+## What changed
+
+### `CmsPanel.tsx` (D1 — works deep-link row)
+
+- New import `templateHasCapability` from `@/modules/templates/templateMeta` (pure data module — no
+  template import, so the bundle firewall is intact and it is client-safe).
+- New reads: `const templateId = useEditStore((s) => s?.templateId)` (optional-chained, matching this
+  file's documented store-access convention) → `hasWorkLibrary = templateHasCapability(templateId, 'works')`.
+- Row rendered after the "New collection" button, inside the same padded column: `<a>` with
+  `data-testid="cms-works-link"`, `href={/dashboard/${encodeURIComponent(tokenId)}/work}`, text
+  "Works library" / "Your work →" — the same testid, href shape and gate as the dashboard board
+  (`CmsBoardClient.tsx:374-384`, range verified: comment on :374, JSX :375-384).
+- Header comment updated: the "NO CAPABILITY GATING" note now scopes itself to the collection LIST and
+  names the works row as the one gated exception, so the next reader does not "fix" the gate away.
+
+### `LeftPanel.tsx` (D2 — label only)
+
+- `RAIL_TABS` entry: `label: 'CMS'` → `label: 'Content'`, with a comment stating that `value: 'cms'`,
+  `RailTab` and `LIVE_RAIL_TABS` stay `'cms'` because `lessgo:manage-collections` keys off them.
+  Nothing else in the file changed — value, type, allow-list and event wiring are byte-identical.
+
+### `CmsPanel.test.tsx`
+
+- `storeState` gained a mutable `templateId` (default `'meridian'` — a real template WITHOUT the
+  `works` capability); the top-level `beforeEach` resets it so no test leaks the gate.
+- Existing rail-integration selectors `tab('CMS')` → `tab('Content')` (3 call sites). Those tests are
+  exactly the rename's proof: the live-tab check, the tab→panel body swap, the consume-once target and
+  the `lessgo:manage-collections` auto-switch all still pass against the new label.
+- New `describe('CmsPanel — works library deep link')` with BOTH directions:
+  `atelier` (works-capable) → link present with `href="/dashboard/tok/work"` and "Works library" text;
+  `meridian` → absent; `templateId: null` → absent.
+
+## Deviations
+
+1. **Type sizes, not the dashboard's.** The ported row keeps the dashboard's structure, testid, href,
+   copy and border/radius tokens, but uses `text-[12.5px]` / `text-[11px]` and `mt-2` instead of
+   `text-sm` / `text-xs` / `mt-3` — the rail's scale (its sibling "New collection" button is
+   `text-[12.5px]`). Conservative in-scope call: a 14px row in a 300px rail would read as a different
+   system, which is the opposite of the row's purpose. Logged rather than escalated (in Files-touched).
+2. **Row placement below "New collection"** (dashboard renders it below the index column list) — the
+   nearest equivalent position in the rail.
+
+## Test results (real output)
+
+- `npx vitest run src/app/edit/[token]/components/cms/CmsPanel.test.tsx` →
+  `Test Files 1 passed (1)` / `Tests 19 passed (19)` (was 16).
+- `npx tsc --noEmit` → clean, no output.
+- `npm run test:run` → `Test Files 315 passed | 1 skipped (316)`, `Tests 5084 passed | 15 skipped (5099)`, 68.99s.
+- Playwright, `E2E_PORT=3311 npx playwright test --project=authed`:
+  - `cms-authoring.spec.ts` → **1 failed** at `e2e/cms-authoring.spec.ts:54`,
+    `getByRole('button', { name: 'Collections' })` timed out. **PRE-EXISTING, not this phase.** That
+    selector targets the GlobalAppHeader "Collections" button DELETED by cms-collections phase 8B
+    (`394d461c`) when CMS moved into the rail; the spec's last touch is phase 8A (`a8aa8221`), i.e. it
+    has been stale since before this branch. It never selected the string `CMS`, so the rename cannot
+    have caused or worsened it. **Out of scope to fix (file not in Files touched) — reported.**
+  - `cms-publish.spec.ts` → **1 failed, 2 did not run**: `expect(pub?.status())` received `undefined`
+    at `:121` — the local `/p/<slug>` fetch, i.e. the absent-Blob/KV local-dev environment, not a
+    selector. This spec never touches the rail tab.
+- Rename safety, checked directly rather than assumed: `grep` over `src/` + `e2e/` for the literal tab
+  label found only `CmsPanel.test.tsx` (updated) and the definition itself. No e2e spec selects the
+  rail tab at all (`e2e/*.spec.ts` has no `[role="radio"]`/`Sections` rail selector outside
+  link-picker's own panel). The `lessgo:manage-collections` → switch-to-tab flow is covered by the two
+  vitest rail tests, both green post-rename.
+
+## Open risks
+
+1. `e2e/cms-authoring.spec.ts` is dead weight until its opening selector is repointed at the rail tab
+   (now `Content`) — it will keep failing and cannot regression-test the CMS UI meanwhile. Needs its
+   own ticket.
+2. The works row is gated on the template's `works` CAPABILITY, matching the dashboard exactly. A
+   works-capable project whose owner has not run ingestion still sees the link and lands on an empty
+   board — same behaviour as the dashboard, deliberately not diverged.
+3. The row's `href` is a plain full-page navigation OUT of the editor; unsaved-draft protection is
+   whatever the editor's existing dirty-guard provides for external links (unchanged by this phase).

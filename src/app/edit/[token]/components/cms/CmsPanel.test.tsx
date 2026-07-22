@@ -56,6 +56,9 @@ const COLLECTION = {
 };
 
 const storeState = {
+  // Mutable per-test (the works-row gate reads it through the same selector).
+  // Default = a template WITHOUT the `works` capability.
+  templateId: 'meridian' as string | null,
   cmsData: {
     bundles: {
       col_1: {
@@ -125,6 +128,7 @@ let fetchMock: ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  storeState.templateId = 'meridian'; // reset the works-row gate between tests
   confirmDialog.mockResolvedValue(true);
   fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) }));
   (globalThis as any).fetch = fetchMock;
@@ -166,6 +170,42 @@ describe('CmsPanel — listing', () => {
   it('places the collection on the current page via addCmsSection', () => {
     act(() => must<HTMLButtonElement>('[data-collection-place="col_1"]').click());
     expect(addCmsSection).toHaveBeenCalledWith('col_1');
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// THE WORKS DEEP-LINK ROW (section-background phase 5 / D1)
+//
+// The dashboard board shipped this row; the editor rail omitted it, so the two
+// halves of the same system did not read as one. Both DIRECTIONS are pinned: an
+// always-rendered row and an always-hidden row would each pass a one-sided test.
+// ────────────────────────────────────────────────────────────────────────────
+describe('CmsPanel — works library deep link', () => {
+  const remount = () => {
+    act(() => root.render(<CmsPanel tokenId="tok" />));
+  };
+  const link = () => q<HTMLAnchorElement>('[data-testid="cms-works-link"]');
+
+  it('renders the deep link for a works-capable template', () => {
+    storeState.templateId = 'atelier';
+    remount();
+
+    const a = link();
+    expect(a).not.toBeNull();
+    expect(a!.getAttribute('href')).toBe('/dashboard/tok/work');
+    expect(a!.textContent).toContain('Works library');
+  });
+
+  it('does NOT render it for a template without the works capability', () => {
+    storeState.templateId = 'meridian'; // real template, no `works` capability
+    remount();
+    expect(link()).toBeNull();
+  });
+
+  it('does NOT render it when the project has no templateId at all', () => {
+    storeState.templateId = null;
+    remount();
+    expect(link()).toBeNull();
   });
 });
 
@@ -316,7 +356,7 @@ describe('LeftPanel — the CMS rail tab is the CMS entry point', () => {
   });
 
   it('renders a LIVE CMS tab — not the greyed <Coming> placeholder', () => {
-    const cms = tab('CMS');
+    const cms = tab('Content');
     expect(cms).toBeTruthy();
     // <Coming> marks its child aria-disabled and swallows clicks. If the tab
     // regressed to a placeholder, this is what would come back.
@@ -328,7 +368,7 @@ describe('LeftPanel — the CMS rail tab is the CMS entry point', () => {
   it('selecting the CMS tab renders the collections panel; Sections does not', () => {
     expect(railContainer.querySelector('[data-cms-panel]')).toBeNull();
 
-    act(() => tab('CMS')!.click());
+    act(() => tab('Content')!.click());
     expect(railContainer.querySelector('[data-cms-panel]')).not.toBeNull();
     expect(railContainer.querySelector('[data-collection-row="col_1"]')).not.toBeNull();
 
@@ -376,7 +416,7 @@ describe('LeftPanel — the CMS rail tab is the CMS entry point', () => {
     expect(document.querySelector('[data-cms-browser]')).not.toBeNull();
 
     act(() => tab('Sections')!.click());
-    act(() => tab('CMS')!.click());
+    act(() => tab('Content')!.click());
 
     expect(railContainer.querySelector('[data-cms-panel]')).not.toBeNull();
     expect(document.querySelector('[data-cms-browser]')).toBeNull();
