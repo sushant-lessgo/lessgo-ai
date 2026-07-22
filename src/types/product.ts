@@ -56,13 +56,18 @@ export const techPremiumPalettes = ['forest', 'harbor'] as const;
 export type TechPremiumPalette = (typeof techPremiumPalettes)[number];
 
 /**
- * Palettes the in-editor theme picker may offer for TechPremium. Deliberately
- * NOT the full tuple: `harbor` is picker-HIDDEN so a click can never write
- * `Project.paletteId` on an existing row. Wired into
+ * Palettes the in-editor theme picker may offer for TechPremium. Wired into
  * `PALETTES_BY_TEMPLATE.techpremium` (src/types/service.ts) — the real popover
- * source. Clicking the one `forest` swatch doubles as the manual revert lever.
+ * source.
+ *
+ * `harbor` was picker-HIDDEN while its delivery rationale was "no row write will
+ * ever happen". That inverted at the prod cutover: `Project.paletteId='harbor'`
+ * is now written on the live row, so a hidden `harbor` leaves the popover
+ * rendering a single UNSELECTED `forest` swatch — one stray click silently
+ * reverts the customer. Both palettes are offered; `forest` remains the manual
+ * revert lever, now as a visible, deliberate choice.
  */
-export const techPremiumPickerPalettes = ['forest'] as const;
+export const techPremiumPickerPalettes = ['forest', 'harbor'] as const;
 
 export const techPremiumVariants = ['default'] as const;
 export type TechPremiumVariant = (typeof techPremiumVariants)[number];

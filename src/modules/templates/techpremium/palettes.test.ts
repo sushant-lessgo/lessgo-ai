@@ -117,8 +117,13 @@ describe('techpremium palettes — forest revert-lever guard', () => {
   });
 
   // 2 — the REAL picker source, not the (importer-less) pilotEnabledPalettes.
-  it('the theme popover offers forest ONLY (harbor is picker-hidden)', () => {
-    expect([...palettesForTemplate('techpremium')]).toEqual(['forest']);
+  // Both palettes are offered: `Project.paletteId='harbor'` is written on the live
+  // row at the prod cutover, and a picker missing the ACTIVE palette renders an
+  // all-unselected grid whose only click reverts the customer. See the
+  // `techPremiumPickerPalettes` doc comment in src/types/product.ts.
+  it('the theme popover offers both palettes, active one included', () => {
+    expect([...palettesForTemplate('techpremium')]).toEqual(['forest', 'harbor']);
+    expect([...palettesForTemplate('techpremium')]).toContain(defaultTechPremiumPalette);
   });
 
   // 3 — harbor exists and is the default.
