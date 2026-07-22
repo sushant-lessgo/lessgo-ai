@@ -7,6 +7,7 @@ import type { TechPremiumPalette } from '@/types/product';
 
 export const PALETTE_IMAGE_KEYWORDS: Record<TechPremiumPalette, string> = {
   forest: 'industrial IoT hardware install warm natural light',
+  harbor: 'industrial IoT hardware install cool marine daylight',
 };
 
 /**

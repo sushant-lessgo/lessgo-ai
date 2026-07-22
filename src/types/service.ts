@@ -2,7 +2,7 @@
 // Service-route types - Phase 0 foundation
 // Reference: docs/architecture/newServiceOnboarding.md, docs/tracks/nsoPlan.md
 
-import { meridianPalettes, techPremiumPalettes, vestriaPalettes } from '@/types/product';
+import { meridianPalettes, techPremiumPickerPalettes, vestriaPalettes } from '@/types/product';
 
 /**
  * ===== AUDIENCE TYPE =====
@@ -364,13 +364,19 @@ export const templateBlurbs: Record<TemplateId, string> = {
   atelier2: 'Photography & visual-portfolio (work-skeleton skin) — warm paper, vermilion accent, cover-slider hero.',
 };
 
-/** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Surge → 9 accent-hue, Meridian → 9 accent, TechPremium → forest). */
+/**
+ * Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Surge → 9
+ * accent-hue, Meridian → 9 accent, TechPremium → forest ONLY).
+ * TechPremium deliberately maps to the picker subset, not its full tuple: it also
+ * ships `harbor`, which reaches pages via the template default and must stay out
+ * of the theme popover (a swatch click writes Project.paletteId).
+ */
 const PALETTES_BY_TEMPLATE: Record<TemplateId, readonly string[]> = {
   hearth: hearthPalettes,
   lex: lexPalettes,
   surge: surgePalettes,
   meridian: meridianPalettes,
-  techpremium: techPremiumPalettes,
+  techpremium: techPremiumPickerPalettes,
   lumen: lumenPalettes,
   granth: granthPalettes,
   vestria: vestriaPalettes,

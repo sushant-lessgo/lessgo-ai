@@ -44,19 +44,31 @@ export const defaultMeridianVariant: MeridianVariant = 'developer';
 
 /**
  * ===== TECHPREMIUM PALETTE / VARIANT =====
- * Product template for the hardware-founder persona. Light, warm-paper
- * "control-room" system (forest + signal-lime). Pilot-locked: a single palette
- * + single variant (no picker). Applied via `[data-palette]` / `[data-variant]`.
- * Source of truth: TechPremium.html (<head> :root).
+ * Product template for the hardware-founder persona. TWO palettes, one variant.
+ * Applied via `[data-palette]` / `[data-variant]`.
+ *  - forest: the original light warm-paper "control-room" system (forest +
+ *    signal-lime). Source of truth: TechPremium.html (<head> :root). Kept
+ *    value-identical at the token layer — it is the revert lever.
+ *  - harbor: navy bands (hue 252) + brand-green signal + cool hue-240 neutrals,
+ *    from the designer's `brand-palette` style block. The new default.
  */
-export const techPremiumPalettes = ['forest'] as const;
+export const techPremiumPalettes = ['forest', 'harbor'] as const;
 export type TechPremiumPalette = (typeof techPremiumPalettes)[number];
+
+/**
+ * Palettes the in-editor theme picker may offer for TechPremium. Deliberately
+ * NOT the full tuple: `harbor` is picker-HIDDEN so a click can never write
+ * `Project.paletteId` on an existing row. Wired into
+ * `PALETTES_BY_TEMPLATE.techpremium` (src/types/service.ts) — the real popover
+ * source. Clicking the one `forest` swatch doubles as the manual revert lever.
+ */
+export const techPremiumPickerPalettes = ['forest'] as const;
 
 export const techPremiumVariants = ['default'] as const;
 export type TechPremiumVariant = (typeof techPremiumVariants)[number];
 
 /** Default palette when none is picked or persisted. */
-export const defaultTechPremiumPalette: TechPremiumPalette = 'forest';
+export const defaultTechPremiumPalette: TechPremiumPalette = 'harbor';
 
 /** Default variant when none is picked or persisted. */
 export const defaultTechPremiumVariant: TechPremiumVariant = 'default';

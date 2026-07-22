@@ -1,9 +1,11 @@
 // src/modules/templates/techpremium/tokens.ts
 // TechPremium design tokens — palette-invariant + variant-invariant base.
 // Source of truth: TechPremium.html :root (the "Naayom" control-room system).
-// Per-palette accent overrides (forest + signal-lime hue knobs) live in
-// ./palettes.ts; TechPremium ships a single variant so ./variants.ts emits no
-// per-variant rescale block.
+// Per-palette overrides live in ./palettes.ts and now cover the neutrals,
+// hairlines, status, teal and on-dark ink as well as the accent hue knobs — so
+// most of the block below is a bare-page FALLBACK (see the dead-value hazard note
+// on serializeBaseTokens). TechPremium ships a single variant so ./variants.ts
+// emits no per-variant rescale block.
 //
 // Unlike Meridian (dark-native, one --ink surface), TechPremium is light-native
 // warm paper with TWO dark "forest" sections (cta + footer). Surface tones:
@@ -59,6 +61,10 @@ export interface TechPremiumBaseTokens {
   limeDim: string;
   teal: string;
   tealDim: string;
+
+  // Pale ink ON the dark bands — :root fallback for the per-palette --on-dark*.
+  onDark: string;
+  onDark2: string;
 }
 
 export const techPremiumBaseTokens: TechPremiumBaseTokens = {
@@ -99,6 +105,8 @@ export const techPremiumBaseTokens: TechPremiumBaseTokens = {
   limeDim: 'oklch(0.855 0.185 128 / 0.16)',
   teal:    'oklch(0.700 0.095 192)',
   tealDim: 'oklch(0.700 0.095 192 / 0.14)',
+  onDark:  'oklch(0.840 0.022 140)',
+  onDark2: 'oklch(0.780 0.030 140)',
 };
 
 /**
@@ -114,6 +122,19 @@ export const techPremiumBaseTokens: TechPremiumBaseTokens = {
  *
  * The accent hue knobs (--forest* / --lime* / --teal*) are re-emitted by
  * serializePaletteOverrides() per palette; the single variant adds no rescale.
+ *
+ * ⚠️ ORDER, NOT SPECIFICITY. `:root` and `[data-palette="x"]` are both (0,1,0), so
+ * the palette block wins ONLY because every composition emits
+ * serializeBaseTokens() BEFORE serializePaletteOverrides()
+ * (ThemeInjector.tsx / components/TechPremiumSSRTokens.tsx; same precedent noted at
+ * vestria/tokens.ts:212). palettes.test.ts asserts that call order in both files —
+ * flip it and every palette silently stops applying.
+ *
+ * ⚠️ DEAD-VALUE HAZARD. Both palettes now override the neutrals, hairlines, status,
+ * teal AND the accents, so editing the values below has NO rendered effect on a
+ * page that carries a [data-palette] attribute — they are a bare-page fallback
+ * only. Keep them in sync with the `forest` record in ./palettes.ts (palettes.test.ts
+ * assertion 7 enforces value equality for all 19 relocated vars).
  */
 export function serializeBaseTokens(t: TechPremiumBaseTokens = techPremiumBaseTokens): string {
   return `:root{
@@ -147,6 +168,8 @@ export function serializeBaseTokens(t: TechPremiumBaseTokens = techPremiumBaseTo
   --lime-dim:${t.limeDim};
   --teal:${t.teal};
   --teal-dim:${t.tealDim};
+  --on-dark:${t.onDark};
+  --on-dark-2:${t.onDark2};
 }
 [data-surface="paper"]{background:var(--paper);}
 [data-surface="paper-2"]{background:var(--paper-2);}
