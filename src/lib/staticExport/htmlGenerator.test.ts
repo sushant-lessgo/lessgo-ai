@@ -215,6 +215,14 @@ describe('generateStaticHTML — per-section background override (both channels)
     const baseline = await renderTwoSections(null);
     expect(wrapperFor(html, HERO_ANCHOR)).toBe(wrapperFor(baseline, HERO_ANCHOR));
     expect(wrapperFor(html, HERO_ANCHOR)).toContain('data-surface=');
+
+    // N10 (phase 2): the comparison above is byte-exact but VALUE-vacuous for the
+    // one value under test — the hero's skin default already IS `dark`, so it could
+    // never detect a bleed *of `dark`*. Re-run with a value the hero's default is
+    // NOT, and assert the hero still reads its own default.
+    const paperOnAbout = await renderTwoSections({ [ABOUT]: { background: 'paper' } });
+    expect(wrapperFor(paperOnAbout, ABOUT_ANCHOR)).toContain('data-surface="paper"');
+    expect(wrapperFor(paperOnAbout, HERO_ANCHOR)).toContain('data-surface="dark"');
   });
 
   it('absent override → the wrapper keeps the skin default (byte-neutral)', async () => {

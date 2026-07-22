@@ -182,3 +182,238 @@ one-line change with the same shape, but it needs its own parity check because k
 - **Selector churn.** `EditablePageRenderer` now subscribes to the `styleTokens` object.
   Its identity changes only when `setSectionStyleTokens` runs (or on draft hydration), so
   no per-keystroke re-render risk; worth a glance at phase 2's e2e for editor responsiveness.
+
+---
+
+## Phase 2 — Background toolbar UI, Colour on body sections (Slice 1b — the decision gate)
+
+Branch: `feature/section-background` (verified with `git branch --show-current` before any edit).
+
+### Files changed
+
+Created:
+- `e2e/section-background.spec.ts`
+- `src/app/edit/[token]/components/toolbars/BackgroundPanel.tsx`
+
+Modified:
+- `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx`
+- `playwright.config.ts`
+- `src/modules/skeletons/styleTokens.ts` — **justified addition** (the N8 fix; see below)
+- `src/modules/skeletons/work/tokenContract.test.ts` — **justified addition** (the N8 fix's assertions + the one pre-existing exact-string case it necessarily changes)
+- `src/lib/staticExport/htmlGenerator.test.ts` — **justified addition** (N10, which the task brief assigned to this phase)
+- `docs/task/section-background.audit.md` (this file)
+
+Shows as modified but NOT edited by me (`git diff` empty — Vitest CRLF rewrite on Windows, same as
+phase 1): `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap`.
+Dirty from before this phase started: `docs/task/section-background.plan.md` (the orchestrator's
+N8/N9/N10 addendum), `docs/temp/message.md`, the designer-handoff HTML.
+
+### Scope additions (3 files outside the phase's Files-touched list) — why
+
+The task brief authorised "plus whatever N8's fix requires", and assigned N10 to this phase.
+
+1. **`styleTokens.ts`** — where the N8 fix landed. See "N8" below for why here and not in the block
+   stylesheets.
+2. **`tokenContract.test.ts`** — the serializer's test home (the plan forbids splitting that suite).
+   The N8 fix necessarily changes the exact-string `dark` case; the rest are new assertions.
+3. **`htmlGenerator.test.ts`** — N10 only.
+
+Nothing else was touched. In particular `Footer/styles.ts`, `Hero/styles.ts`, `tokenContract.ts`,
+`WorkHeader.*`, `scripts/`, `public/assets/` are all untouched.
+
+### Per-file
+
+**`src/app/edit/[token]/components/toolbars/SectionToolbar.tsx`**
+- Extracted `sectionTypeOf(sectionId)` (the `${type}-${uuid}` grammar) and re-pointed
+  `sectionChipLabel` + `isFooterId` at it. No behaviour change.
+- NEW `BACKGROUND_DENIED_SECTION_TYPES` — the section gate as a **DENYLIST** per N2. Keys: `hero`
+  (phase 3), `header` (D5), `workcatalog` / `workdetail` (R1). Everything else is eligible, so the
+  atelier gallery — section type **`work`**, not `gallery` — ships LIVE. An allowlist transcribed
+  from D7's matrix would have shipped the centrepiece body section greyed.
+- Template gate `isSkeletonBacked(templateId)` — the SAME predicate `resolveSectionSurface` uses, so
+  toolbar and renderer cannot drift. Non-skeleton templates keep the EXACT string
+  "Section backgrounds are coming with the design system." (pinned as a named constant with a
+  comment saying why), so `toolbar-dispatch.spec.ts` stays green unmodified — verified by running it.
+- The `background` action is now `disabled: Boolean(<reason>)` + `disabledTitle: <reason>`; the
+  handler toggles the panel. A `useEffect` closes the panel if the gate flips underneath it.
+- Render: the background button is wrapped in a `relative` div so the panel docks as an
+  `absolute top-full left-0` sibling (N6's precedent — TextToolbarMVP's pickers, documented at
+  `ToolbarShell.tsx:248`; the chrome box is `relative` with no `overflow-hidden` precisely for this).
+  `active` lights the button while the panel is open. Every other action renders exactly as before.
+- The stale `:320-333` comment is REPLACED with D2's two-channel truth (the CSS `[data-sid]{--u-*}`
+  block is what paints, because block roots self-paint; the wrapper `data-surface` carries the
+  hairline / template-agnostic consumers / the `[data-surface][id]` analytics pair; both resolved
+  from the same stored value; the override is ID-keyed and `getSurfaceForSection` is left alone, D6).
+- `'palette'` iconMap entry verified present (`:539`). No edit.
+
+**`src/app/edit/[token]/components/toolbars/BackgroundPanel.tsx` (new)**
+- Toolbar-docked dropdown. Colour row ONLY. Chips `Auto - Paper - Subtle - Ink` are live and call
+  `setSectionStyleTokens(sectionId, { background })` — `{background}` ONLY. **`bgMode` is never
+  written** (D1). `Accent` ships greyed (`aria-disabled` + why-tooltip + inert onClick) per R3.
+- Reads the stored value with a **scalar** selector (`...styleTokens?.[sectionId]?.background`), so
+  the panel re-renders only when THIS section's value changes.
+- Click-outside close via a `mousedown` document listener (TextToolbarMVP precedent). The Background
+  BUTTON is deliberately excluded from "outside": otherwise its mousedown would close the panel and
+  its click would immediately re-open it, making the toggle unclosable.
+- `data-testid`s: `section-bg-panel`, `section-bg-chip-{auto,paper,paper-2,dark}`,
+  `section-bg-chip-accent-disabled`.
+
+**`src/modules/skeletons/styleTokens.ts` — the N8 fix**
+`BACKGROUND_CSS`: every non-default surface now ALSO re-points the polarity-bound SKIN tokens inside
+that one section's `[data-sid]` block:
+- `paper` / `paper-2` → `--wk-on-dark`, `--wk-on-dark-soft`, `--wk-line-dark` point at the ink family.
+- `dark` → `--wk-ink`, `--wk-ink-soft`, `--wk-ink-mute`, `--wk-line`, `--wk-line-soft` point at the
+  on-dark family, and `--wk-paper` / `--wk-paper-2` point at `--wk-dark` (nested card + placeholder
+  fills).
+- `accent` → all of the above point at `var(--wk-accent-ink, #fff)` / `--wk-line-dark` /
+  `--wk-accent`. `--wk-line-dark` is deliberately NOT re-declared under accent: a custom property
+  pointing at itself is a CYCLE (guaranteed-invalid), which would delete the hairline rather than
+  restyle it.
+
+**`src/modules/skeletons/work/tokenContract.test.ts`** — updated the two exact-string surface cases
+to the new output, and added 5 assertions: light surfaces re-point the on-dark family; `dark`
+re-points the ink family + card fills; `accent` re-points everything to accent-ink and contains no
+self-referential `--wk-line-dark`; and the **containment** case — a section with no `background`
+override emits NO skin-token re-point at all.
+
+**`src/lib/staticExport/htmlGenerator.test.ts`** — N10. The CHANNEL-2 no-bleed check compares the
+hero wrapper byte-for-byte against a no-override baseline: exact, but value-vacuous for the value
+under test (the atelier hero's skin default already IS `dark`). Added a second render with
+`{[ABOUT]: {background:'paper'}}` asserting about reads `paper` while hero still reads `dark`.
+
+**`playwright.config.ts`** — registered `/section-background\.spec\.ts/` under the **`authed`**
+project (explicit allowlist; an unregistered spec matches nothing and goes green having never run).
+
+### N8 — how it was fixed, and why in the serializer
+
+N8 named the footer's on-dark children. Two mechanisms were considered:
+
+- *(rejected)* surface-scoped descendant rules in `Footer/styles.ts`
+  (`[data-surface="paper"] .wk-footer__note{...}`). Contained, but it fixes ONE block in ONE
+  direction, and would have to be repeated in every block stylesheet forever as a list that rots.
+- *(chosen)* re-point the polarity-bound skin tokens inside the `[data-sid]` block the serializer
+  already emits. One place, no per-block selector lists, and it also covers the MIRROR case N8
+  doesn't name but the Ink chip makes reachable on every body section: light-default blocks pin
+  `--wk-ink-soft` / `--wk-ink-mute` / `--wk-line` and fill cards with `--wk-paper`, so a `dark`
+  override would otherwise leave dark-grey labels and white cards on a dark band. The spec AC ("no
+  surface choice can produce an unreadable text/background pairing") covers that direction too.
+
+**Containment is the whole safety argument, and it is airtight:** a `[data-sid]` block is only ever
+emitted for a section the user has EXPLICITLY overridden. With no override nothing is emitted, so no
+skin token is ever re-pointed and every existing draft — including atelier's own skin-default `dark`
+proof/contact/footer bands — renders exactly as before. There is a dedicated test for this.
+
+### Tests added
+
+`e2e/section-background.spec.ts`, 3 cases, all **computed-style** (`getComputedStyle` on the block
+root `[data-sid]`), never attribute-presence — the attribute lands whether or not a pixel changes:
+
+1. **Ink on a body section** — About's root `backgroundColor` AND `color` both change from a
+   captured baseline, and each equals the RESOLVED value of `--wk-dark` / `--wk-on-dark` (read via a
+   throwaway probe element, so it is a real comparison, not a tautology). Wrapper carries
+   `data-surface="dark"` + `data-section-id`. **No-bleed at paint level**: the sibling gallery
+   section's computed colours are unchanged. **Preview hop**: `/edit/{token}/preview`
+   (LandingPageRenderer's usesTemplate branch — the third resolver call site) shows the same computed
+   colours. **Reload**: the override comes back from the server.
+2. **Paper on the DARK-default footer (N8)** — root pair equals resolved `--wk-paper` / `--wk-ink`;
+   `.wk-footer__note` CHANGED from its on-dark baseline and equals resolved `--wk-ink-soft`;
+   `.wk-footer__top`'s `borderBottomColor` equals resolved `--wk-line`.
+3. **Gate** — the gallery (`work-...`, the N2 trap) is NOT greyed and opens the panel; the Accent
+   chip is `aria-disabled` with a non-empty title; the hero is `aria-disabled` with an
+   `/image mode/i` tooltip and is INERT on force-click (no panel).
+
+Seeding follows **N1** exactly: `POST /api/user/persona` -> `GET /api/start` (the only place
+`audienceType` is captured) -> `POST /api/saveDraft` with `templateId: 'atelier'`. `beforeEach`
+asserts a `[data-sid]` block root exists — the N1 tripwire: if the editor ever falls back to the
+legacy path there is no `data-sid`, no `data-surface` and no `[data-sid]{--u-*}` CSS, and the spec
+fails loudly instead of testing nothing.
+
+**Mutation check (the assertions are not inert):** removing two of the N8 re-points from
+`BACKGROUND_CSS` turned **5 of the 28** tokenContract cases red; the mutant was reverted and the
+suite re-run green (`git diff --stat` confirms only the intended edit remains).
+
+### Verification (actual results, run in this worktree)
+
+- `npx tsc --noEmit` -> **0 errors** (phase 1's stale `founder.jpg` TS2307 is gone — `.next/types`
+  was regenerated by the build).
+- `npm run test:run` -> **310 passed | 1 skipped (311 files); 5013 passed | 15 skipped**. Zero
+  failures. D9 tripwires green **UNMODIFIED**: `kundiusPages.test.tsx`, `oldContentFallback.test.tsx`,
+  `coreParity.test.ts`, `uiFoundationIsolation.test.tsx.snap` (no snapshot content change).
+- `npx next lint --file ...` on the three touched source files -> 1 PRE-EXISTING warning
+  (`react-hooks/exhaustive-deps` on SectionToolbar's validation `useMemo`), no errors, nothing new.
+- **Playwright, actually run** (`E2E_PORT=3411`, `--project=authed --project=setup`):
+  `e2e/section-background.spec.ts` + `e2e/toolbar-dispatch.spec.ts` -> **16 passed**. The runner
+  reported all 3 section-background tests as EXECUTED (allowlist registration confirmed), and
+  toolbar-dispatch passed **unmodified**, including its two `/design system/i` greyed-Background
+  assertions on meridian/hearth.
+- `npm run build` -> success. `git status --porcelain public/assets scripts/legacy
+  public/published.css` -> **empty**. `work.v1.js` byte-unchanged.
+- `npx playwright test e2e/parity.spec.ts --project=public` -> **4 passed, 3 failed, all
+  PRE-EXISTING**:
+  - `atelier/header 4.94% > 3%` — the known-accepted `atelier/header` parity red recorded by
+    work-contract-wave2 ("don't re-flag").
+  - `atelier2` x2 — the dev-only stage never renders `[data-parity-band="published"]` and times out.
+  - Both are provably unrelated to this phase: the parity stage renders
+    `<ThemeInjector ... styleTokens={undefined}>` (`TemplateBlocksStage.tsx:253`), so the serializer
+    returns `''` and the only rendering-affecting change here is inert there. meridian + hearth
+    bands are all well under 3%.
+
+### Deviations from the plan
+
+1. **N8 fixed in the serializer, not in the block stylesheets** (and generalised to the
+   `dark`-on-light-block direction). Rationale + containment argument above. This is why
+   `styleTokens.ts` + `tokenContract.test.ts` appear on the changed-file list.
+2. **The e2e's HEADER greyed case was dropped** (the plan asked for "Hero + header toolbars:
+   background action disabled"). Evidence-based: on the WORK skeleton, clicking the header section
+   wrapper dispatches **no toolbar at all** — the wrapper is present and focusable (`role="button"`,
+   `aria-selected`, confirmed in the failure's page snapshot) but `[data-toolbar-chrome]` never
+   mounts. There is therefore no Background button on an atelier header to inspect; a header case
+   would have been testing toolbar-wave-2's missing host, not this gate. The header entry in the
+   denylist is the identical one-line lookup the hero case exercises, and `toolbar-dispatch.spec.ts`
+   still covers the header toolbar on meridian (where it does dispatch). Recorded verbatim in the
+   spec at the point of omission.
+3. **Two e2e mechanics the plan didn't anticipate**, both documented inline because they look like
+   noise otherwise: (a) `page.on('dialog', accept)` for the SaveStateChip `beforeunload` guard;
+   (b) an `about:blank` hop before leaving the live editor — navigating straight from `/edit/{token}`
+   to another route reliably yields `net::ERR_ABORTED`. Neither weakens an assertion: every hop is
+   still followed by a computed-style comparison against server-restored state.
+4. `data-testid` for the disabled accent chip is `section-bg-chip-accent-disabled` (the plan's own
+   naming) while the live chips are `section-bg-chip-<value>`.
+
+### Deliberately NOT done
+
+- **No `bgMode`** — not in the type, not written, not read (D1: phase 3 owns it).
+- No Image / Video tabs, no `MediaPickerModal`, no slides helpers, no filmstrip (phases 3-4).
+- Hero, header, `workcatalog`, `workdetail` stay greyed; `WorkHeroCenter.*` and all hero cores
+  untouched.
+- `tokenContract.ts` (incl. `:399` `--wk-header-bg` and the `[data-surface]` rules), `.wk-header`,
+  `WorkHeader.*`, `Footer/styles.ts`, `Hero/styles.ts`: untouched (D5 / D9).
+- `getSurfaceForSection` signature, `src/types/template.ts`, all 8 template `sectionRules.ts`:
+  untouched (D6).
+- `scripts/`, `public/assets/`: untouched. No git state changes, no commit.
+
+### Risks / open items for the reviewer and the founder gate
+
+1. **The N8 fix re-points SKIN tokens from the USER token layer.** That is a layering step beyond
+   "emit `--u-*`", and it is the single most reviewable decision in this phase. It is contained to
+   overridden sections only (tested), but a reviewer should agree the mechanism is right before
+   phase 3 builds on it.
+2. **Nested light cards on a dark band are only PARTIALLY solved.** `--wk-paper` / `--wk-paper-2` are
+   re-pointed to `--wk-dark`, so `.wk-proof__card` / `.wk-packages__card` no longer paint white on a
+   dark band — but they then have little separation from the band beyond their border. That is a
+   taste call, not a legibility one. **Founder-gate ASK, alongside the Accent question.**
+3. **Pre-existing, NOT introduced here, but adjacent and worth logging:** atelier's skin already puts
+   `proof` on a `dark` surface while `.wk-proof__eyebrow` / `__source` hard-code `var(--wk-ink-mute)`
+   and `.wk-proof__card` fills `var(--wk-paper)`. That is a live contrast bug on Kundius TODAY, with
+   no user override involved. The N8 fix deliberately does NOT touch it: fixing it means editing the
+   shared `[data-surface]` rules, which changes existing drafts' rendering and would break the D9
+   "untouched draft renders identically" contract. Suggested as its own ticket.
+4. **Accent chip is greyed** pending the R3 decision (audit accent bands vs drop the chip). The
+   serializer already emits a full accent re-point set, so un-greying it later is a one-line UI
+   change — the contrast plumbing is in place.
+5. **`atelier2` parity + `atelier/header` parity are red before and after this phase** (see
+   Verification). If the gate run re-surfaces them, they are not this phase's.
+6. **Autosave debounce.** The panel writes through `setSectionStyleTokens`, which triggers the 2s
+   debounced autosave. The e2e waits for the `saveDraft` POST carrying `"styleTokens"`, so the
+   round-trip is genuinely proven, but a user who closes the tab within 2s of a chip click relies on
+   the same dirty-guard every other editor write does.

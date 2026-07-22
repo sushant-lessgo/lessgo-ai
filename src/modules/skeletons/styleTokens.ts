@@ -63,12 +63,82 @@ type Decls = ReadonlyArray<readonly [string, string]>;
 // the root, which BEATS any colour inherited from the wrapper's
 // `[data-surface="paper"]` rule — so a bg-only `paper`/`paper-2` override would
 // paint light-on-light. Never add a background-only row here.
+//
+// CONTRAST INVARIANT, PART 2 (section-background N8, phase 2). The root pair is
+// NOT the whole story: block CHILDREN hard-code a POLARITY-SPECIFIC skin token and
+// so ignore `--u-fg` entirely. Both directions are real:
+//   - dark-default blocks pin ON-DARK values on children — `.wk-footer__note` /
+//     `__eyebrow` / `__bottom` / `__col-head` / `__contact-line` use
+//     `color:var(--wk-on-dark-soft)` and `.wk-footer__top` uses
+//     `border-bottom:1px solid var(--wk-line-dark)` (Footer/styles.ts:16-35). A
+//     `paper` override there leaves near-white secondary text + hairlines on a
+//     light band.
+//   - light-default blocks pin INK values — `.wk-about__eyebrow`,
+//     `.wk-proof__eyebrow`, `.wk-faq__a`, `.wk-packages__desc`, … use
+//     `var(--wk-ink-soft)` / `var(--wk-ink-mute)` / `var(--wk-line)`, plus card
+//     fills of `var(--wk-paper)`. A `dark` override there leaves dark-grey labels
+//     and light cards on a dark band.
+// Spec AC: "No surface choice can produce an unreadable text/background pairing."
+//
+// FIX: each non-default surface also RE-POINTS the polarity-bound skin tokens to
+// the family that matches the chosen band, at the block root (`[data-sid]`), so
+// every descendant that reads them follows the override by inheritance — no
+// per-block CSS and no per-block selector list to keep in sync.
+//
+// CONTAINMENT (why this is safe): these declarations exist ONLY inside a
+// `[data-sid]` block, and a `[data-sid]` block is only ever emitted for a section
+// the user has EXPLICITLY overridden. With no override nothing is emitted at all,
+// so every existing draft (Kundius included) is untouched — this cannot change any
+// skin-default surface, including atelier's own `dark` proof/contact/footer bands.
+const INK_FAMILY: Decls = [
+  ['--wk-ink', 'var(--wk-on-dark)'],
+  ['--wk-ink-soft', 'var(--wk-on-dark-soft)'],
+  ['--wk-ink-mute', 'var(--wk-on-dark-soft)'],
+  ['--wk-line', 'var(--wk-line-dark)'],
+  ['--wk-line-soft', 'var(--wk-line-dark)'],
+];
+/** Light band: only the ON-DARK family needs re-pointing (ink tokens already fit). */
+const ON_DARK_TO_INK: Decls = [
+  ['--wk-on-dark', 'var(--wk-ink)'],
+  ['--wk-on-dark-soft', 'var(--wk-ink-soft)'],
+  ['--wk-line-dark', 'var(--wk-line)'],
+];
+
 const BACKGROUND_CSS: Record<UBackground, Decls> = {
   default: [],
-  paper:     [['--u-bg', 'var(--wk-paper)'], ['--u-fg', 'var(--wk-ink)']],
-  'paper-2': [['--u-bg', 'var(--wk-paper-2)'], ['--u-fg', 'var(--wk-ink)']],
-  dark:      [['--u-bg', 'var(--wk-dark)'], ['--u-fg', 'var(--wk-on-dark)']],
-  accent:    [['--u-bg', 'var(--wk-accent)'], ['--u-fg', 'var(--wk-accent-ink, #fff)']],
+  paper: [
+    ['--u-bg', 'var(--wk-paper)'], ['--u-fg', 'var(--wk-ink)'],
+    ...ON_DARK_TO_INK,
+  ],
+  'paper-2': [
+    ['--u-bg', 'var(--wk-paper-2)'], ['--u-fg', 'var(--wk-ink)'],
+    ...ON_DARK_TO_INK,
+  ],
+  dark: [
+    ['--u-bg', 'var(--wk-dark)'], ['--u-fg', 'var(--wk-on-dark)'],
+    ...INK_FAMILY,
+    // Card/placeholder fills (`.wk-proof__card`, `.wk-packages__card`,
+    // `.wk-*__ph`) paint `var(--wk-paper)`/`var(--wk-paper-2)` explicitly but set
+    // no colour of their own — on a dark band that is white-on-white. Re-point the
+    // surface family too so nested fills follow the override.
+    ['--wk-paper', 'var(--wk-dark)'],
+    ['--wk-paper-2', 'var(--wk-dark)'],
+  ],
+  accent: [
+    ['--u-bg', 'var(--wk-accent)'], ['--u-fg', 'var(--wk-accent-ink, #fff)'],
+    ['--wk-ink', 'var(--wk-accent-ink, #fff)'],
+    ['--wk-ink-soft', 'var(--wk-accent-ink, #fff)'],
+    ['--wk-ink-mute', 'var(--wk-accent-ink, #fff)'],
+    ['--wk-on-dark', 'var(--wk-accent-ink, #fff)'],
+    ['--wk-on-dark-soft', 'var(--wk-accent-ink, #fff)'],
+    // NB: `--wk-line-dark` is deliberately NOT re-declared here — pointing it at
+    // itself would be a custom-property CYCLE (guaranteed-invalid at computed-value
+    // time), which would take the hairline out entirely rather than restyle it.
+    ['--wk-line', 'var(--wk-line-dark)'],
+    ['--wk-line-soft', 'var(--wk-line-dark)'],
+    ['--wk-paper', 'var(--wk-accent)'],
+    ['--wk-paper-2', 'var(--wk-accent)'],
+  ],
 };
 
 const SPACING_CSS: Record<USpacingY, Decls> = {
@@ -120,7 +190,12 @@ const FIELD_ORDER = ['background', 'spacingY', 'corners', 'border', 'shadow', 'o
 
 /** All `--u-*` custom properties this vocabulary can emit (for phase-3+ block cores
  *  that consume `var(--u-*, <skeleton default>)`). `headerMode` drives a data-attr,
- *  not a var — hence absent here. */
+ *  not a var — hence absent here.
+ *
+ *  NOTE: a non-default `background` ALSO re-points polarity-bound SKIN tokens
+ *  (`--wk-ink*`, `--wk-on-dark*`, `--wk-line*`, `--wk-paper*`) inside that one
+ *  section's `[data-sid]` block — see the contrast invariant above. Those are skin
+ *  names, not `--u-*` names, so they are deliberately not listed here. */
 export const USER_STYLE_TOKEN_VARS = [
   '--u-bg', '--u-fg', '--u-space-y', '--u-radius', '--u-border', '--u-shadow', '--u-opacity',
 ] as const;

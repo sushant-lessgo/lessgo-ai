@@ -128,6 +128,12 @@ export default defineConfig({
         // Registered late — until now they matched no project and never ran.
         /cms-authoring\.spec\.ts/,
         /cms-publish\.spec\.ts/,
+        // section-background (phase 2, the slice-1 DECISION GATE): the Background
+        // toolbar → computed-style proof that a picked surface repaints the band in
+        // the editor AND survives the preview hop + a reload. Authed — it seeds a
+        // real atelier project (persona → /api/start → saveDraft) and drives the
+        // editor store.
+        /section-background\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },

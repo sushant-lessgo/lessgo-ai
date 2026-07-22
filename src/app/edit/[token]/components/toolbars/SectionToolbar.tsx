@@ -19,6 +19,12 @@ import { ToolbarButton, ToolbarDivider, ToolbarLabel, useHideToolbarChrome } fro
 // across the firewall. GlobalAppHeader.tsx:55 already imports it the same way, and
 // there is no cycle: GlobalModals imports no toolbar.
 import { showSocialModal } from '../ui/GlobalModals';
+// section-background phase 2: the Background action's TEMPLATE gate. Pure data
+// (no React, no template/skeleton module) → firewall-safe, and deliberately the
+// SAME predicate `resolveSectionSurface` uses, so the toolbar and the renderer can
+// never drift about which projects have surfaces.
+import { isSkeletonBacked } from '@/modules/skeletons/ids';
+import { BackgroundPanel } from './BackgroundPanel';
 
 // Shared chrome (header/footer) is site-wide: hide per-page structural actions.
 // `regen` joins the list — chrome isn't a copy-contract section, so a section
@@ -51,10 +57,47 @@ const FOOTER_ONLY_ACTIONS = ['manage-links', 'manage-social', 'social-orientatio
  * so it would degrade to this fallback for half the templates anyway.
  */
 function sectionChipLabel(sectionId: string): string {
-  const dash = sectionId.indexOf('-');
-  const type = dash === -1 ? sectionId : sectionId.slice(0, dash);
+  const type = sectionTypeOf(sectionId);
   return type.charAt(0).toUpperCase() + type.slice(1);
 }
+
+/** The `${type}-${uuid}` grammar, in one place (a suffix-less legacy `footer` id
+ *  is its own type). Shared by the chip label, `isFooterId` and the phase-2
+ *  Background section gate. */
+function sectionTypeOf(sectionId: string): string {
+  const dash = sectionId.indexOf('-');
+  return dash === -1 ? sectionId : sectionId.slice(0, dash);
+}
+
+// ── section-background phase 2: the Background section gate (plan D7 + note N2) ──
+//
+// A DENYLIST, not an allowlist. The gallery — the atelier centrepiece and the most
+// likely first thing a user recolours — has section type `work`, NOT `gallery`
+// (`resolveWorkBlock.ts:114` registers it under `work`; `workSections.ts:204`
+// declares `sectionType:'work'`; only the legacy name in `sectionRules.ts:25` says
+// `gallery`). An allowlist transcribed from the plan's matrix would therefore ship
+// the centrepiece body section greyed. Everything not listed here is eligible.
+//
+// Each entry is the mandatory "why" tooltip for a greyed placeholder (founder
+// ruling 9) — a dead button with no explanation reads as a bug.
+const BACKGROUND_DENIED_SECTION_TYPES: Record<string, string> = {
+  // Phase 3 (D7): on the slider/image hero variants the band is fully covered by
+  // `.wk-hero__media`/`__slides` + `__scrim`, so Color is INVISIBLE there until
+  // `bgMode:'color'` suppresses the media. The hero ships as ONE coherent control.
+  hero: 'Hero background lands with image mode.',
+  // D5 / orchestrator R2: `--wk-header-bg` is declared on `:root` and cannot be
+  // retro-bound per-section; the header's surface belongs to the header toolbar.
+  header: 'Header background comes with the header toolbar.',
+  // Orchestrator R1: the works catalog + project pages share one piece of
+  // collection machinery; a per-section band there is a collection-wide decision.
+  workcatalog: 'Collection pages share one background — that comes with the works settings.',
+  workdetail: 'Collection pages share one background — that comes with the works settings.',
+};
+
+/** The verbatim pre-phase-2 tooltip. Every NON-work template keeps this string
+ *  unchanged — `e2e/toolbar-dispatch.spec.ts` (which seeds meridian/hearth) matches
+ *  on `/design system/i`, and those assertions must stay green UNMODIFIED. */
+const BACKGROUND_UNSUPPORTED_TITLE = 'Section backgrounds are coming with the design system.';
 
 /**
  * True for the shared FOOTER chrome section only.
@@ -65,8 +108,7 @@ function sectionChipLabel(sectionId: string): string {
  * grammar as `sectionChipLabel` above, so a suffix-less legacy `footer` id matches.
  */
 function isFooterId(sectionId: string): boolean {
-  const dash = sectionId.indexOf('-');
-  return (dash === -1 ? sectionId : sectionId.slice(0, dash)) === 'footer';
+  return sectionTypeOf(sectionId) === 'footer';
 }
 
 interface SectionToolbarProps {
@@ -77,6 +119,7 @@ interface SectionToolbarProps {
 // component is a dumb child of the shell's floating container.
 export function SectionToolbar({ sectionId }: SectionToolbarProps) {
   const [showElementToggle, setShowElementToggle] = useState(false);
+  const [showBackgroundPanel, setShowBackgroundPanel] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   // Narrow selector: pull ONLY the fields/actions this toolbar reads. Actions are
@@ -148,6 +191,25 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
     // Show the layout change modal
     showLayoutChangeModal(sectionId, sectionType, currentLayout, section.elements);
   };
+
+  // ── Background gate (section-background phase 2, plan D7 + N2) ───────────────
+  // TWO axes, resolved to one of three greyed reasons or "live":
+  //   1. TEMPLATE — only skeleton-backed projects have a surface vocabulary whose
+  //      blocks consume `var(--u-bg)`. Every other template keeps the verbatim
+  //      pre-phase-2 tooltip (see BACKGROUND_UNSUPPORTED_TITLE).
+  //   2. SECTION — the denylist above (hero → phase 3; header → D5; collection
+  //      machinery → R1).
+  const backgroundSupported = isSkeletonBacked(templateId);
+  const backgroundDeniedReason = BACKGROUND_DENIED_SECTION_TYPES[sectionTypeOf(sectionId)];
+  const backgroundDisabledTitle = !backgroundSupported
+    ? BACKGROUND_UNSUPPORTED_TITLE
+    : backgroundDeniedReason;
+
+  // Close the panel if the gate flips underneath it (template switch / selection
+  // change) — otherwise a dropdown could outlive the button that owns it.
+  useEffect(() => {
+    if (backgroundDisabledTitle) setShowBackgroundPanel(false);
+  }, [backgroundDisabledTitle, sectionId]);
 
   const {
     duplicateSection,
@@ -317,27 +379,39 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
         'Social layout options are coming — orientation isn’t stored on your site yet.',
       handler: () => {},
     },
-    // ── Section → Background: GREYED PLACEHOLDER (phase 3.5, founder ruling 9) ──
+    // ── Section → Background (section-background phase 2) ───────────────────────
     // Last, per toolbarPlan's Beta column order (`… Duplicate · Delete · Background`);
     // it is also Footer's second Beta action, so it is deliberately NOT filtered to
     // non-chrome sections.
     //
-    // DISABLED with ZERO functionality. Note the reason is NOT "the renderers can't
-    // read it" — `styleTokens` IS already threaded through BOTH renderers and
-    // `serializeStyleTokens` already emits `--u-bg`. The real blocker (D-1): the
-    // write has nowhere to LAND. `data-surface` is derived as
-    // `tmpl.getSurfaceForSection(sectionType)` with NO per-section override argument,
-    // and the 8 served templates' blocks hardcode their CSS — none consume
-    // `var(--u-bg)`. A real Background action today would visibly do NOTHING for
-    // every user (no served template's blocks consume `--u-*` yet). Un-defer =
-    // templates consuming `--u-*`. Stays out of scope for the skeleton cutover.
+    // WAS a greyed placeholder for every template (phase 3.5, ruling 9). It is now
+    // LIVE on skeleton-backed projects' body sections, and still greyed everywhere
+    // else — see the gate above for the three distinct "why" strings.
+    //
+    // ⚠️ The old comment here claimed the blocker was that "the write has nowhere to
+    // land — `data-surface` is derived from `getSurfaceForSection(sectionType)` with
+    // no override argument, and no served template's blocks consume `var(--u-bg)`".
+    // Both halves are now stale. The truth, and the reason the write is delivered on
+    // TWO channels (plan D2), is:
+    //   1. CSS channel — `serializeStyleTokens` emits `[data-sid]{--u-bg;--u-fg;…}`
+    //      and every work-skeleton block root SELF-PAINTS `background:var(--u-bg,
+    //      <default>)`. A wrapper-only override would be painted over by the block,
+    //      so this channel is what actually recolours the band.
+    //   2. Wrapper channel — `resolveSectionSurface` feeds the wrapper's
+    //      `data-surface`, which carries what the vars don't: `paper-2`'s
+    //      `border-block` hairline, template-agnostic consumers, and the
+    //      `[data-surface][id]` pair `analyticsGenerator.js:126` reads.
+    // The two are resolved from the SAME stored value (`styleTokens[sectionId]
+    // .background`) but are NOT redundant — foreground and hairline genuinely differ
+    // between them. The override is ID-keyed; `getSurfaceForSection`'s own override
+    // param is TYPE-keyed skin data and is deliberately left alone (D6).
     {
       id: 'background',
       label: 'Background',
       icon: 'palette',
-      disabled: true,
-      disabledTitle: 'Section backgrounds are coming with the design system.',
-      handler: () => {},
+      disabled: Boolean(backgroundDisabledTitle),
+      disabledTitle: backgroundDisabledTitle,
+      handler: () => setShowBackgroundPanel((open) => !open),
     },
   ]
     .filter((action) => !isChromeId(sectionId) || !CHROME_HIDDEN_ACTIONS.includes(action.id))
@@ -463,31 +537,53 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
           {/* Primary Actions */}
           {primaryActions.map((action, index) => {
             const actionDisabled = (action as any).disabled === true;
+            const isBackground = action.id === 'background';
+            const button = (
+              <ToolbarButton
+                data-action={action.id}
+                onClick={(e) => {
+                  // phase 3.5: placeholders are inert. `disabled` on the DOM node
+                  // already stops real clicks; this also covers force-clicks.
+                  if (actionDisabled) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                  }
+                  action.handler();
+                }}
+                disabled={actionDisabled}
+                // phase 3.5: honour an explicit `disabledTitle` (the placeholders'
+                // mandatory "why"). Falling back to `action.label` preserves the
+                // pre-existing tooltip for the move-up/move-down disabled states,
+                // which have no "why" copy of their own.
+                disabledTitle={(action as any).disabledTitle ?? action.label}
+                variant={(action as any).variant === 'danger' ? 'danger' : 'default'}
+                active={isBackground && showBackgroundPanel}
+                icon={<ActionIcon icon={action.icon} />}
+                label={action.label}
+              />
+            );
             return (
               <React.Fragment key={action.id}>
                 {index > 0 && <ToolbarDivider />}
-                <ToolbarButton
-                  data-action={action.id}
-                  onClick={(e) => {
-                    // phase 3.5: placeholders are inert. `disabled` on the DOM node
-                    // already stops real clicks; this also covers force-clicks.
-                    if (actionDisabled) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      return;
-                    }
-                    action.handler();
-                  }}
-                  disabled={actionDisabled}
-                  // phase 3.5: honour an explicit `disabledTitle` (the placeholders'
-                  // mandatory "why"). Falling back to `action.label` preserves the
-                  // pre-existing tooltip for the move-up/move-down disabled states,
-                  // which have no "why" copy of their own.
-                  disabledTitle={(action as any).disabledTitle ?? action.label}
-                  variant={(action as any).variant === 'danger' ? 'danger' : 'default'}
-                  icon={<ActionIcon icon={action.icon} />}
-                  label={action.label}
-                />
+                {isBackground && !actionDisabled ? (
+                  // The panel is an `absolute top-full left-0` SIBLING of its
+                  // button (TextToolbarMVP's picker precedent, documented at
+                  // ToolbarShell.tsx:248). `relative` here — not on the row — keeps
+                  // the dropdown anchored to the Background button rather than to
+                  // the whole pill.
+                  <div className="relative">
+                    {button}
+                    {showBackgroundPanel && (
+                      <BackgroundPanel
+                        sectionId={sectionId}
+                        onClose={() => setShowBackgroundPanel(false)}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  button
+                )}
               </React.Fragment>
             );
           })}

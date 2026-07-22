@@ -250,9 +250,15 @@ describe('serializeStyleTokens — user style-token serializer', () => {
     );
   });
 
-  it('maps dark background to both --u-bg and --u-fg', () => {
+  it('maps dark background to both --u-bg and --u-fg (+ the N8 polarity re-points)', () => {
     const css = serializeStyleTokens({ 'contact-x': { background: 'dark' } });
-    expect(css).toBe('[data-sid="contact-x"]{--u-bg:var(--wk-dark);--u-fg:var(--wk-on-dark);}');
+    expect(css).toBe(
+      '[data-sid="contact-x"]{--u-bg:var(--wk-dark);--u-fg:var(--wk-on-dark);' +
+        '--wk-ink:var(--wk-on-dark);--wk-ink-soft:var(--wk-on-dark-soft);' +
+        '--wk-ink-mute:var(--wk-on-dark-soft);--wk-line:var(--wk-line-dark);' +
+        '--wk-line-soft:var(--wk-line-dark);' +
+        '--wk-paper:var(--wk-dark);--wk-paper-2:var(--wk-dark);}',
+    );
   });
 
   it('skips default / absent coordinates and empty sections', () => {
@@ -285,12 +291,69 @@ describe('serializeStyleTokens — user style-token serializer', () => {
     },
   );
 
-  it('maps paper / paper-2 to the ink foreground', () => {
+  it('maps paper / paper-2 to the ink foreground (+ the N8 polarity re-points)', () => {
+    const onDarkToInk =
+      '--wk-on-dark:var(--wk-ink);--wk-on-dark-soft:var(--wk-ink-soft);' +
+      '--wk-line-dark:var(--wk-line);';
     expect(serializeStyleTokens({ 'about-1': { background: 'paper' } })).toBe(
-      '[data-sid="about-1"]{--u-bg:var(--wk-paper);--u-fg:var(--wk-ink);}',
+      `[data-sid="about-1"]{--u-bg:var(--wk-paper);--u-fg:var(--wk-ink);${onDarkToInk}}`,
     );
     expect(serializeStyleTokens({ 'about-1': { background: 'paper-2' } })).toBe(
-      '[data-sid="about-1"]{--u-bg:var(--wk-paper-2);--u-fg:var(--wk-ink);}',
+      `[data-sid="about-1"]{--u-bg:var(--wk-paper-2);--u-fg:var(--wk-ink);${onDarkToInk}}`,
     );
+  });
+
+  // ── section-background N8 (phase 2) — CONTRAST INVARIANT PART 2 ──────────────
+  // The root `--u-bg`/`--u-fg` pair does not reach block CHILDREN that hard-code a
+  // polarity-specific SKIN token. `.wk-footer__note`/`__eyebrow`/`__bottom` pin
+  // `var(--wk-on-dark-soft)` and `.wk-footer__top` pins `var(--wk-line-dark)`
+  // (Footer/styles.ts:16-35) — so `paper` there must ALSO re-point the on-dark
+  // family, or secondary text and hairlines stay near-white on a light band.
+  // Mirror case: light-default blocks pin `--wk-ink-soft`/`--wk-ink-mute`/
+  // `--wk-line` and fill cards with `--wk-paper`, so `dark` must re-point those.
+  // Spec AC: "No surface choice can produce an unreadable text/background pairing."
+  it.each(['paper', 'paper-2'] as const)(
+    'light surface "%s" re-points the ON-DARK family to ink (footer children stay readable)',
+    (background) => {
+      const css = serializeStyleTokens({ 'footer-1': { background } });
+      expect(css).toContain('--wk-on-dark:var(--wk-ink);');
+      expect(css).toContain('--wk-on-dark-soft:var(--wk-ink-soft);');
+      expect(css).toContain('--wk-line-dark:var(--wk-line);');
+    },
+  );
+
+  it('dark surface re-points the INK family + card fills to the on-dark family', () => {
+    const css = serializeStyleTokens({ 'about-1': { background: 'dark' } });
+    expect(css).toContain('--wk-ink:var(--wk-on-dark);');
+    expect(css).toContain('--wk-ink-soft:var(--wk-on-dark-soft);');
+    expect(css).toContain('--wk-ink-mute:var(--wk-on-dark-soft);');
+    expect(css).toContain('--wk-line:var(--wk-line-dark);');
+    expect(css).toContain('--wk-paper:var(--wk-dark);');
+    expect(css).toContain('--wk-paper-2:var(--wk-dark);');
+  });
+
+  it('accent surface re-points every polarity-bound token to the accent ink', () => {
+    const css = serializeStyleTokens({ 'contact-1': { background: 'accent' } });
+    for (const name of ['--wk-ink', '--wk-ink-soft', '--wk-ink-mute', '--wk-on-dark', '--wk-on-dark-soft']) {
+      expect(css).toContain(`${name}:var(--wk-accent-ink, #fff);`);
+    }
+    // A custom property may never point at ITSELF (cycle → guaranteed-invalid,
+    // which would delete the hairline instead of restyling it).
+    expect(css).not.toContain('--wk-line-dark:var(--wk-line-dark)');
+  });
+
+  // CONTAINMENT: the re-points live ONLY inside a `[data-sid]` block, and a block
+  // is only emitted for an EXPLICITLY overridden section. No override ⇒ no skin
+  // token is ever re-pointed ⇒ existing drafts (Kundius) are untouched. This is
+  // the assertion that keeps the N8 fix from becoming a global design change.
+  it('emits no skin-token re-point when the section has no background override', () => {
+    const css = serializeStyleTokens({
+      'about-1': { corners: 'round', spacingY: 'compact' },
+      'faq-1': { background: 'default' },
+    });
+    expect(css).not.toContain('--wk-ink');
+    expect(css).not.toContain('--wk-on-dark');
+    expect(css).not.toContain('--wk-paper');
+    expect(css).not.toContain('--wk-line');
   });
 });

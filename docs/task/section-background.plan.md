@@ -17,7 +17,7 @@ editor gaps: `worksRow` in `CmsPanel` and rail tab "CMS"→"Content".
 
 ## Progress log
 
-- phase 1 surface-override plumbing + contrast pair (slice 1a): pending
+- phase 1 surface-override plumbing + contrast pair (slice 1a): **done** (commit 2393cee4, review loops 1, verdict `ship`)
 - phase 2 background toolbar UI, colour on body sections (slice 1b): pending
 - phase 3 hero — Color + Image mode + bgMode + slides invariant (slice 2): pending
 - phase 4 filmstrip tray (slice 3): pending
@@ -549,6 +549,27 @@ deletion is impossible, record the edge case in the audit.
 **N7 (phase 1, confirmed safe)** — no existing exact-string serializer test covers `paper`/`paper-2`
 (`tokenContract.test.ts:242-269` covers corners/spacing/shadow, `dark`, border, `headerMode`), so
 adding `--u-fg` to paper/paper-2 keeps them green as D2 claims.
+
+**N8 (phase 2, from the phase-1 impl-review) — D2's root `--u-bg`/`--u-fg` pair is NOT the whole
+contrast story.** Dark-default blocks hardcode on-dark colours on their CHILDREN:
+`.wk-footer__note` / `.wk-footer__eyebrow` use `color:var(--wk-on-dark-soft)` and `.wk-footer__top`
+uses `border-bottom:1px solid var(--wk-line-dark)` (`blocks/Footer/styles.ts:11-13`); the hero has
+the same pattern. Picking `paper`/`paper-2` on footer/hero fixes the ROOT foreground but leaves
+secondary text and hairlines near-white on paper — which violates spec AC "No surface choice can
+produce an unreadable text/background pairing". **Phase 2 must handle this** (surface-scoped
+overrides for the on-dark children, or soft/hairline tokens that follow `--u-fg`), and the
+slice-1 founder gate must eyeball it alongside the Accent-chip question.
+
+**N9 (follow-up ticket, NOT this feature)** — `src/lib/blog/ssr.tsx:88` renders
+`LandingPagePublishedRenderer` without `styleTokens` (also without `mood`/`knobs`) — the same
+divergence class as the recorded `EditLayout` `knobs` gap. Blog sections aren't in the styleTokens
+map today, so it's inert; log it, don't fix it here.
+
+**N10 (phase 2, cheap)** — `htmlGenerator.test.ts`'s CHANNEL-2 no-bleed assertion is
+value-vacuous: the sibling it compares is `hero`, whose skin default already IS `dark` (the override
+value under test), so it can never detect a bleed *of `dark`*. Resolver- and edit-level no-bleed
+tests ARE non-vacuous, so this is cosmetic — strengthen it in one line by also rendering with
+`{[ABOUT]: {background:'paper'}}` and asserting the hero wrapper still reads `data-surface="dark"`.
 
 ## Unresolved questions
 
