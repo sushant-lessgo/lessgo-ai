@@ -91,7 +91,7 @@ const STYLES = `
 .tp-sec-head__lede { font-family:var(--font-body); font-size:18px; line-height:1.7; color:var(--ink-2); margin:0; max-width:60ch; }
 .tp-price-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
 .tp-pcard { border:1px solid var(--line); border-radius:var(--r-lg); padding:32px 28px 28px; background:var(--paper); position:relative; display:flex; flex-direction:column; }
-.tp-pcard--mid { border-color:var(--forest); box-shadow:0 16px 40px -28px oklch(0.30 0.04 158 / 0.5); }
+.tp-pcard--mid { border-color:var(--forest); box-shadow:0 16px 40px -28px color-mix(in oklch, var(--forest) 50%, transparent); }
 .tp-pcard--mid::before { content:"Most chosen"; position:absolute; top:-1px; right:24px; transform:translateY(-50%); font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--forest-d); background:var(--lime); padding:4px 10px; border-radius:999px; }
 .tp-pcard__plan { font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--lime-d); }
 .tp-pcard__amount { font-family:var(--font-display); font-weight:700; font-size:clamp(34px,4vw,46px); letter-spacing:-0.03em; line-height:1; margin:18px 0 4px; color:var(--ink); }

@@ -552,3 +552,241 @@ the 16 hue-140 sites collapse from `0.84 0.022 140` onto `--on-dark` (`0.840 0.0
 zero-visible-difference collapse for this file, since every literal here shared the one base
 value), and `:8`'s panel fill moves `0.34 0.045 158` → `--forest` `0.325 0.045 158` (slightly
 darker 34px logo mark). Phase 4 not started.
+
+---
+
+## Phase 4 (slice 2 — B3: dual-renderer inline pairs + parity test)
+
+Branch verified FIRST, before any edit: `git -C <WORKDIR> branch --show-current` →
+`feature/techpremium-harbor-palette`. Match.
+
+### Files changed
+
+1. `src/modules/templates/techpremium/blocks/Hero/TechPremiumHero.tsx`
+2. `src/modules/templates/techpremium/blocks/Hero/TechPremiumHero.published.tsx`
+3. `src/modules/templates/techpremium/blocks/CTA/TechPremiumCTA.tsx`
+4. `src/modules/templates/techpremium/blocks/CTA/TechPremiumCTA.published.tsx`
+5. `src/modules/templates/techpremium/blocks/Pricing/TechPremiumPricing.tsx`
+6. `src/modules/templates/techpremium/blocks/Pricing/TechPremiumPricing.published.tsx`
+7. `src/modules/templates/techpremium/blocks/renderParity.test.ts` (NEW)
+8. `docs/task/techpremium-harbor-palette.audit.md` (this append)
+
+Exactly the phase's 7 Files-touched. `git status --porcelain` shows those 6 modified sources +
+the 1 new untracked test (plus one incidental non-authored entry — see "Open risks").
+**`Testimonials/TechPremiumResults.tsx` / `.published.tsx` were NOT modified** (0+0 in-scope; the
+parity test only READS them) — they do not appear in `git status`. No phase-5 file was opened for
+modification.
+
+### Work order — strict pair-by-pair lockstep
+
+Hero → (diff both sides, confirm identical) → CTA → (diff) → Pricing → (diff). Not batched.
+Every pair's two files got the SAME literal → the SAME canonical string in the same step, and the
+extracted colour-expression sets were compared with `diff` before moving on. All three compared
+IDENTICAL first time.
+
+### Hero pair — 4+4 replacements (before → after)
+
+`Hero.tsx:308` / `:316` (×2) / `:336` and `Hero.published.tsx:128` / `:133` (×2) / `:151`. Four
+occurrences on three lines per file — `:316`/`:133` carries TWO literals on ONE line.
+
+| # | line (.tsx / .published.tsx) | role | before | after | source |
+|---|---|---|---|---|---|
+| 1 | 308 / 128 | inline `.tp-ph` re-declaration, repeating-linear-gradient hatch | `oklch(0.325 0.045 158 / 0.055)` | `color-mix(in oklch, var(--forest) 5.5%, transparent)` | canonical "base `.tp-ph` hatch"; byte-identical to phase 2's `sharedStyles.ts:8` |
+| 2 | 316 / 133 (1st of 2) | `.tp-readout` box-shadow, outer | `oklch(0.30 0.04 158 / 0.5)` | `color-mix(in oklch, var(--forest) 50%, transparent)` | scout §G row 3 (shadow tint); byte-identical to phase 2's `sharedStyles.ts:56` |
+| 3 | 316 / 133 (2nd of 2) | `.tp-readout` box-shadow, inner | `oklch(0.30 0.04 158 / 0.25)` | `color-mix(in oklch, var(--forest) 25%, transparent)` | scout §G row 4 (same form @ 25%) |
+| 4 | 336 / 151 | `.tp-btn--lime:hover` fill | `oklch(0.815 0.185 128)` | `color-mix(in oklch, var(--lime) 95%, black)` | canonical hue-128 hover fill |
+
+**The trap, handled explicitly:** #1 is a FOREST 5.5% hatch, NOT the lime stripe. The 7% lime
+stripe (`oklch(0.855 0.185 128 / 0.07)` → `color-mix(in oklch, var(--lime) 7%, transparent)`)
+exists at exactly ONE site repo-wide — `sharedStyles.ts:11`, landed in phase 2 and untouched here.
+Verified post-edit: `var(--lime) 7%` appears 0 times in the six phase-4 files.
+
+### CTA pair — 3+3 replacements (before → after)
+
+| # | line (.tsx / .published.tsx) | role | before | after | source |
+|---|---|---|---|---|---|
+| 1 | 108 / 52 | `.tp-cta__body` on the dark band | `oklch(0.86 0.025 140 / 0.82)` | `color-mix(in oklch, var(--on-dark) 82%, transparent)` | canonical hue-140 form @ ORIGINAL α 0.82; byte-identical to phase 2 `sharedStyles.ts:35` + phase 3 `footerStyles.ts:5` |
+| 2 | 113 / 57 | `.tp-btn--lime:hover` fill | `oklch(0.815 0.185 128)` | `color-mix(in oklch, var(--lime) 95%, black)` | canonical hue-128 hover fill |
+| 3 | 118 / 62 | `.tp-cta__phone` | `oklch(0.82 0.03 140 / 0.78)` | `color-mix(in oklch, var(--on-dark) 78%, transparent)` | canonical hue-140 form @ ORIGINAL α 0.78; byte-identical to phase 3 `footerStyles.ts:12` |
+
+### Pricing pair — 1+1 replacement (before → after)
+
+| # | line (.tsx / .published.tsx) | role | before | after | source |
+|---|---|---|---|---|---|
+| 1 | 238 / 94 | `.tp-pcard--mid` box-shadow | `oklch(0.30 0.04 158 / 0.5)` | `color-mix(in oklch, var(--forest) 50%, transparent)` | scout §G row 3; byte-identical to Hero #2 and phase 2 `sharedStyles.ts:56` |
+
+Colour values only across all six files. No selector, declaration, markup, JSX, import or
+structural change; `git diff --stat` = `6 files changed, 14 insertions(+), 14 deletions(-)`
+(3+3+3+3+1+1) — one changed line per changed declaration, no whitespace/CRLF churn.
+
+### Scope-outs — verified untouched, at their original line numbers
+
+```
+Hero/TechPremiumHero.tsx:301                       oklch(0.66 0.15 150 / 0.30)   (hue 150)
+Hero/TechPremiumHero.published.tsx:121             oklch(0.66 0.15 150 / 0.30)   (hue 150)
+CTA/TechPremiumCTA.tsx:117                         oklch(0.55 0.16 150)          (hue 150)
+CTA/TechPremiumCTA.published.tsx:61                oklch(0.55 0.16 150)          (hue 150)
+Testimonials/TechPremiumResults.tsx:247            oklch(0.66 0.15 150 / 0.30)   (hue 150, file NOT edited)
+Testimonials/TechPremiumResults.published.tsx:101  oklch(0.66 0.15 150 / 0.30)   (hue 150, file NOT edited)
+```
+
+Post-edit `grep -c "oklch("`: Hero.tsx 1, Hero.published.tsx 1, CTA.tsx 1, CTA.published.tsx 1,
+Pricing.tsx 0, Pricing.published.tsx 0 — only the four named scope-outs remain in the six touched
+files.
+
+**Census anchors re-derived repo-wide over `blocks/`, excluding `*.test.ts`:** hue 150 = **11**,
+hue 192 = **2**, hue 95 = **4** — exactly the phase-5 targets, unmoved. Remaining in-scope
+literals for phase 5: hue 158 = 6, 159 = 4, 140 = 4, 128 = 1 → **15**, matching the plan's
+phase-5 arithmetic (4+2+1+3+5 = 15; 16 this phase + 15 = the 31 outstanding after phase 3).
+
+### Byte-identity across phases 2-4
+
+`grep -roh` over all touched block files — one spelling per distinct value:
+
+```
+2 color-mix(in oklch, var(--forest) 25%, transparent)     3 color-mix(in oklch, var(--forest) 5.5%, transparent)
+9 color-mix(in oklch, var(--forest) 50%, transparent)     1 color-mix(in oklch, var(--forest) 50%, var(--forest-d))
+4 color-mix(in oklch, var(--forest-d) 78%, black)         1 color-mix(in oklch, var(--lime) 7%, transparent)
+5 color-mix(in oklch, var(--lime) 95%, black)             1 color-mix(in oklch, var(--on-dark) 50%, transparent)
+3 color-mix(in oklch, var(--on-dark) 60%, transparent)    8 color-mix(in oklch, var(--on-dark) 70%, transparent)
+3 color-mix(in oklch, var(--on-dark) 78%, transparent)    1 color-mix(in oklch, var(--on-dark) 80%, transparent)
+5 color-mix(in oklch, var(--on-dark) 82%, transparent)
+```
+
+Every phase-4 string is a byte-exact paste of the plan's canonical text / the spelling phases 2-3
+already landed. The `--lime 95%, black` hover count is now 5 of the 6 sites (the 6th,
+`Explainer/styles.ts:16`, is phase 5). **Scout §G's superseded `88% var(--forest-d)` hover form
+was NOT used anywhere** — 0 hits repo-wide.
+
+(The single `color-mix(in oklch, var(--forest) 55%, transparent)` a wider grep will show lives
+ONLY inside the new test file, as the extractor's negative-case sample — see the phase-5 note.)
+
+### The parity test — `blocks/renderParity.test.ts` (5 tests)
+
+Covers all 4 pairs (Hero, CTA, Pricing, Results — Results read-only) plus one extractor
+self-test. Per pair: read both sources via `fs`, extract every colour expression, assert the
+sorted multisets are equal.
+
+- **Paren-balanced extraction**, as mandated: a regex finds each `oklch(` / `color-mix(` token
+  start, then a character walk counts paren depth to the matching close; scanning resumes AFTER
+  the closing paren, so nested forms
+  (`color-mix(in oklch, color-mix(…) 92%, transparent)` — phase 2's scrims, phase 5's
+  `ProductDetail/styles.ts`) are captured as ONE outermost expression and nesting depth is itself
+  part of what parity compares. Unbalanced input throws rather than silently dropping.
+- **Per-file non-emptiness** asserted on both sides of every pair, so a broken extractor cannot
+  pass green by returning `[]` twice.
+- The extractor self-test pins the balanced behaviour on a flat expr, a nested expr and a raw
+  `oklch(…)`, and explicitly asserts that a 55%-vs-50% pair does NOT compare equal — the exact
+  case the naive `/color-mix\([^)]*\)/` form would have swallowed.
+
+### Parity-test failure proof (real output; mutation made, then reverted)
+
+Mutation: `CTA/TechPremiumCTA.published.tsx:52` ONLY — `… var(--on-dark) 82%, transparent` →
+`… 55%, transparent`. Chosen deliberately as a divergence in the PERCENTAGE TAIL, i.e. precisely
+what a truncating extractor would miss.
+
+```
+ ❯ src/modules/templates/techpremium/blocks/renderParity.test.ts (5 tests | 1 failed) 10ms
+     × 'CTA': .tsx and .published.tsx declare identical colour expressions 5ms
+
+AssertionError: expected [ …(4) ] to deeply equal [ …(4) ]
+- Expected
++ Received
+  [
+    "color-mix(in oklch, var(--lime) 95%, black)",
+-   "color-mix(in oklch, var(--on-dark) 55%, transparent)",
+    "color-mix(in oklch, var(--on-dark) 78%, transparent)",
++   "color-mix(in oklch, var(--on-dark) 82%, transparent)",
+    "oklch(0.55 0.16 150)",
+  ]
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+```
+
+Reverted immediately; re-run → **5 passed**. The revert is visible in the final `git diff`
+(CTA.published.tsx:52 reads `82%`, identical to CTA.tsx:108) and in the full-suite green below.
+So the test demonstrably detects the divergence class it exists for, at percentage granularity.
+
+### Commands run and their real results
+
+| command | result |
+|---|---|
+| `git branch --show-current` (FIRST action) | `feature/techpremium-harbor-palette` — match |
+| `npx vitest run …/renderParity.test.ts` (post-edit) | **5 passed** |
+| `npx vitest run …/renderParity.test.ts` (under mutation) | **1 failed \| 4 passed** — output quoted above |
+| `npx vitest run …/renderParity.test.ts` (after revert) | **5 passed** |
+| `npx tsc --noEmit` | exit 0, **0 errors** |
+| `npm run test:run` | **317 passed \| 1 skipped (318 files); 5097 passed \| 15 skipped (5112 tests)** — 123.49s |
+| `npx vitest run …/palettes.test.ts` (phase-1 forest guard) | **8 passed** |
+| `git diff --stat` | `6 files changed, 14 insertions(+), 14 deletions(-)` |
+| `git status --porcelain` | 6 modified sources + 1 untracked test (+ 1 incidental, see Open risks) |
+| per-pair `diff` of extracted colour expressions (Hero, CTA, Pricing) | IDENTICAL in all three, checked before moving to the next pair |
+
+Deltas vs phase 3's totals are exactly `+1 file / +5 tests` — the new parity file and nothing
+else. No pre-existing test was dropped or newly skipped, and the phase-1 forest cascade guard
+still holds. As in phases 2-3: that guard covers the TOKEN layer only, so it is evidence phase 4
+broke nothing upstream, **not** evidence that these 16 replacements render correctly.
+
+### Deviations from the plan
+
+**None.** No value invented; every replacement traces to a canonical string or a named scout §G
+row (table column 6 above). No scope-out touched, no Results edit, no phase-5 work started.
+
+Two in-scope judgment calls, both resolved conservatively:
+
+1. **CTA `:118`/`:62` `oklch(0.82 0.03 140 / 0.78)` → `--on-dark` (not `--on-dark-2`).** This
+   literal sits between the two tokens: its chroma 0.03 matches `--on-dark-2`
+   (`0.780 0.030 140`) exactly, while its lightness 0.82 is nearer `--on-dark`
+   (`0.840 0.022 140`, Δ0.02) than `--on-dark-2` (Δ0.04). The plan's canonical rule reserves
+   `var(--on-dark-2)` for "the opaque tag cluster"; this site carries an explicit alpha, so it
+   takes the alpha-mix `--on-dark` form — the same resolution phase 3 recorded for its 16 alpha'd
+   hue-140 sites. Net forest effect: the CTA phone line lightens 0.82 → 0.840 L and loses 0.008
+   chroma at 78% alpha. Inside the ruled hue-140 collapse (AC #4 scope), but it IS a real (small)
+   forest change, named here rather than buried.
+2. **Alpha → percentage is a literal transcription** (`/ 0.055`→`5.5%`, `/ 0.5`→`50%`,
+   `/ 0.25`→`25%`, `/ 0.82`→`82%`, `/ 0.78`→`78%`). Nothing rounded or harmonised.
+
+### Note for phase 5 (not an action taken — a hazard flagged)
+
+`renderParity.test.ts` contains literal colour strings in its extractor self-test, including
+`oklch(0.66 0.15 150 / 0.30)` twice and `color-mix(in oklch, var(--forest) 55%, transparent)`
+once. The plan already mandates that the phase-5 census test EXCLUDE `*.test.ts`/`*.test.tsx`
+under `blocks/`; that exclusion is now load-bearing — without it the hue-150 anchor reads 13
+instead of 11. Confirmed empirically: 13 with the test file included, 11 without.
+
+### Known-and-accepted forest deltas from this phase
+
+All pre-ruled in the plan's AC #4 scope: three shadow tints move `0.30 0.04 158` → `--forest`
+`0.325 0.045 158` (Hero `:316` ×2, Pricing `:238`); two lime hovers drop chroma 0.185 → 0.176
+(Hero `:336`, CTA `:113`); two hue-140 sites collapse onto `--on-dark` (CTA `:108`
+`0.86 0.025 140` → `0.840 0.022 140`; CTA `:118` per judgment call 1). The Hero `.tp-ph` hatch
+(`:308`) is value-exact under forest (`0.325 0.045 158` = `--forest`).
+
+### What is NOT verified — outstanding, and it matters
+
+I have no browser and ran no dev server. **I make no visual claim whatsoever.** The parity test
+proves the two SOURCES agree; it cannot prove either of them RENDERS correctly. Specifically
+outstanding for the founder/human gate:
+
+- **Hero and CTA in the editor vs their published render, side by side, under harbor** — must be
+  identical colour. (Source parity is now machine-enforced; the rendered comparison is not.)
+- **The Hero band hatch must read as a faint band tint** — green-tinted under forest,
+  navy-tinted under harbor — and **NOT lime**. This is the specific confusion the plan warned
+  about; nothing automated can distinguish "faint forest hatch" from "lime stripe" on screen.
+- The `color-mix(…, transparent)` premultiplied-alpha behaviour (5 of this phase's sites) and the
+  `color-mix(…, black)` powerless-hue carry (2 sites: Hero `:336`, CTA `:113`) — both flagged
+  unverified since phase 2 and still unverified. A wrong engine result renders wrong while
+  type-checking and unit-testing green.
+- Pricing's `.tp-pcard--mid` shadow under both palettes.
+- No `/dev/seed-techpremium` hit, no DB touched, `npm run build` not run (orchestrator, after
+  phase 5). Phase 5 not started.
+
+### Open risks
+
+- **Incidental working-tree entry (recurrence of phase 1's):**
+  `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` shows as
+  modified after `npm run test:run`. `git diff --numstat` reports **zero changed lines** — vitest
+  rewrote it with LF endings only. Not authored by me and not revertible without `git checkout --`,
+  a state-changing git command I am not permitted to run. Safe to discard.
+- The four remaining hue-158/159/140/128 clusters (15 literals) still render stale-green under
+  harbor until phase 5 lands. Expected.
